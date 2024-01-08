@@ -79,6 +79,19 @@ int gitFoldeerCheck(char* foldername, int nowLevel, int finalLevel){
         return 1 + gitFoldeerCheck(connectTwoString("..//", foldername), nowLevel+1, finalLevel);
     }
 }
+int initgitFoldeerCheck(char* foldername, int nowLevel, int finalLevel){
+    DIR* neogit = opendir(foldername);
+    if (neogit) {
+        closedir(neogit);
+        return 0;
+    } 
+    else {
+        if(nowLevel == finalLevel){
+            return -1000000;
+        }
+        return 1 + initgitFoldeerCheck(connectTwoString("..//", foldername), nowLevel+1, finalLevel);
+    }
+}
 //End of additional functions
 
 //other functions
@@ -162,6 +175,13 @@ char checkIfACommandIsOk(char** command){ //return 1 for accept. //********* for
     return 1;
 }
 char checkIfANameRezerved(char* name){ //return 1 for is rezerved. //******** for alias
+    return 0;
+}
+char initgitFolder(){ //1 -> there is a neogit folder. 0-> there is no neo git folder
+    int k = initgitFoldeerCheck(".neogit", 0, getLevelofAddress(GetAddressHere()));
+    if(k>=0){
+        return 1;
+    }
     return 0;
 }
 //end of other functions
@@ -351,7 +371,20 @@ void Alias(char* newName, char** command){
     }
     printf("local alias updated successfully\n");
 }
-
+void init(){
+    if(initgitFolder()){
+        printf("a neoit repository is existed!\n");
+        exit(-1);
+    }
+    if (!mkdir(".neogit")){
+        system("attrib +h .neogit");
+        printf("Initialized empty neogit repository\n");
+    }
+    else{
+        printf("an unkown problem!\n");
+        exit(-1);
+    }
+}
 //End of main functions
 
 int main(int argc, char* argv[]){
@@ -396,5 +429,8 @@ int main(int argc, char* argv[]){
         }
         Alias(input[2]+6, delete_spaces(input[3]));
     }
+    //neogit init
+    if(equalStrings(input[1], "init") && equalStrings(input[2], "") && len == 2)
+        init();
     return 0;
 }
