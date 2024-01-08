@@ -158,6 +158,12 @@ char ** tokenizeInput(int* len, char** argv){
         *(input + i) = (char *)calloc(2,sizeof(char));
     return input;
 }
+char checkIfACommandIsOk(char** command){ //return 1 for accept. //********* for alias
+    return 1;
+}
+char checkIfANameRezerved(char* name){ //return 1 for is rezerved. //******** for alias
+    return 0;
+}
 //end of other functions
 
 
@@ -272,8 +278,78 @@ void changeEmail(char* email){
     }
     printf("local email changed successfully\n");
 }
-void alias(char* newName, char** command){
-
+void GlobalAlias(char* newName, char** command){
+    if(checkIfANameRezerved(newName)){
+        printf("The new name is invalid! (alias.*)\n");
+        exit(-1);
+    }
+    if(!checkIfACommandIsOk(command)){
+        printf("The command is invalid!\n");
+        exit(-1);
+    }
+    FILE * f = fopen("d://SETTINGS//config//alias", "a");
+    if(f == NULL){
+        printf("an unkown problem!\n");
+        exit(-1);
+    }
+    fprintf(f, "%s\n", newName);
+    int index = 0;
+    while(*(command + index)){
+        fprintf(f, "%s ", *(command + index));
+        index++;
+    }
+    fprintf(f, "\n");
+    fclose(f);
+    printf("global alias updated successfully\n");
+}
+void Alias(char* newName, char** command){
+    if(checkIfANameRezerved(newName)){
+        printf("The new name is invalid! (alias.*)\n");
+        exit(-1);
+    }
+    if(!checkIfACommandIsOk(command)){
+        printf("The command is invalid!\n");
+        exit(-1);
+    }
+    char * address =  gitFolder();
+    DIR* dir = opendir(connectTwoString(address, "//config"));
+    if(dir) {
+        FILE *f = fopen(connectTwoString(address,"//config//alias"), "a");
+        if(f == NULL){
+            printf("an unkown problem!\n");
+            exit(-1);
+        }
+        fprintf(f, "%s\n", newName);
+        int index = 0;
+        while(*(command + index)){
+            fprintf(f, "%s ", *(command + index));
+            index++;
+        }
+        fprintf(f, "\n");
+        fclose(f);
+        closedir(dir);
+    } else  {
+        if (!mkdir(connectTwoString(address, "//config"))){
+            FILE *f = fopen(connectTwoString(address,"//config//alias"), "a");
+                if(f == NULL){
+                    printf("an unkown problem!\n");
+                    exit(-1);
+                }
+            fprintf(f, "%s\n", newName);
+            int index = 0;
+            while(*(command + index)){
+                fprintf(f, "%s ", *(command + index));
+                index++;
+            }
+            fprintf(f, "\n");
+            fclose(f);
+        }
+        else{
+            printf("an unkown problem!\n");
+            exit(-1);
+        }
+    }
+    printf("local alias updated successfully\n");
 }
 
 //End of main functions
@@ -297,7 +373,7 @@ int main(int argc, char* argv[]){
     if(equalStrings(input[1], "config") && equalStrings(input[2], "user.email") && strcasecmp(input[3], "") && equalStrings(input[4], "") && len == 4)
         changeEmail(input[3]);
     //neogit config -gelobal alias.name "command"
-    if(equalStrings(input[1], "config") && equalStrings(input[2], "-gelobal") && (input[3][0] == 'a' && input[3][1] == 'l' && input[3][2] == 'i' && input[3][3] == 'a' && input[3][4] == 's' && input[3][5] == '.' && strlen(input[3]) > 6) && strcasecmp(input[4], "") && equalStrings(input[5], "") && len == 5){       
+    if(equalStrings(input[1], "config") && equalStrings(input[2], "-global") && (input[3][0] == 'a' && input[3][1] == 'l' && input[3][2] == 'i' && input[3][3] == 'a' && input[3][4] == 's' && input[3][5] == '.' && strlen(input[3]) > 6) && strcasecmp(input[4], "") && equalStrings(input[5], "") && len == 5){       
         if(strlen(input[4]) > 250){
             printf("Your command is too long!\n");
             exit(-1);
@@ -306,7 +382,19 @@ int main(int argc, char* argv[]){
             printf("Your command is invalid!\n");
             exit(-1);
         }
-        alias(input[3]+6, delete_spaces(input[4]));
+        GlobalAlias(input[3]+6, delete_spaces(input[4]));
+    }
+    //neogit config alias.name "command"
+    if(equalStrings(input[1], "config") && (input[2][0] == 'a' && input[2][1] == 'l' && input[2][2] == 'i' && input[2][3] == 'a' && input[2][4] == 's' && input[2][5] == '.' && strlen(input[2]) > 6) && strcasecmp(input[3], "") && equalStrings(input[4], "") && len == 4){       
+        if(strlen(input[3]) > 250){
+            printf("Your command is too long!\n");
+            exit(-1);
+        }
+        if(strcheck(input[3], '\"')){
+            printf("Your command is invalid!\n");
+            exit(-1);
+        }
+        Alias(input[2]+6, delete_spaces(input[3]));
     }
     return 0;
 }
