@@ -113,6 +113,39 @@ char* GetAddressHere(){
     }
     return address;
 }
+char ** getAddressOfHere_tokenized(){
+    FILE* f = fopen(".__E__neogit_temp.bat", "w");
+    if(f == NULL){
+        printf("an unkown problem!\n");
+        exit(-1);
+    }
+    fprintf(f, "%s\n%s\n%s\n%s\n", "@ECHO OFF", "call set PARENT_DIR=%CD%", "set PARENT_DIR=%PARENT_DIR:\\= %", "FOR %%i IN (%PARENT_DIR%) DO (echo %%i>> .____neogit_temp)");
+    fclose(f);
+    if(!system(".__E__neogit_temp.bat")){
+        remove(".__E__neogit_temp.bat");
+        FILE* f = fopen(".____neogit_temp", "r");
+        if(f == NULL){
+            printf("an unkown problem!\n");
+            exit(-1);
+        }
+        char** text = (char **)calloc(100, sizeof(char*));
+        int i = 0;
+        char line[1000];
+        while(fgets(line, 990, f) != NULL && line[0] != '\n'){
+            *(text + i) = (char*)calloc(1000, sizeof(char));
+            strcpy(text[i], line);
+            text[i][strlen(text[i]) - 1] = 0;
+            i++;
+        }
+        fclose(f);
+        remove(".____neogit_temp");
+        return text;
+    }
+    else{
+        printf("an unkown problem!\n");
+        exit(-1);
+    }
+}
 char** delete_spaces (char* string){
     char ** finaladdress = (char**)calloc(300,sizeof(char*));
     int p = 0;
@@ -149,7 +182,7 @@ char * connectTwoString(char* a, char* b){
     str3[j] = '\0';
    return str3;
 }
-char* gitFolder(){
+char* gitFolder(){ // return address ..//..//..//.neogit //type no if no git folder
     int k = gitFoldeerCheck(".neogit", 0, getLevelofAddress(GetAddressHere()));
     char* address = (char*)calloc(2000,1);
     for(int i = 0; i < k; i++){
@@ -385,6 +418,124 @@ void init(){
         exit(-1);
     }
 }
+char check_type(char* name){ // 1 -> folder 0-> not found  -1->file
+    if(!system("echo A > .____neogit_temp")){
+        if(!system(connectTwoString("if exist \"", connectTwoString(name, "/*\" echo Q > .____neogit_temp")))){
+            char check = 0;
+            FILE* f = fopen(".____neogit_temp", "r");
+            fscanf(f, "%c", &check);
+            fclose(f);
+            if(check == 'Q'){ // it is a folder;
+                remove(".____neogit_temp");
+                return 1;
+            }
+            else{ // it is not a folder
+                if(!system(connectTwoString("if exist \"", connectTwoString(name, "\" echo W > .____neogit_temp")))){
+                    FILE* f = fopen(".____neogit_temp", "r");
+                    if(f == NULL){
+                        printf("an unkown problem!\n");
+                        exit(-1);
+                    }
+                    fscanf(f, "%c", &check);
+                    fclose(f);
+                    remove(".____neogit_temp");
+                    if(check == 'W'){ // it is a file
+                        return -1;
+                    }
+                    else{ //not found
+                        return 0;
+                    }
+                }
+            }
+        }
+        else{
+            printf("an unkown problem!\n");
+            exit(-1);   
+        }
+    }
+    else{
+        printf("an unkown problem!\n");
+        exit(-1);   
+    }
+}
+
+void add(char *name){ //uncomplete
+    char * address_stage = gitFolder();
+    char mode = check_type(name);
+    if(!mode){
+        printf("file not found!");
+        exit(-1);
+    }
+    //create folder
+    DIR* dir = opendir(connectTwoString(address_stage, "//stage"));
+    if(dir) {
+        closedir(dir);
+    } else  {
+        if (!mkdir(connectTwoString(address_stage, "//stage"))){
+        }
+        else{
+            printf("an unkown problem!\n");
+            exit(-1);
+        }
+    }
+    address_stage = connectTwoString(address_stage, "//stage");
+    char ** address_file = getAddressOfHere_tokenized();
+    char ** address_neogit = getAddressOfHere_tokenized();
+    FILE* f = fopen(".__E__neogit_temp.bat", "w");
+    if(f == NULL){
+        printf("an unkown problem!\n");
+        exit(-1);
+    }
+    fprintf(f, "%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n", "@ECHO OFF", "call set PARENT_DIR=%%CD%%" , "set /A j = 0" , ":while", "if  not exist \".neogit/*\" (", "	set /a j += 1" , "	cd ..", "	goto :while" , ")", "cd %PARENT_DIR%", "echo %j% > .____neogit_temp");
+    fclose(f);
+    int ch = 0;;
+    if(!system(".__E__neogit_temp.bat")){
+        remove(".__E__neogit_temp.bat");
+        FILE* f = fopen(".____neogit_temp", "r");
+        if(f == NULL){
+            printf("an unkown problem!\n");
+            exit(-1);
+        }
+        fscanf(f, "%d", &ch);
+        fclose(f);
+        remove(".____neogit_temp");
+    }
+    else{
+        printf("an unkown problem!\n");
+        exit(-1);
+    }
+    int a = 0;
+    while(address_neogit[a]){
+        a++;
+    }
+    a--;
+    for(int m = 0; m < ch; m++){
+        address_neogit[a] = NULL;
+        a--;
+    }
+    //now we cave e: & e: c bp 
+    //end of create folder
+
+    //test
+    a = 0;
+    while(address_file[a]){
+        printf("%s_", address_file[a]);
+        a++;
+    }
+    printf("\n");
+    a = 0;
+    while(address_neogit[a]){
+        printf("%s_", address_neogit[a]);
+        a++;
+    }
+    printf("\n");
+    printf("MODE=%d | address = %s", mode, name);
+    if(mode == 1){
+
+    }
+    //test
+}
+
 //End of main functions
 
 int main(int argc, char* argv[]){
@@ -394,19 +545,19 @@ int main(int argc, char* argv[]){
     //end of getting    #############################
 
     // neogit config -global user.name
-    if(equalStrings(input[1], "config") && equalStrings(input[2], "-global") && equalStrings(input[3], "user.name") && strcasecmp(input[4], "") && equalStrings(input[5], "") && len == 5)
+    if(equalStrings(input[1], "config") && equalStrings(input[2], "-global") && equalStrings(input[3], "user.name") && strcmp(input[4], "") && equalStrings(input[5], "") && len == 5)
         changeNameGlobal(input[4]);
     // neogit config -global user.email
-    if(equalStrings(input[1], "config") && equalStrings(input[2], "-global") && equalStrings(input[3], "user.email") && strcasecmp(input[4], "") && equalStrings(input[5], "") && len == 5)
+    if(equalStrings(input[1], "config") && equalStrings(input[2], "-global") && equalStrings(input[3], "user.email") && strcmp(input[4], "") && equalStrings(input[5], "") && len == 5)
         changeEmailGlobal(input[4]);
     // neogit config user.name
-    if(equalStrings(input[1], "config") && equalStrings(input[2], "user.name") && strcasecmp(input[3], "") && equalStrings(input[4], "") && len == 4)
+    if(equalStrings(input[1], "config") && equalStrings(input[2], "user.name") && strcmp(input[3], "") && equalStrings(input[4], "") && len == 4)
         changeName(input[3]);
     // neogit config user.email
-    if(equalStrings(input[1], "config") && equalStrings(input[2], "user.email") && strcasecmp(input[3], "") && equalStrings(input[4], "") && len == 4)
+    if(equalStrings(input[1], "config") && equalStrings(input[2], "user.email") && strcmp(input[3], "") && equalStrings(input[4], "") && len == 4)
         changeEmail(input[3]);
     //neogit config -gelobal alias.name "command"
-    if(equalStrings(input[1], "config") && equalStrings(input[2], "-global") && (input[3][0] == 'a' && input[3][1] == 'l' && input[3][2] == 'i' && input[3][3] == 'a' && input[3][4] == 's' && input[3][5] == '.' && strlen(input[3]) > 6) && strcasecmp(input[4], "") && equalStrings(input[5], "") && len == 5){       
+    if(equalStrings(input[1], "config") && equalStrings(input[2], "-global") && (input[3][0] == 'a' && input[3][1] == 'l' && input[3][2] == 'i' && input[3][3] == 'a' && input[3][4] == 's' && input[3][5] == '.' && strlen(input[3]) > 6) && strcmp(input[4], "") && equalStrings(input[5], "") && len == 5){       
         if(strlen(input[4]) > 250){
             printf("Your command is too long!\n");
             exit(-1);
@@ -418,7 +569,7 @@ int main(int argc, char* argv[]){
         GlobalAlias(input[3]+6, delete_spaces(input[4]));
     }
     //neogit config alias.name "command"
-    if(equalStrings(input[1], "config") && (input[2][0] == 'a' && input[2][1] == 'l' && input[2][2] == 'i' && input[2][3] == 'a' && input[2][4] == 's' && input[2][5] == '.' && strlen(input[2]) > 6) && strcasecmp(input[3], "") && equalStrings(input[4], "") && len == 4){       
+    if(equalStrings(input[1], "config") && (input[2][0] == 'a' && input[2][1] == 'l' && input[2][2] == 'i' && input[2][3] == 'a' && input[2][4] == 's' && input[2][5] == '.' && strlen(input[2]) > 6) && strcmp(input[3], "") && equalStrings(input[4], "") && len == 4){       
         if(strlen(input[3]) > 250){
             printf("Your command is too long!\n");
             exit(-1);
@@ -432,5 +583,25 @@ int main(int argc, char* argv[]){
     //neogit init
     if(equalStrings(input[1], "init") && equalStrings(input[2], "") && len == 2)
         init();
+    if(equalStrings(input[1], "add") && strcmp(input[2], "") && equalStrings(input[3], "") && len == 3){
+        if(strlen(input[2]) > 250){
+            printf("Your command is too long!\n");
+            exit(-1);
+        }
+        if(strcheck(input[2], '\"')){
+            printf("Your command is invalid!\n");
+            exit(-1);
+        }
+        add(input[2]);
+    }
+
+
+
+
+
+    // printf("%d", len);
+    // for (int i = 0; i < len; i++){
+    //     printf("%s||", input[i]);
+    // }
     return 0;
 }
