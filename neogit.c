@@ -56,6 +56,17 @@ void ___print(char* str, int len, char** final){ //only for deleting spaces
 
 
 }
+char** ___split(char* name){ //c:/users\j -> c:   users    j
+    char** a = (char**)calloc(10000, sizeof(char*));
+    int i = 0;
+    char * u = strtok(name, "\\/");
+    while(u){
+        a[i] = u;
+        u = strtok(NULL, "\\/");
+        i++;
+    }
+    return a;
+}
 int getLevelofAddress(char* address){
     int i = 0;
     for(int k = 0; address[k] != 0; k++){
@@ -458,7 +469,6 @@ char check_type(char* name){ // 1 -> folder 0-> not found  -1->file
         exit(-1);   
     }
 }
-
 void add(char *name){ //uncomplete
     char * address_stage = gitFolder();
     char mode = check_type(name);
@@ -466,7 +476,8 @@ void add(char *name){ //uncomplete
         printf("file not found!");
         exit(-1);
     }
-    //create folder
+
+
     DIR* dir = opendir(connectTwoString(address_stage, "//stage"));
     if(dir) {
         closedir(dir);
@@ -478,7 +489,6 @@ void add(char *name){ //uncomplete
             exit(-1);
         }
     }
-    address_stage = connectTwoString(address_stage, "//stage");
     char ** address_file = getAddressOfHere_tokenized();
     char ** address_neogit = getAddressOfHere_tokenized();
     FILE* f = fopen(".__E__neogit_temp.bat", "w");
@@ -513,27 +523,97 @@ void add(char *name){ //uncomplete
         address_neogit[a] = NULL;
         a--;
     }
-    //now we cave e: & e: c bp 
-    //end of create folder
+    char** address_given = ___split(name);
+    int size_address_file = 0;
+    while(address_file[size_address_file]){
+        size_address_file++;
+    }
+    int size_address_neogit = 0;
+    while(address_neogit[size_address_neogit]){
+        size_address_neogit++;
+    }
+    int size_address_given = 0;
+    while(address_given[size_address_given]){
+        size_address_given++;
+    }
 
-    //test
-    a = 0;
-    while(address_file[a]){
-        printf("%s_", address_file[a]);
-        a++;
+
+    char * dis = (char*)calloc(10000, sizeof(char));
+    for(int i = 0; i < size_address_neogit; i++){
+        dis = connectTwoString(dis, address_neogit[i]);
+        dis = connectTwoString(dis, "\\");
     }
-    printf("\n");
-    a = 0;
-    while(address_neogit[a]){
-        printf("%s_", address_neogit[a]);
-        a++;
+    dis = connectTwoString(dis, ".neogit\\stage\\");
+    for(int i = size_address_neogit; i < size_address_file; i++){
+        dis = connectTwoString(dis, address_file[i]);
+        dis = connectTwoString(dis, "\\");
     }
-    printf("\n");
-    printf("MODE=%d | address = %s", mode, name);
+    for(int i = 0; i < size_address_given-1; i++){
+        dis = connectTwoString(dis, address_given[i]);
+        dis = connectTwoString(dis, "\\");
+    }
+    if(mode == -1){
+        char* command = (char*)calloc(10000,sizeof(char));
+        sprintf(command, "if not exist %s* mkdir %s", dis, dis);
+        if(!system(command)){
+            FILE* f = fopen(".__E__neogit_temp.bat", "w");
+            if(f == NULL){
+                printf("an unkown problem!\n");
+                exit(-1);
+            }
+            fprintf(f, "@ECHO OFF\ncopy %s %s > NUL", name, dis);
+            fclose(f);
+            if(!system(".__E__neogit_temp.bat")){
+                remove(".__E__neogit_temp.bat");
+                for(int i = 0; i < size_address_given-1; i++)
+                    printf("%s\\", address_given[i]);
+                printf("%s added successfully\n", address_given[size_address_given - 1]);
+                exit(0);
+            }
+            else{
+                remove(".__E__neogit_temp.bat");
+                printf("an unkown problem!\n");
+                exit(-1); 
+            }
+        }
+        else{
+            printf("an unkown problem!\n");
+            exit(-1);
+        }
+    }
+    
     if(mode == 1){
-
+        dis = connectTwoString(dis, address_given[size_address_given - 1]);
+        dis = connectTwoString(dis, "\\");
+        char* command = (char*)calloc(10000,sizeof(char));
+        sprintf(command, "if not exist %s* mkdir %s", dis, dis);
+        if(!system(command)){
+            FILE* f = fopen(".__E__neogit_temp.bat", "w");
+            if(f == NULL){
+                printf("an unkown problem!\n");
+                exit(-1);
+            }
+            fprintf(f, "@ECHO OFF\nxcopy %s %s /e/h/c/i/y > NUL", name, dis);
+            fclose(f);
+            if(!system(".__E__neogit_temp.bat")){
+                remove(".__E__neogit_temp.bat");
+                for(int i = 0; i < size_address_given-1; i++)
+                    printf("%s\\", address_given[i]);
+                printf("%s\\ added successfully\n", address_given[size_address_given - 1]);
+                exit(0);
+            }
+            else{
+                remove(".__E__neogit_temp.bat");
+                printf("an unkown problem!\n");
+                exit(-1); 
+            }
+        }
+        else{
+            printf("an unkown problem!\n");
+            exit(-1);
+        }
     }
-    //test
+
 }
 
 //End of main functions
