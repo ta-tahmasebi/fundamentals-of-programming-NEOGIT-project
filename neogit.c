@@ -478,7 +478,7 @@ void add(char *name){
     char * address_stage = gitFolder();
     char mode = check_type(name);
     if(!mode){
-        printf("file not found!");
+        printf("<%s> not found!\n", name);
         exit(-1);
     }
     DIR* dir = opendir(connectTwoString(address_stage, "//stage"));
@@ -626,6 +626,12 @@ int main(int argc, char* argv[]){
     char** input = tokenizeInput(&len, argv);
     //end of getting    #############################
 
+    //test
+    // printf("%d", len);
+    // for (int i = 0; i < len; i++){
+    //     printf("%s||", input[i]);
+    // }
+
     // neogit config -global user.name
     if(equalStrings(input[1], "config") && equalStrings(input[2], "-global") && equalStrings(input[3], "user.name") && strcmp(input[4], "") && equalStrings(input[5], "") && len == 5)
         changeNameGlobal(input[4]);
@@ -665,7 +671,8 @@ int main(int argc, char* argv[]){
     //neogit init
     if(equalStrings(input[1], "init") && equalStrings(input[2], "") && len == 2)
         init();
-    if(equalStrings(input[1], "add") && strcmp(input[2], "") && equalStrings(input[3], "") && len == 3){
+    //neogit add
+    if(equalStrings(input[1], "add") && strcmp(input[2], "") && !strcheck(input[2] , '-') && equalStrings(input[3], "") && len == 3){
         if(strlen(input[2]) > 250){
             printf("Your command is too long!\n");
             exit(-1);
@@ -676,14 +683,42 @@ int main(int argc, char* argv[]){
         }
         add(input[2]);
     }
+    //neogit add *
+    if(equalStrings(input[1], "add") && strcmp(input[2], "") && !strcheck(input[2] , '-') && len > 3){
+        for(int i = 2; i < len; i++){
+            if(strlen(input[i]) > 250){
+                printf("Your path is too long!\n");
+                exit(-1);
+            }
+            if(strcheck(input[i], '\"')){
+                printf("Your path is invalid!\n");
+                exit(-1);
+            }
+            char cc[1000];
+            sprintf(cc, "neogit add \"%s\"", input[i]);
+            system(cc);
+        }
+        exit(0);
+    }
+    //neogit add -f
+    if(equalStrings(input[1], "add") && equalStrings(input[2], "-f") && strcmp(input[3], "") && len >= 4){
+        for(int i = 3; i < len; i++){
+            if(strlen(input[i]) > 250){
+                printf("Your path is too long!\n");
+                exit(-1);
+            }
+            if(strcheck(input[i], '\"')){
+                printf("Your path is invalid!\n");
+                exit(-1);
+            }
+            char cc[1000];
+            sprintf(cc, "neogit add \"%s\"", input[i]);
+            system(cc);
+        }
+        exit(0);
+    }
 
 
 
-
-
-    // printf("%d", len);
-    // for (int i = 0; i < len; i++){
-    //     printf("%s||", input[i]);
-    // }
     return 0;
 }
