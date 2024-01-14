@@ -1,10 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/stat.h>
-#include <unistd.h>
+//#include <sys/stat.h>
+//#include <unistd.h>
 #include <string.h>
 #include <dirent.h>
-#include <errno.h>
+//#include <errno.h>
 
 
 //   *(IN THE NAME OF GOD)*
@@ -13,6 +13,18 @@
 //portotypes
 char* connectTwoString(char*, char*);
 //End of portotypes
+
+//structs
+struct address__{
+    char** address_given;
+    int size_address_given;
+    char** address_cmd;
+    int size_address_cmd;
+    char** address_neogit;
+    int size_address_neogit;
+    char* adress_stage_file;
+};
+//end of structs
 
 //Helpful additinal functions:
 char equalStrings(char* a, char* b){
@@ -86,7 +98,7 @@ int gitFoldeerCheck(char* foldername, int nowLevel, int finalLevel){
     } 
     else {
         if(nowLevel == finalLevel){
-            printf("not a neogit repository (or any of the parent directories): .neogit");
+            printf("not a neogit repository (or any of the parent directories): .neogit\n");
             exit(-1);
         }
         return 1 + gitFoldeerCheck(connectTwoString("..//", foldername), nowLevel+1, finalLevel);
@@ -436,7 +448,7 @@ void init(){
 }
 char check_type(char* name){ // 1 -> folder 0-> not found  -1->file
     if(!system("echo A > .____neogit_temp")){
-        if(!system(connectTwoString("if exist \"", connectTwoString(name, "/*\" echo Q > .____neogit_temp")))){
+        if(!system(connectTwoString("if exist \"", connectTwoString(name, "\\*\" echo Q > .____neogit_temp")))){
             char check = 0;
             FILE* f = fopen(".____neogit_temp", "r");
             fscanf(f, "%c", &check);
@@ -473,6 +485,91 @@ char check_type(char* name){ // 1 -> folder 0-> not found  -1->file
         printf("an unkown problem!\n");
         exit(-1);   
     }
+}
+struct address__ Help_ADD(char* name){
+    char * address_stage = gitFolder();
+    DIR* dir = opendir(connectTwoString(address_stage, "//stage"));
+    if(dir) {
+        closedir(dir);
+    } else  {
+        if (!mkdir(connectTwoString(address_stage, "//stage"))){
+        }
+        else{
+            printf("an unkown problem!\n");
+            exit(-1);
+        }
+    }
+    char ** address_file = getAddressOfHere_tokenized();
+    char ** address_neogit = getAddressOfHere_tokenized();
+    FILE* f = fopen(".__E__neogit_temp.bat", "w");
+    if(f == NULL){
+        printf("an unkown problem!\n");
+        exit(-1);
+    }
+    fprintf(f, "%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n", "@ECHO OFF", "call set PARENT_DIR=%%CD%%" , "set /A j = 0" , ":while", "if  not exist \".neogit/*\" (", "	set /a j += 1" , "	cd ..", "	goto :while" , ")", "cd %PARENT_DIR%", "echo %j% > .____neogit_temp");
+    fclose(f);
+    int ch = 0;;
+    if(!system(".__E__neogit_temp.bat")){
+        remove(".__E__neogit_temp.bat");
+        FILE* f = fopen(".____neogit_temp", "r");
+        if(f == NULL){
+            printf("an unkown problem!\n");
+            exit(-1);
+        }
+        fscanf(f, "%d", &ch);
+        fclose(f);
+        remove(".____neogit_temp");
+    }
+    else{
+        printf("an unkown problem!\n");
+        exit(-1);
+    }
+    int a = 0;
+    while(address_neogit[a]){
+        a++;
+    }
+    a--;
+    for(int m = 0; m < ch; m++){
+        address_neogit[a] = NULL;
+        a--;
+    }
+    char** address_given = ___split(name);
+    int size_address_file = 0;
+    while(address_file[size_address_file]){
+        size_address_file++;
+    }
+    int size_address_neogit = 0;
+    while(address_neogit[size_address_neogit]){
+        size_address_neogit++;
+    }
+    int size_address_given = 0;
+    while(address_given[size_address_given]){
+        size_address_given++;
+    }
+    char * dis = (char*)calloc(10000, sizeof(char));
+    for(int i = 0; i < size_address_neogit; i++){
+        dis = connectTwoString(dis, address_neogit[i]);
+        dis = connectTwoString(dis, "\\");
+    }
+    dis = connectTwoString(dis, ".neogit\\stage\\");
+    for(int i = size_address_neogit; i < size_address_file; i++){
+        dis = connectTwoString(dis, address_file[i]);
+        dis = connectTwoString(dis, "\\");
+    }
+
+    for(int i = 0; i < size_address_given-1; i++){
+        dis = connectTwoString(dis, address_given[i]);
+        dis = connectTwoString(dis, "\\");
+    }
+    struct address__ tt;
+    tt.address_cmd = address_file;
+    tt.address_given = address_given;
+    tt.address_neogit = address_neogit;
+    tt.size_address_cmd = size_address_file;
+    tt.size_address_given = size_address_given;
+    tt.size_address_neogit = size_address_neogit;
+    tt.adress_stage_file = dis;
+    return tt;
 }
 void add(char *name){
     char * address_stage = gitFolder();
@@ -617,7 +714,40 @@ void add(char *name){
     }
 
 }
+void rest(char * name){
+    struct address__ adress = Help_ADD(name);
+    adress.adress_stage_file = connectTwoString(adress.adress_stage_file, adress.address_given[adress.size_address_given - 1]);
+    char mode = check_type(adress.adress_stage_file);
+    if(!mode){
+        printf("<%s> is not in stage now!\n", name);
+        exit(-1);
+    }
+    if(mode == -1){
+        char dastoor[1000];
+        sprintf(dastoor, "del /f/q \"%s\"", adress.adress_stage_file);
+        if(!system(dastoor)){
+            printf("%s unstaged successfully\n", name);
+            exit(0);
+        }
+        else{
+            printf("an unkown problem!\n");
+            exit(-1);
+        }
+    }
+    if(mode == 1){
+        char dastoor[1000];
+        sprintf(dastoor, "RMDIR /s/q \"%s\"", adress.adress_stage_file);
+        if(!system(dastoor)){
+            printf("%s\\ unstaged successfully\n", name);
+            exit(0);
+        }
+        else{
+            printf("an unkown problem!\n");
+            exit(-1);
+        }
+    }
 
+}
 //End of main functions
 
 int main(int argc, char* argv[]){
@@ -685,6 +815,7 @@ int main(int argc, char* argv[]){
     }
     //neogit add *
     if(equalStrings(input[1], "add") && strcmp(input[2], "") && !strcheck(input[2] , '-') && len > 3){
+        gitFoldeerCheck(".neogit", 0, getLevelofAddress(GetAddressHere()));
         for(int i = 2; i < len; i++){
             if(strlen(input[i]) > 250){
                 printf("Your path is too long!\n");
@@ -702,6 +833,7 @@ int main(int argc, char* argv[]){
     }
     //neogit add -f
     if(equalStrings(input[1], "add") && equalStrings(input[2], "-f") && strcmp(input[3], "") && len >= 4){
+        gitFoldeerCheck(".neogit", 0, getLevelofAddress(GetAddressHere()));
         for(int i = 3; i < len; i++){
             if(strlen(input[i]) > 250){
                 printf("Your path is too long!\n");
@@ -717,8 +849,55 @@ int main(int argc, char* argv[]){
         }
         exit(0);
     }
+    //neogit rest
+    if(equalStrings(input[1], "rest") && strcmp(input[2], "") && !strcheck(input[2] , '-') && equalStrings(input[3], "") && len == 3){
+        if(strlen(input[2]) > 250){
+            printf("Your command is too long!\n");
+            exit(-1);
+        }
+        if(strcheck(input[2], '\"')){
+            printf("Your command is invalid!\n");
+            exit(-1);
+        }
+        rest(input[2]);
+    }
+    //neogit rest name*
+    if(equalStrings(input[1], "rest") && strcmp(input[2], "") && !strcheck(input[2] , '-') && len > 3){
+        gitFoldeerCheck(".neogit", 0, getLevelofAddress(GetAddressHere()));
+        for(int i = 2; i < len; i++){
+            if(strlen(input[i]) > 250){
+                printf("Your path is too long!\n");
+                exit(-1);
+            }
+            if(strcheck(input[i], '\"')){
+                printf("Your path is invalid!\n");
+                exit(-1);
+            }
+            char cc[1000];
+            sprintf(cc, "neogit rest \"%s\"", input[i]);
+            system(cc);
+        }
+        exit(0);
+    }
 
-
+    //neogit rest -f
+    if(equalStrings(input[1], "rest") && equalStrings(input[2], "-f") && strcmp(input[3], "") && len >= 4){
+        gitFoldeerCheck(".neogit", 0, getLevelofAddress(GetAddressHere()));
+        for(int i = 3; i < len; i++){
+            if(strlen(input[i]) > 250){
+                printf("Your path is too long!\n");
+                exit(-1);
+            }
+            if(strcheck(input[i], '\"')){
+                printf("Your path is invalid!\n");
+                exit(-1);
+            }
+            char cc[1000];
+            sprintf(cc, "neogit rest \"%s\"", input[i]);
+            system(cc);
+        }
+        exit(0);
+    }
 
     return 0;
 }
