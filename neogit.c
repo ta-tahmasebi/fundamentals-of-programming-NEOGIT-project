@@ -669,6 +669,31 @@ void Undo(){
     sscanf(line[count - 2], "%[^\n]s", address);
     char command[1000];
     if(mode == -1){
+        char oo[400];
+        sprintf(oo, "if exist \"%s\" echo. > ____T____.neogit", address);
+        system(oo);
+        FILE* ooo = fopen("____T____.neogit", "r");
+        if(ooo == NULL){
+            char temp[] = ".neogit\\stage\\";
+            for(int i = 0; i < (int)strlen(address) - (int)strlen(temp) - 1; i++){
+                int flag = 1;
+                int j;
+                for(j = 0; j < (int)strlen(temp); j++){
+                    if (address[i+j] != temp[j]){
+                        flag = 0;
+                        break;
+                    }
+                }
+                if(flag){
+                    address = (address+i+j);
+                    break;
+                }
+            }
+            printf("%s is unstage now!\n", address);
+            exit(-1);
+        }
+        fclose(ooo);
+        remove("____T____.neogit");
         sprintf(command, "del /f /q \"%s\"", address);
         if(!system(command)){
             char temp[] = ".neogit\\stage\\";
@@ -695,6 +720,31 @@ void Undo(){
         }
     }
     else if(mode == 1){
+        char oo[400];
+        sprintf(oo, "if exist \"%s*\" echo. > ____T____.neogit", address);
+        system(oo);
+        FILE* ooo = fopen("____T____.neogit", "r");
+        if(ooo == NULL){
+            char temp[] = ".neogit\\stage\\";
+            for(int i = 0; i < (int)strlen(address) - (int)strlen(temp) - 1; i++){
+                int flag = 1;
+                int j;
+                for(j = 0; j < (int)strlen(temp); j++){
+                    if (address[i+j] != temp[j]){
+                        flag = 0;
+                        break;
+                    }
+                }
+                if(flag){
+                    address = (address+i+j);
+                    break;
+                }
+            }
+            printf("%s is unstage now!\n", address);
+            exit(-1);
+        }
+        fclose(ooo);
+        remove("____T____.neogit");
         sprintf(command, "rmdir /s /q \"%s\"", address);
         if(!system(command)){
             char temp[] = ".neogit\\stage\\";
