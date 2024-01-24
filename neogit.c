@@ -65,8 +65,6 @@ void ___print(char* str, int len, char** final){ //only for deleting spaces
         a[i] = *(str + i);
     a[len] = '\0';
     *(final + index) = a;
-
-
 }
 char** ___split(char* name){ //c:/users\j -> c:   users    j
     char *k = calloc(1000, sizeof(char));
@@ -148,7 +146,7 @@ char ** getAddressOfHere_tokenized(){
     fclose(f);
     if(!system(".__E__neogit_temp.bat")){
         remove(".__E__neogit_temp.bat");
-        FILE* f = fopen(".____neogit_temp", "r");
+        f = fopen(".____neogit_temp", "r");
         if(f == NULL){
             printf("an unkown problem!\n");
             exit(-1);
@@ -263,7 +261,7 @@ void changeNameGlobal(char* name){
         printf("an unkown problem!\n");
         exit(-1);
     }
-    fprintf(f, name);
+    fprintf(f, "%s", name);
     fclose(f);
     printf("global name changed successfully\n");
 }
@@ -284,7 +282,7 @@ void changeName(char* name){
             printf("an unkown problem!\n");
             exit(-1);
         }
-        fprintf(f, name);
+        fprintf(f, "%s", name);
         fclose(f);
         closedir(dir);
     } else  {
@@ -294,7 +292,7 @@ void changeName(char* name){
                     printf("an unkown problem!\n");
                     exit(-1);
                 }
-            fprintf(f, name);
+            fprintf(f, "%s", name);
             fclose(f);
         }
         else{
@@ -318,7 +316,7 @@ void changeEmailGlobal(char* email){
         printf("an unkown problem!\n");
         exit(-1);
     }
-    fprintf(f, email);
+    fprintf(f,"%s", email);
     fclose(f);
     printf("global email changed successfully\n");
 }
@@ -339,7 +337,7 @@ void changeEmail(char* email){
             printf("an unkown problem!\n");
             exit(-1);
         }
-        fprintf(f, email);
+        fprintf(f, "%s", email);
         fclose(f);
         closedir(dir);
     } else  {
@@ -349,7 +347,7 @@ void changeEmail(char* email){
                     printf("an unkown problem!\n");
                     exit(-1);
                 }
-            fprintf(f, email);
+            fprintf(f, "%s", email);
             fclose(f);
         }
         else{
@@ -459,7 +457,7 @@ char check_type(char* name){ // 1 -> folder 0-> not found  -1->file
             }
             else{ // it is not a folder
                 if(!system(connectTwoString("if exist \"", connectTwoString(name, "\" echo W > .____neogit_temp")))){
-                    FILE* f = fopen(".____neogit_temp", "r");
+                    f = fopen(".____neogit_temp", "r");
                     if(f == NULL){
                         printf("an unkown problem!\n");
                         exit(-1);
@@ -485,6 +483,7 @@ char check_type(char* name){ // 1 -> folder 0-> not found  -1->file
         printf("an unkown problem!\n");
         exit(-1);   
     }
+    return 0;
 }
 struct address__ Help_ADD(char* name){
     char * address_stage = gitFolder();
@@ -511,7 +510,7 @@ struct address__ Help_ADD(char* name){
     int ch = 0;;
     if(!system(".__E__neogit_temp.bat")){
         remove(".__E__neogit_temp.bat");
-        FILE* f = fopen(".____neogit_temp", "r");
+        f = fopen(".____neogit_temp", "r");
         if(f == NULL){
             printf("an unkown problem!\n");
             exit(-1);
@@ -571,6 +570,161 @@ struct address__ Help_ADD(char* name){
     tt.adress_stage_file = dis;
     return tt;
 }
+void addToUndo(char* name_file, char mode, char* address_undo){
+    FILE* f = fopen(address_undo, "r");
+    if(f==NULL){
+        char * gitfolder = gitFolder();
+        gitfolder = connectTwoString(gitfolder, "//config");
+        mkdir(gitfolder);
+        char oo[1000];
+        sprintf(oo, "echo.> %s", address_undo);
+        if(system(oo)){
+            printf("an unkown problem!\n");
+            exit(-1);
+        }
+        f = fopen(address_undo, "r");
+        if(f == NULL){
+            printf("an unkown problem!\n");
+            exit(-1);
+        }
+    }
+    char line[30][400];
+    int count = 0;
+    while(fgets(line[count], 399, f)){
+        count++;
+    }
+    fclose(f);
+    FILE* ff = fopen(address_undo, "w");
+    if(ff == NULL){
+        printf("an unkown problem!\n");
+        exit(-1);
+    }
+    if(count == 1){
+        fprintf(ff, "");
+        addToUndo(name_file, mode, address_undo);
+        count = 0;
+    }
+    if(count <= 18){
+        for(int i = 0;i<count; i++){
+            fprintf(ff, "%s", line[i]);
+        }
+    }
+    else{
+        for(int i = 2;i<count; i++){
+            fprintf(ff, "%s", line[i]);
+        }
+    }
+    fprintf(ff, "%s\n", name_file);
+    fprintf(ff,"%d\n", mode);
+    fclose(ff);
+}
+void Undo(){
+    char * address_undo = gitFolder();
+    address_undo = connectTwoString(address_undo, "//config//undo");
+    FILE * f = fopen(address_undo, "r");
+    if(f==NULL){
+        char * gitfolder = gitFolder();
+        gitfolder = connectTwoString(gitfolder, "//config");
+        mkdir(gitfolder);
+        char oo[1000];
+        sprintf(oo, "echo.> %s", address_undo);
+        if(system(oo)){
+            printf("an unkown problem!\n");
+            exit(-1);
+        }
+        f = fopen(address_undo, "r");
+        if(f == NULL){
+            printf("an unkown problem!\n");
+            exit(-1);
+        }
+
+    }
+    char line[30][400];
+    int count = 0;
+    while(fgets(line[count], 399, f)){
+        count++;
+    }
+    fclose(f);
+    FILE* ff = fopen(address_undo, "w");
+    if(ff == NULL){
+        printf("an unkown problem!\n");
+        exit(-1);
+    }
+    for(int i = 0; i < count-2; i++){
+        fprintf(ff, "%s", line[i]);
+    }
+    fclose(ff);
+    if(count == 0){
+        printf("There is no history of adding files!\n");
+        exit(-1);
+    }
+    if(count == 1){
+        printf("There is no history of adding files!\n");
+        fprintf(ff, "");
+        exit(-1);
+    }
+    int mode;
+    char* address = (char*)calloc(400, sizeof(char));
+    sscanf(line[count - 1], "%d", &mode);
+    sscanf(line[count - 2], "%[^\n]s", address);
+    char command[1000];
+    if(mode == -1){
+        sprintf(command, "del /f /q \"%s\"", address);
+        if(!system(command)){
+            char temp[] = ".neogit\\stage\\";
+            for(int i = 0; i < (int)strlen(address) - (int)strlen(temp) - 1; i++){
+                int flag = 1;
+                int j;
+                for(j = 0; j < (int)strlen(temp); j++){
+                    if (address[i+j] != temp[j]){
+                        flag = 0;
+                        break;
+                    }
+                }
+                if(flag){
+                    address = (address+i+j);
+                    break;
+                }
+            }
+            printf("%s unstaged successfully\n", address);
+            exit(0);
+        }
+        else{
+            printf("an unkown problem!\n");
+            exit(-1);
+        }
+    }
+    else if(mode == 1){
+        sprintf(command, "rmdir /s /q \"%s\"", address);
+        if(!system(command)){
+            char temp[] = ".neogit\\stage\\";
+            for(int i = 0; i < (int)strlen(address) - (int)strlen(temp) - 1; i++){
+                int flag = 1;
+                int j;
+                for(j = 0; j < (int)strlen(temp); j++){
+                    if (address[i+j] != temp[j]){
+                        flag = 0;
+                        break;
+                    }
+                }
+                if(flag){
+                    address = (address+i+j);
+                    break;
+                }
+            }
+            printf("%s unstaged successfully\n", address);
+            exit(0);
+        }
+        else{
+            printf("an unkown problem!\n");
+            exit(-1);
+        }
+    }
+    else{
+        printf("an unkown problem!\n");
+        exit(-1);
+    }
+}
 void add(char *name){
     char * address_stage = gitFolder();
     char mode = check_type(name);
@@ -601,7 +755,7 @@ void add(char *name){
     int ch = 0;;
     if(!system(".__E__neogit_temp.bat")){
         remove(".__E__neogit_temp.bat");
-        FILE* f = fopen(".____neogit_temp", "r");
+        f = fopen(".____neogit_temp", "r");
         if(f == NULL){
             printf("an unkown problem!\n");
             exit(-1);
@@ -641,6 +795,7 @@ void add(char *name){
         dis = connectTwoString(dis, address_neogit[i]);
         dis = connectTwoString(dis, "\\");
     }
+    char* address_undo = connectTwoString(dis, ".neogit\\config\\undo");
     dis = connectTwoString(dis, ".neogit\\stage\\");
     for(int i = size_address_neogit; i < size_address_file; i++){
         dis = connectTwoString(dis, address_file[i]);
@@ -655,7 +810,7 @@ void add(char *name){
         char* command = (char*)calloc(10000,sizeof(char));
         sprintf(command, "if not exist \"%s\\*\" mkdir \"%s\"", dis, dis);
         if(!system(command)){
-            FILE* f = fopen(".__E__neogit_temp.bat", "w");
+            f = fopen(".__E__neogit_temp.bat", "w");
             if(f == NULL){
                 printf("an unkown problem!\n");
                 exit(-1);
@@ -666,6 +821,7 @@ void add(char *name){
                 remove(".__E__neogit_temp.bat");
                 for(int i = 0; i < size_address_given-1; i++)
                     printf("%s\\", address_given[i]);
+                addToUndo(connectTwoString(dis,address_given[size_address_given - 1]), -1, address_undo);
                 printf("%s added successfully\n", address_given[size_address_given - 1]);
                 exit(0);
             }
@@ -687,7 +843,7 @@ void add(char *name){
         char* command = (char*)calloc(10000,sizeof(char));
         sprintf(command, "if not exist \"%s\\*\" mkdir \"%s\\\"", dis, dis);
         if(!system(command)){
-            FILE* f = fopen(".__E__neogit_temp.bat", "w");
+            f = fopen(".__E__neogit_temp.bat", "w");
             if(f == NULL){
                 printf("an unkown problem!\n");
                 exit(-1);
@@ -697,7 +853,8 @@ void add(char *name){
             if(!system(".__E__neogit_temp.bat")){
                 remove(".__E__neogit_temp.bat");
                 for(int i = 0; i < size_address_given-1; i++)
-                printf("%s\\", address_given[i]);
+                    printf("%s\\", address_given[i]);
+                addToUndo(dis, 1, address_undo);
                 printf("%s\\ added successfully\n", address_given[size_address_given - 1]);
                 exit(0);
             }
@@ -712,7 +869,6 @@ void add(char *name){
             exit(-1);
         }
     }
-
 }
 void rest(char * name){
     struct address__ adress = Help_ADD(name);
@@ -757,7 +913,7 @@ int main(int argc, char* argv[]){
     //end of getting    #############################
 
     //test
-    // printf("%d", len);
+    // printf("%d ||", len);
     // for (int i = 0; i < len; i++){
     //     printf("%s||", input[i]);
     // }
@@ -811,6 +967,9 @@ int main(int argc, char* argv[]){
             printf("Your command is invalid!\n");
             exit(-1);
         }
+        if(strstr(input[2], ".neogit") == input[2]){
+            exit(0);
+        }
         add(input[2]);
     }
     //neogit add *
@@ -850,7 +1009,7 @@ int main(int argc, char* argv[]){
         exit(0);
     }
     //neogit rest
-    if(equalStrings(input[1], "rest") && strcmp(input[2], "") && !strcheck(input[2] , '-') && equalStrings(input[3], "") && len == 3){
+    if(equalStrings(input[1], "reset") && strcmp(input[2], "") && !strcheck(input[2] , '-') && equalStrings(input[3], "") && len == 3){
         if(strlen(input[2]) > 250){
             printf("Your command is too long!\n");
             exit(-1);
@@ -862,7 +1021,7 @@ int main(int argc, char* argv[]){
         rest(input[2]);
     }
     //neogit rest name*
-    if(equalStrings(input[1], "rest") && strcmp(input[2], "") && !strcheck(input[2] , '-') && len > 3){
+    if(equalStrings(input[1], "reset") && strcmp(input[2], "") && !strcheck(input[2] , '-') && len > 3){
         gitFoldeerCheck(".neogit", 0, getLevelofAddress(GetAddressHere()));
         for(int i = 2; i < len; i++){
             if(strlen(input[i]) > 250){
@@ -874,14 +1033,14 @@ int main(int argc, char* argv[]){
                 exit(-1);
             }
             char cc[1000];
-            sprintf(cc, "neogit rest \"%s\"", input[i]);
+            sprintf(cc, "neogit reset \"%s\"", input[i]);
             system(cc);
         }
         exit(0);
     }
 
-    //neogit rest -f
-    if(equalStrings(input[1], "rest") && equalStrings(input[2], "-f") && strcmp(input[3], "") && len >= 4){
+    //neogit reset -f
+    if(equalStrings(input[1], "reset") && equalStrings(input[2], "-f") && strcmp(input[3], "") && len >= 4){
         gitFoldeerCheck(".neogit", 0, getLevelofAddress(GetAddressHere()));
         for(int i = 3; i < len; i++){
             if(strlen(input[i]) > 250){
@@ -893,11 +1052,14 @@ int main(int argc, char* argv[]){
                 exit(-1);
             }
             char cc[1000];
-            sprintf(cc, "neogit rest \"%s\"", input[i]);
+            sprintf(cc, "neogit reset \"%s\"", input[i]);
             system(cc);
         }
         exit(0);
     }
+    //reset -undo
+    if(equalStrings(input[1], "reset") && equalStrings(input[2], "-undo") && len == 3)
+        Undo();
 
     return 0;
 }
