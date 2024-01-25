@@ -589,7 +589,7 @@ int current_id(){
     f = fopen("d://SETTINGS//config//idCount", "w");
     fprintf(f, "%d", number);
     fclose(f);
-    printf("%d\n", list);
+    return list;
 }
 char ** current_dateTime(){
     char ** dateTime = (char**)calloc(6,sizeof(char*));
@@ -1467,8 +1467,8 @@ int main(int argc, char* argv[]){
         addNDeath(".", death);
         exit(0);
     }
-    if(equalStrings(input[1], "test")){
-        current_id();
-    }
+    // if(equalStrings(input[1], "test")){
+    //     current_id();
+    // }
     return 0;
 }
