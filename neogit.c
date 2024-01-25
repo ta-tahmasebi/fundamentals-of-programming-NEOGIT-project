@@ -192,7 +192,7 @@ char** delete_spaces (char* string){
     return finaladdress;
 }
 char * connectTwoString(char* a, char* b){
-    char* str3 = (char*)calloc(2000,1);
+    char* str3 = (char*)calloc(strlen(a) + strlen(b) + 10 ,1);
     int i = 0, j = 0;   
     while (a[i] != '\0') {
         str3[j] = a[i];
@@ -600,7 +600,8 @@ void addToUndo(char* name_file, char mode, char* address_undo){
         exit(-1);
     }
     if(count == 1){
-        fprintf(ff, "");
+        char temp[] = "";
+        fprintf(ff, temp);
         addToUndo(name_file, mode, address_undo);
         count = 0;
     }
@@ -660,7 +661,8 @@ void Undo(){
     }
     if(count == 1){
         printf("There is no history of adding files!\n");
-        fprintf(ff, "");
+        char temp[] = "";
+        fprintf(ff, temp);
         exit(-1);
     }
     int mode;
@@ -954,6 +956,85 @@ void rest(char * name){
     }
 
 }
+void checkFileInStage(char* name, int mode){
+    struct address__ address = Help_ADD(name);
+    address.adress_stage_file = connectTwoString(address.adress_stage_file,address.address_given[address.size_address_given - 1]);
+    char command[400];
+    if(mode == 1){
+        sprintf(command, "if exist \"%s\\*\" echo. > ___T____.neogit", address.adress_stage_file);
+        system(command);
+        FILE* f = fopen("___T____.neogit","r");
+        if(f == NULL){
+            printf("%s\\ is not in stage area.\n", name);
+            exit(0);
+        }
+        fclose(f);
+        remove("___T____.neogit");
+        printf("%s\\ is in stage area.\n", name);
+        exit(0);
+    }
+    if(mode == -1){
+        sprintf(command, "if exist \"%s\" echo. > ___T____.neogit", address.adress_stage_file);
+        system(command);
+        FILE* f = fopen("___T____.neogit","r");
+        if(f == NULL){
+            printf("%s is not in stage area\n", name);
+            exit(0);
+        }
+        fclose(f);
+        remove("___T____.neogit");
+        printf("%s is in stage area\n", name);
+        exit(0);
+    }
+}
+void addNDeath(char* address, int death){
+    gitFolder();
+    char directiries[100][400];
+    int numberdir = 0;
+    char files[100][400];
+    int numberfile = 0;
+    char* address_free;
+    if(death == 0){
+        return;
+    }
+    DIR* dir;
+    dir = opendir(address);
+    struct dirent* entry;
+    if(dir == NULL){
+        printf("unable to open %s directory", address);
+        return;
+    }
+    while ((entry = readdir(dir)) != NULL){
+        if(strcmp(entry->d_name, ".") && strcmp(entry->d_name, "..")){
+            address_free = connectTwoString(address, "");
+            char isDir;
+            address_free = connectTwoString(address_free, connectTwoString("\\", entry->d_name));
+            address_free = address_free + 2;
+            isDir = check_type(address_free);
+            if(isDir == 1){
+                strcpy(directiries[numberdir], address_free);
+                numberdir++;
+            }
+            else{
+                strcpy(files[numberfile], address_free);
+                numberfile++;
+            }
+        }
+    }
+    closedir(dir);
+    for(int i = 0; i < numberfile; i++){
+        char oo[500];
+        sprintf(oo, "neogit ___check_if_a_file_is_in_stage__ \"%s\" -1", files[i]);
+        system(oo);
+    }
+    for(int i = 0; i < numberdir; i++){
+        if(!strcmp(directiries[i], ".neogit")) continue;
+        char oo[500];
+        sprintf(oo, "neogit ___check_if_a_file_is_in_stage__ \"%s\" 1", directiries[i]);
+        system(oo);
+        addNDeath(connectTwoString(".\\", directiries[i]), death - 1);
+    }
+}
 //End of main functions
 
 int main(int argc, char* argv[]){
@@ -1020,6 +1101,10 @@ int main(int argc, char* argv[]){
         if(strstr(input[2], ".neogit") == input[2]){
             exit(0);
         }
+        if(!strcmp(input[2], ".")){
+            system("neogit add *");
+            exit(0);
+        }
         add(input[2]);
     }
     //neogit add *
@@ -1068,6 +1153,13 @@ int main(int argc, char* argv[]){
             printf("Your command is invalid!\n");
             exit(-1);
         }
+        if(strstr(input[2], ".neogit") == input[2]){
+            exit(0);
+        }
+        if(!strcmp(input[2], ".")){
+            system("neogit reset *");
+            exit(0);
+        }
         rest(input[2]);
     }
     //neogit rest name*
@@ -1110,6 +1202,22 @@ int main(int argc, char* argv[]){
     //reset -undo
     if(equalStrings(input[1], "reset") && equalStrings(input[2], "-undo") && len == 3)
         Undo();
-
+    //add -n option
+    if(equalStrings(input[1], "___check_if_a_file_is_in_stage__")){
+        if(!strcmp(input[3], "1"))
+            checkFileInStage(input[2], 1);
+        else
+            checkFileInStage(input[2], -1);
+    }
+    //add -n death (death > 1)
+    if(equalStrings(input[1], "add") && equalStrings(input[2], "-n") && strcmp(input[3], "") && len == 4){
+        int death = atoi(input[3]);
+        if(death <= 0){
+            printf("invalid death!\n");
+            exit(1);
+        }
+        addNDeath(".", death);
+        exit(0);
+    }
     return 0;
 }
