@@ -5,6 +5,7 @@
 #include <string.h>
 #include <dirent.h>
 //#include <errno.h>
+#include <time.h>
 
 
 //   *(IN THE NAME OF GOD)*
@@ -564,6 +565,45 @@ char* current_email(){
     fscanf(ff, "%[^\n]s", email);
     fclose(ff);
     return email;
+}
+int current_id(){
+    FILE* f = fopen("d://SETTINGS//config//idCount", "a");
+    fclose(f);
+    f = fopen("d://SETTINGS//config//idCount", "r");
+    int number = -1;
+    fscanf(f, "%d", &number);
+    number++;
+    fclose(f);
+    f = fopen("d://SETTINGS//config//IDs", "r");
+    int list;
+    char line[10];
+    for(int i = 0; i <= number; i++){
+        fgets(line, 9, f);
+        for(int j = 0; j < 10; j++){
+            if(line[j] == '\n')
+                line[j] = 0;
+        }
+        list = atoi(line);
+    }
+    fclose(f);
+    f = fopen("d://SETTINGS//config//idCount", "w");
+    fprintf(f, "%d", number);
+    fclose(f);
+    printf("%d\n", list);
+}
+char ** current_dateTime(){
+    char ** dateTime = (char**)calloc(6,sizeof(char*));
+    time_t t = time(NULL);
+    struct tm tmm = *localtime(&t);
+    for(int i = 0; i < 6; i++)
+        dateTime[i] = (char*)calloc(6, sizeof(char));
+    sprintf(dateTime[0], "%04d", tmm.tm_year + 1900);
+    sprintf(dateTime[1], "%02d", tmm.tm_mon + 1);
+    sprintf(dateTime[2], "%02d", tmm.tm_mday);
+    sprintf(dateTime[3], "%02d", tmm.tm_hour);
+    sprintf(dateTime[4], "%02d", tmm.tm_min);
+    sprintf(dateTime[5], "%02d", tmm.tm_sec);
+    return dateTime;
 }
 void GlobalAlias(char* newName, char** command){
     if(checkIfANameRezerved(newName)){
@@ -1427,8 +1467,8 @@ int main(int argc, char* argv[]){
         addNDeath(".", death);
         exit(0);
     }
-    // if(equalStrings(input[1], "test")){
-    //     printf("%s", current_email());
-    // }
+    if(equalStrings(input[1], "test")){
+        current_id();
+    }
     return 0;
 }
