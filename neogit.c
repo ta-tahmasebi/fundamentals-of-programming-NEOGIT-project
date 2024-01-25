@@ -263,6 +263,23 @@ void changeNameGlobal(char* name){
     }
     fprintf(f, "%s", name);
     fclose(f);
+    FILE* ff = fopen("d://SETTINGS//config//nameCount", "a");
+    fclose(ff);
+    long long global = -1, MAX = -1;
+    ff = fopen("d://SETTINGS//config//nameCount", "r");
+    fscanf(ff, "%llu", &global);
+    fclose(ff);
+    ff= fopen("d://SETTINGS//config//MAXnameCount", "a");
+    fclose(ff);
+    ff = fopen("d://SETTINGS//config//MAXnameCount", "r");
+    fscanf(ff, "%llu", &MAX);
+    fclose(ff);
+    ff = fopen("d://SETTINGS//config//MAXnameCount", "w");
+    fprintf(ff, "%llu", (MAX > global)? MAX + 1: global + 1);
+    fclose(ff);
+    ff = fopen("d://SETTINGS//config//nameCount", "w");
+    fprintf(ff, "%llu", (MAX > global)? MAX + 1: global + 1);
+    fclose(ff);
     printf("global name changed successfully\n");
 }
 void changeName(char* name){
@@ -300,6 +317,28 @@ void changeName(char* name){
             exit(-1);
         }
     }
+    FILE* ff = fopen(connectTwoString(address,"//config//nameCount"), "a");
+    fclose(ff);
+    ff = fopen(connectTwoString(address,"//config//nameCount"), "r");
+    long long countlocal = -1, countGlobal = -1, MAX = -1;
+    fscanf(ff, "%llu", &countlocal);
+    fclose(ff);
+    ff = fopen("d://SETTINGS//config//nameCount", "a");
+    fclose(ff);
+    ff = fopen("d://SETTINGS//config//nameCount", "r");
+    fscanf(ff, "%llu", &countGlobal);
+    fclose(ff);
+    ff = fopen(connectTwoString(address,"//config//nameCount"), "w");
+    fprintf(ff, "%llu", (countlocal > countGlobal)? countlocal + 1 : countGlobal + 1);
+    fclose(ff);
+    ff = fopen("d://SETTINGS//config//MAXnameCount", "a");
+    fclose(ff);
+    ff = fopen("d://SETTINGS//config//MAXnameCount", "r");
+    fscanf(ff, "%llu", &MAX);
+    fclose(ff);
+    ff = fopen("d://SETTINGS//config//MAXnameCount", "w");
+    fprintf(ff, "%llu", (MAX > ((countlocal > countGlobal)? countlocal + 1 : countGlobal + 1))? MAX : ((countlocal > countGlobal)? countlocal + 1 : countGlobal + 1));
+    fclose(ff);
     printf("local name changed successfully\n");
 }
 void changeEmailGlobal(char* email){
@@ -318,6 +357,23 @@ void changeEmailGlobal(char* email){
     }
     fprintf(f,"%s", email);
     fclose(f);
+    FILE* ff = fopen("d://SETTINGS//config//emailCount", "a");
+    fclose(ff);
+    long long global = -1, MAX = -1;
+    ff = fopen("d://SETTINGS//config//emailCount", "r");
+    fscanf(ff, "%llu", &global);
+    fclose(ff);
+    ff= fopen("d://SETTINGS//config//MAXemailCount", "a");
+    fclose(ff);
+    ff = fopen("d://SETTINGS//config//MAXemailCount", "r");
+    fscanf(ff, "%llu", &MAX);
+    fclose(ff);
+    ff = fopen("d://SETTINGS//config//MAXemailCount", "w");
+    fprintf(ff, "%llu", (MAX > global)? MAX + 1: global + 1);
+    fclose(ff);
+    ff = fopen("d://SETTINGS//config//emailCount", "w");
+    fprintf(ff, "%llu", (MAX > global)? MAX + 1: global + 1);
+    fclose(ff);
     printf("global email changed successfully\n");
 }
 void changeEmail(char* email){
@@ -355,7 +411,159 @@ void changeEmail(char* email){
             exit(-1);
         }
     }
+    FILE* ff = fopen(connectTwoString(address,"//config//emailCount"), "a");
+    fclose(ff);
+    ff = fopen(connectTwoString(address,"//config//emailCount"), "r");
+    long long countlocal = -1, countGlobal = -1, MAX = -1;
+    fscanf(ff, "%llu", &countlocal);
+    fclose(ff);
+    ff = fopen("d://SETTINGS//config//emailCount", "a");
+    fclose(ff);
+    ff = fopen("d://SETTINGS//config//emailCount", "r");
+    fscanf(ff, "%llu", &countGlobal);
+    fclose(ff);
+    ff = fopen(connectTwoString(address,"//config//emailCount"), "w");
+    fprintf(ff, "%llu", (countlocal > countGlobal)? countlocal + 1 : countGlobal + 1);
+    fclose(ff);
+    ff = fopen("d://SETTINGS//config//MAXemailCount", "a");
+    fclose(ff);
+    ff = fopen("d://SETTINGS//config//MAXemailCount", "r");
+    fscanf(ff, "%llu", &MAX);
+    fclose(ff);
+    ff = fopen("d://SETTINGS//config//MAXemailCount", "w");
+    fprintf(ff, "%llu", (MAX > ((countlocal > countGlobal)? countlocal + 1 : countGlobal + 1))? MAX : ((countlocal > countGlobal)? countlocal + 1 : countGlobal + 1));
+    fclose(ff);
     printf("local email changed successfully\n");
+}
+char* current_name(){
+    char * address =  gitFolder();
+    DIR* dir = opendir(connectTwoString(address, "//config"));
+    if(dir) {
+        FILE *f = fopen(connectTwoString(address,"//config//name"), "a");
+        if(f == NULL){
+            printf("an unkown problem!\n");
+            exit(-1);
+        }
+        fclose(f);
+        f = fopen(connectTwoString(address,"//config//nameCount"), "a");
+            if(f == NULL){
+                printf("an unkown problem!\n");
+                exit(-1);
+            }
+        fclose(f);
+        closedir(dir);
+    } else  {
+        if (!mkdir(connectTwoString(address, "//config"))){
+            FILE *f = fopen(connectTwoString(address,"//config//name"), "a");
+                if(f == NULL){
+                    printf("an unkown problem!\n");
+                    exit(-1);
+                }
+            fclose(f);
+            f = fopen(connectTwoString(address,"//config//nameCount"), "a");
+                if(f == NULL){
+                    printf("an unkown problem!\n");
+                    exit(-1);
+                }
+            fclose(f);
+        }
+        else{
+            printf("an unkown problem!\n");
+            exit(-1);
+        }
+    }
+    FILE* ff = fopen("d://SETTINGS//config//name", "a");
+    fclose(ff);
+    ff = fopen("d://SETTINGS//config//nameCount", "a");
+    fclose(ff);
+    ff = fopen("d://SETTINGS//config//MAXnameCount", "a");
+    fclose(ff);
+    char *name = calloc(200, sizeof(char));
+    long long local = -1, global = -1;
+    ff = fopen(connectTwoString(address,"//config//nameCount"), "r");
+    fscanf(ff, "%llu", &local);
+    fclose(ff);
+    ff = fopen("d://SETTINGS//config//nameCount", "r");
+    fscanf(ff, "%llu", &global);
+    fclose(ff);
+    if(global >= local){
+        ff = fopen("d://SETTINGS//config//name", "r");
+        fscanf(ff, "%[^\n]s", name);
+        fclose(ff);
+        if(name[0] == 0){
+            strcpy(name, "NULL");
+        }
+        return name;
+    }
+    ff = fopen(connectTwoString(address,"//config//name"), "r");
+    fscanf(ff, "%[^\n]s", name);
+    fclose(ff);
+    return name;
+}
+char* current_email(){
+    char * address =  gitFolder();
+    DIR* dir = opendir(connectTwoString(address, "//config"));
+    if(dir) {
+        FILE *f = fopen(connectTwoString(address,"//config//email"), "a");
+        if(f == NULL){
+            printf("an unkown problem!\n");
+            exit(-1);
+        }
+        fclose(f);
+        f = fopen(connectTwoString(address,"//config//emailCount"), "a");
+            if(f == NULL){
+                printf("an unkown problem!\n");
+                exit(-1);
+            }
+        fclose(f);
+        closedir(dir);
+    } else  {
+        if (!mkdir(connectTwoString(address, "//config"))){
+            FILE *f = fopen(connectTwoString(address,"//config//email"), "a");
+                if(f == NULL){
+                    printf("an unkown problem!\n");
+                    exit(-1);
+                }
+            fclose(f);
+            f = fopen(connectTwoString(address,"//config//emailCount"), "a");
+                if(f == NULL){
+                    printf("an unkown problem!\n");
+                    exit(-1);
+                }
+            fclose(f);
+        }
+        else{
+            printf("an unkown problem!\n");
+            exit(-1);
+        }
+    }
+    FILE* ff = fopen("d://SETTINGS//config//email", "a");
+    fclose(ff);
+    ff = fopen("d://SETTINGS//config//emailCount", "a");
+    fclose(ff);
+    ff = fopen("d://SETTINGS//config//MAXemailCount", "a");
+    fclose(ff);
+    char *email = calloc(200, sizeof(char));
+    long long local = -1, global = -1;
+    ff = fopen(connectTwoString(address,"//config//emailCount"), "r");
+    fscanf(ff, "%llu", &local);
+    fclose(ff);
+    ff = fopen("d://SETTINGS//config//emailCount", "r");
+    fscanf(ff, "%llu", &global);
+    fclose(ff);
+    if(global >= local){
+        ff = fopen("d://SETTINGS//config//email", "r");
+        fscanf(ff, "%[^\n]s", email);
+        fclose(ff);
+        if(email[0] == 0){
+            strcpy(email, "NULL");
+        }
+        return email;
+    }
+    ff = fopen(connectTwoString(address,"//config//email"), "r");
+    fscanf(ff, "%[^\n]s", email);
+    fclose(ff);
+    return email;
 }
 void GlobalAlias(char* newName, char** command){
     if(checkIfANameRezerved(newName)){
@@ -1219,5 +1427,8 @@ int main(int argc, char* argv[]){
         addNDeath(".", death);
         exit(0);
     }
+    // if(equalStrings(input[1], "test")){
+    //     printf("%s", current_email());
+    // }
     return 0;
 }
