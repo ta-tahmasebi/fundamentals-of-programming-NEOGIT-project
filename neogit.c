@@ -25,6 +25,10 @@ struct address__{
     int size_address_neogit;
     char* adress_stage_file;
 };
+struct count_directory_file{
+    int directory;
+    int file;
+};
 //end of structs
 
 //Helpful additinal functions:
@@ -591,6 +595,18 @@ int current_id(){
     fclose(f);
     return list;
 }
+char* current_branch(){
+    char* address = gitFolder();
+    address = connectTwoString(address, "//config//branch//current");
+    FILE* f = fopen(address, "r");
+    if(f == NULL){
+
+    }
+    char* name = (char*)calloc(100, sizeof(char));
+    fscanf(f, "%[^\n]s", name);
+    fclose(f);
+    return name;
+}
 char ** current_dateTime(){
     char ** dateTime = (char**)calloc(6,sizeof(char*));
     time_t t = time(NULL);
@@ -685,7 +701,19 @@ void init(){
     }
     if (!mkdir(".neogit")){
         system("attrib +h .neogit");
+        mkdir(".neogit\\stage");
+        mkdir(".neogit\\config");
+        FILE* f = fopen(".neogit\\config\\undo", "w"); fclose(f);
+        f = fopen(".neogit\\config\\alias", "w"); fclose(f);
+        f = fopen(".neogit\\config\\email", "w"); fclose(f);
+        f = fopen(".neogit\\config\\emailCount", "w"); fclose(f);
+        f = fopen(".neogit\\config\\name", "w"); fclose(f);
+        f = fopen(".neogit\\config\\nameCount", "w"); fclose(f);
+        mkdir(".neogit\\config\\branch");
+        f = fopen(".neogit\\config\\branch\\current", "w"); fprintf(f, "%s", "master"); fclose(f);
+        f = fopen(".neogit\\config\\branch\\list", "w"); fprintf(f, "%s\n%s", "master", "NULL"); fclose(f);
         printf("Initialized empty neogit repository\n");
+        mkdir(".neogit\\commits");
     }
     else{
         printf("an unkown problem!\n");
@@ -1283,6 +1311,65 @@ void addNDeath(char* address, int death){
         addNDeath(connectTwoString(".\\", directiries[i]), death - 1);
     }
 }
+char* absolute_address_neogit(){
+    char* address = (char*)calloc(400, sizeof(char));
+    struct address__ ab = Help_ADD("a");
+    for(int i = 0; i < ab.size_address_neogit; i++)
+        address = connectTwoString(address, connectTwoString(ab.address_neogit[i], "\\"));
+    address = connectTwoString(address, ".neogit");
+    return address;
+}
+int* Help_current_countOfStageFiles(char* address){
+    if(address[0] == 0){
+        address = absolute_address_neogit();
+        address = connectTwoString(address, "\\stage");
+    }
+    char directiries[100][400];
+    int numberdir = 0;
+    int numberfile = 0;
+    char* address_free;
+    DIR* dir;
+    dir = opendir(address);
+    struct dirent* entry;
+    if(dir == NULL){
+        printf("unable to open %s directory", address);
+        exit(-1);
+    }
+    while ((entry = readdir(dir)) != NULL){
+        if(strcmp(entry->d_name, ".") && strcmp(entry->d_name, "..")){
+            address_free = connectTwoString(address, "");
+            char isDir;
+            address_free = connectTwoString(address_free, connectTwoString("\\", entry->d_name));
+            isDir = check_type(address_free);
+            if(isDir == 1){
+                strcpy(directiries[numberdir], address_free);
+                numberdir++;
+            }
+            else{
+                numberfile++;
+            }
+        }
+    }
+    closedir(dir);
+    int* count = (int*)calloc(2, sizeof(int));
+    count[1] += numberfile;
+    for(int i = 0; i < numberdir; i++){
+        if(!strcmp(directiries[i], ".neogit")) continue;
+        count[0] += 1;
+        int* temp = Help_current_countOfStageFiles(directiries[i]);
+        count[0] += temp[0];
+        count[1] += temp[1];
+    }
+    return count;
+}
+struct count_directory_file current_countOfStageFiles(){
+    int* a = Help_current_countOfStageFiles("");
+    //printf("DIR: %d, FILE: %d", a[0], a[1]);
+    struct count_directory_file b;
+    b.file = a[1];
+    b.directory = a[0];
+    return b;
+}
 //End of main functions
 
 int main(int argc, char* argv[]){
@@ -1468,7 +1555,7 @@ int main(int argc, char* argv[]){
         exit(0);
     }
     // if(equalStrings(input[1], "test")){
-    //     current_id();
+    //     Scurrent_countOfStageFiles("");
     // }
     return 0;
 }
