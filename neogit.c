@@ -595,18 +595,6 @@ int current_id(){
     fclose(f);
     return list;
 }
-char* current_branch(){
-    char* address = gitFolder();
-    address = connectTwoString(address, "//config//branch//current");
-    FILE* f = fopen(address, "r");
-    if(f == NULL){
-
-    }
-    char* name = (char*)calloc(100, sizeof(char));
-    fscanf(f, "%[^\n]s", name);
-    fclose(f);
-    return name;
-}
 char ** current_dateTime(){
     char ** dateTime = (char**)calloc(6,sizeof(char*));
     time_t t = time(NULL);
@@ -1277,7 +1265,7 @@ void addNDeath(char* address, int death){
     dir = opendir(address);
     struct dirent* entry;
     if(dir == NULL){
-        printf("unable to open %s directory", address);
+        printf("unable to open %s directory\n", address);
         return;
     }
     while ((entry = readdir(dir)) != NULL){
@@ -1332,7 +1320,7 @@ int* Help_current_countOfStageFiles(char* address){
     dir = opendir(address);
     struct dirent* entry;
     if(dir == NULL){
-        printf("unable to open %s directory", address);
+        printf("unable to open %s directory\n", address);
         exit(-1);
     }
     while ((entry = readdir(dir)) != NULL){
@@ -1364,12 +1352,166 @@ int* Help_current_countOfStageFiles(char* address){
 }
 struct count_directory_file current_countOfStageFiles(){
     int* a = Help_current_countOfStageFiles("");
-    //printf("DIR: %d, FILE: %d", a[0], a[1]);
     struct count_directory_file b;
     b.file = a[1];
     b.directory = a[0];
     return b;
 }
+char* get_current_brach(){
+    char* address = gitFolder();
+    address = connectTwoString(address, "//config//branch//current");
+    FILE* f = fopen(address, "r");
+    char* line = (char*)calloc(100, sizeof(char));
+    fscanf(f,"%[^\n]s", line);
+    fclose(f);
+    return line;
+}
+int get_last_hash(){
+    char* branch = get_current_brach();
+    char* address = gitFolder();
+    address = connectTwoString(address, "//config//branch//list");
+    FILE* f = fopen(address, "r");
+    char line[100];
+    while(fgets(line, 99, f) != NULL){
+        if(line[strlen(line) - 1] == '\n' || line[strlen(line) - 1] == '\r')
+            line[strlen(line) - 1] = 0;
+        if(line[strlen(line) - 1] == '\n' || line[strlen(line) - 1] == '\r')
+            line[strlen(line) - 1] = 0;
+        if(!strcmp(line, branch)){
+            fgets(line, 99, f);
+            if(line[strlen(line) - 1] == '\n' || line[strlen(line) - 1] == '\r')
+                line[strlen(line) - 1] = 0;
+            if(line[strlen(line) - 1] == '\n' || line[strlen(line) - 1] == '\r')
+                line[strlen(line) - 1] = 0;
+            if (line[0] == 'N') return 0;
+            int number = 0;
+            number = atoi(line);
+            return number;
+        }
+    }
+    printf("an unknown problem!\n");
+    exit(-1);
+    return 0;
+}
+void change_last_commit_id(char* branch, int id){
+    char* address = gitFolder();
+    address = connectTwoString(address, "//config//branch//list");
+    FILE* f = fopen(address, "r");
+    char line[1000][100];
+    int i = 0;
+    while(fgets(line[i], 99, f) != NULL){
+        if(line[i][strlen(line[i]) - 1] == '\n' || line[i][strlen(line[i]) - 1] == '\r')
+            line[i][strlen(line[i]) - 1] = 0;
+        if(line[i][strlen(line[i]) - 1] == '\n' || line[i][strlen(line[i]) - 1] == '\r')
+            line[i][strlen(line[i]) - 1] = 0;
+        if(!strcmp(line[i], branch)){
+            i++;
+            char temp[100];
+            fgets(temp, 99, f);
+            sprintf(line[i], "%d", id);
+        }
+        i++;
+    }
+    fclose(f);
+    f = fopen(address, "w");
+    for(int j = 0; j < i; j++){
+        fprintf(f, "%s\n", line[j]);
+    }
+    fclose(f);
+}
+void commit(char* massage){
+    char* name = current_name();
+    char* email = current_email();
+    int id = current_id();
+    char** date = current_dateTime();
+    struct count_directory_file count = current_countOfStageFiles();
+    char* branch = get_current_brach();
+    int last_id = get_last_hash();
+    if(count.directory == 0 && count.file == 0){
+        printf("There is nothing in stage area.\n");
+        exit(0);
+    }
+    change_last_commit_id(branch, id);
+    char* address = gitFolder();
+    char temp[100];
+    sprintf(temp, "%d", id);
+    char* address_commit = connectTwoString(address, connectTwoString("//commits//", temp));
+    sprintf(temp, "%d_info", id);
+    char* address_commit_info = connectTwoString(address, connectTwoString("//commits//", temp));
+    if(!mkdir(address_commit) && !mkdir(address_commit_info)){
+        FILE* f = fopen(connectTwoString(address_commit_info, "//name"), "w");
+        fprintf(f, "%s", name);
+        fclose(f);
+        f = fopen(connectTwoString(address_commit_info, "//email"), "w");
+        fprintf(f, "%s", email);
+        fclose(f);
+        f = fopen(connectTwoString(address_commit_info, "//count"), "w");
+        fprintf(f, "%d %d", count.directory, count.file);
+        fclose(f);
+        f = fopen(connectTwoString(address_commit_info, "//branch"), "w");
+        fprintf(f, "%s", branch);
+        fclose(f);
+        f = fopen(connectTwoString(address_commit_info, "//parent"), "w");
+        fprintf(f, "%d", last_id);
+        fclose(f);
+        f = fopen(connectTwoString(address_commit_info, "//date"), "w");
+        fprintf(f, "%s %s %s %s %s %s", date[0], date[1], date[2], date[3], date[4], date[5]);
+        fclose(f);
+        f = fopen(connectTwoString(address_commit_info, "//massage"), "w");
+        fprintf(f, "%s", massage);
+        fclose(f);
+        char* address_neogit = absolute_address_neogit();
+        address_neogit = connectTwoString(address_neogit, "\\stage");
+        ///////////////////// commiting
+        DIR* dir;
+        dir = opendir(address_neogit);
+        struct dirent* entry;
+        if(dir == NULL){
+            printf("unable to open %s directory\n", address_neogit);
+            exit(-1);
+        }
+        char* address_free;
+        sprintf(temp, "%d", id);
+        char* address_commit_absolut = connectTwoString(absolute_address_neogit(), connectTwoString("\\commits\\", temp));
+        char command[400];
+        sprintf(command, "xcopy \"%s\\*\" \"%s\" /e/h/c/i/y > NUL", address_neogit, address_commit_absolut);
+        if(system(command)){
+            printf("an unknown problem!\n");
+            exit(-1);
+        }
+        while ((entry = readdir(dir)) != NULL){
+            if(strcmp(entry->d_name, ".") && strcmp(entry->d_name, "..")){
+                address_free = connectTwoString(address_neogit, "");
+                char isDir;
+                address_free = connectTwoString(address_free, connectTwoString("\\", entry->d_name));
+                isDir = check_type(address_free);
+                if(isDir == 1){
+                    sprintf(command, "rmdir /s /q \"%s\"", address_free);
+                    if(system(command)){
+                        printf("an unknown problem!\n");
+                        continue;
+                    }
+                }
+                else{
+                    sprintf(command, "del /f /q \"%s\"", address_free);
+                    if(system(command)){
+                        printf("an unknown problem!\n");
+                        continue;
+                    }
+                }
+            }
+        }
+        closedir(dir);
+    /////////////////////
+        printf("%d directory(s) and %d file(s) commited by ID %d  at %s/%s/%s-%s:%s:%s on branch %s\n", count.directory, count.file, id, date[0],date[1],date[2],date[3],date[4],date[5], branch);
+        printf("commit massage is: %s", massage);
+    }
+    else{
+        printf("an unkown problem!\n");
+        exit(-1);
+    }
+}
+
 //End of main functions
 
 int main(int argc, char* argv[]){
@@ -1555,7 +1697,7 @@ int main(int argc, char* argv[]){
         exit(0);
     }
     // if(equalStrings(input[1], "test")){
-    //     Scurrent_countOfStageFiles("");
+    //     commit("MASSAGE");
     // }
     return 0;
 }
