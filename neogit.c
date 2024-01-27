@@ -8,8 +8,8 @@
 #include <time.h>
 
 
-//   *(IN THE NAME OF GOD)*
-//**  AMIRMAHDI TAHMASEBI   **
+//   *(IN THE NAME OF THE GOD)*
+//   ** AMIRMAHDI TAHMASEBI  **
 
 //portotypes
 char* connectTwoString(char*, char*);
@@ -29,7 +29,30 @@ struct count_directory_file{
     int directory;
     int file;
 };
+typedef struct folder__{
+    char name[20];
+    unsigned long long time;
+    int parent;
+    char user_name[200];
+    char email[200];
+    char massage[100];
+    int count_file;
+    int count_folder;
+    char banch[100];
+    struct folder__* next;
+    struct folder__* perv;
+} folder;
 //end of structs
+
+//unions
+typedef union parametrs__ {
+    char string[100];
+    char** list;
+    int number_int;
+    unsigned long long number_llu;
+}parametrs;
+
+//end of unions
 
 //Helpful additinal functions:
 char equalStrings(char* a, char* b){
@@ -250,6 +273,68 @@ char initgitFolder(){ //1 -> there is a neogit folder. 0-> there is no neo git f
 }
 //end of other functions
 
+//log function
+char beInList_normal (folder a, parametrs b){
+    if(sizeof(b.number_int) == 4) //unuseful condition just for turnning of gcc warning;
+        return 1;
+    if(a.time > 0)
+        return 1;
+    return 0;
+}
+char timeUpToDown(folder* a, folder* b){
+    if(a->time > b->time){
+        return 1;
+    }
+    return 0;
+}
+char beInList_InBranch(folder a, parametrs b){
+    if(!strcmp(a.banch, b.string)){
+        return 1;
+    }
+    return 0;
+}
+char beInList_InAuthor(folder a, parametrs b){
+    if(!strcmp(a.user_name, b.string)){
+        return 1;
+    }
+    return 0;
+}
+char beInList_since(folder a, parametrs b){
+    if(a.time >= b.number_llu){
+        return 1;
+    }
+    return 0;
+}
+char beInList_before(folder a, parametrs b){
+    if(a.time <= b.number_llu){
+        return 1;
+    }
+    return 0;
+}
+char beInList_search(folder a, parametrs b){
+    int i = 0;
+    while(b.list[i] != NULL){
+        if(strstr(a.massage, b.list[i])){
+            return 1;
+        } 
+        i++;
+    }  
+    return 0;
+}
+void print_time(unsigned long long number){
+    printf("%04llu", number / 4000000000llu);
+    number -= number / 4000000000llu * 4000000000llu;
+    printf("/%02llu", number / 4000000llu);
+    number -= number / 4000000llu * 4000000llu;
+    printf("/%02llu-", number / (60*60*24));
+    number -= number / (60*60*24) * (60*60*24);
+    printf("%02llu:", number / (60*60));
+    number -= number / (60*60) * 60 * 60;
+    printf("%02llu:", number / (60));
+    number -= number / 60 * 60;
+    printf("%02llu", number);
+}
+//end of log
 
 //main functions
 void changeNameGlobal(char* name){
@@ -1721,6 +1806,126 @@ void show_listOfAllBranches(){
     printf("HEAD is on: %s\n", lines);
     fclose(f);
 }
+folder extract_data_from_commit(char* name, char* address_folder_info){
+    folder temp;
+    strcpy(temp.name, name);
+    FILE* f = fopen(connectTwoString(address_folder_info, "\\massage"), "r");
+    char line[200];
+    fscanf(f, "%[^\n]s", line);
+    strcpy(temp.massage, line);
+    fclose(f);
+    f = fopen(connectTwoString(address_folder_info, "\\name"), "r");
+    fscanf(f, "%[^\n]s", line);
+    strcpy(temp.user_name, line);
+    fclose(f);
+    f = fopen(connectTwoString(address_folder_info, "\\email"), "r");
+    fscanf(f, "%[^\n]s", line);
+    strcpy(temp.email, line);
+    fclose(f);
+    f = fopen(connectTwoString(address_folder_info, "\\parent"), "r");
+    int number = 0;
+    fscanf(f, "%d", &number);
+    temp.parent = number;
+    fclose(f);
+    f = fopen(connectTwoString(address_folder_info, "\\branch"), "r");
+    fscanf(f, "%[^\n]s", line);
+    strcpy(temp.banch, line);
+    fclose(f);
+    f = fopen(connectTwoString(address_folder_info, "\\count"), "r");
+    int directory = 0, file = 0;
+    fscanf(f, "%d %d", &directory, &file);
+    temp.count_file = file; temp.count_folder = directory;
+    fclose(f);
+    f = fopen(connectTwoString(address_folder_info, "\\date"), "r");
+    unsigned long long year = 0, month = 0, day = 0, h = 0, m = 0, s = 0, total = 0;
+    fscanf(f, "%llu %llu %llu %llu %llu %llu", &year, &month, &day, &h, &m, &s);
+    total = s + 60*m + 60*60*h + 60*60*24*day + 4000000llu * month + 4000000000llu * year;
+    temp.time = total;
+    temp.next = temp.perv = NULL;
+    fclose(f);
+    return temp;
+}
+folder* log_conditional(parametrs a, char(*function)(folder, parametrs)){
+    folder* list = (folder*)calloc(1, sizeof(folder));
+    list->next = NULL;
+    list->perv = NULL;
+    list->count_file = 0;
+    list->count_folder = 0;
+    list->time = 0;
+    strcpy(list->banch, "");
+    strcpy(list->email, "");
+    strcpy(list->massage, "");
+    strcpy(list->name, "");
+    strcpy(list->user_name, "");
+    list->parent = 0;
+    char* address = gitFolder();
+    address = absolute_address_neogit();
+    address = connectTwoString(address, "\\commits");
+    //printf("%s", address);
+    DIR* dir;
+    dir = opendir(address);
+    struct dirent* entry;
+    if(dir == NULL){
+        printf("unable to open %s directory\n", address);
+        return list;
+    }
+    folder ff;
+    while ((entry = readdir(dir)) != NULL){
+        if(!strcheck(entry->d_name, 'i') && strcmp(entry->d_name, ".") && strcmp(entry->d_name, "..")){
+            ff = extract_data_from_commit(entry->d_name, connectTwoString(address, connectTwoString("\\", connectTwoString(entry->d_name, "_info"))));
+            folder* temp = list;
+            if(!(*function)(ff, a)){
+                continue;
+            }
+            while(temp->next){
+                temp = temp->next;
+            }
+            temp->next = (folder*)calloc(1, sizeof(folder));
+            temp->next->next = NULL;
+            temp->next->perv = temp;
+            temp = temp->next;
+            temp->count_file = ff.count_file;
+            temp->count_folder = ff.count_folder;
+            temp->time = ff.time;
+            strcpy(temp->banch, ff.banch);
+            strcpy(temp->email, ff.email);
+            strcpy(temp->massage, ff.massage);
+            strcpy(temp->name, ff.name);
+            strcpy(temp->user_name, ff.user_name);
+            temp->parent = ff.parent;
+        }
+    }
+    return list;
+}
+folder** neogitLOG(char(*SORT_function)(folder*, folder*), char(*TO_BE_IN_LIST_function)(folder, parametrs), parametrs TO_BE_IN_LIST_union){
+    folder* c = log_conditional(TO_BE_IN_LIST_union, TO_BE_IN_LIST_function);
+    unsigned long long count = 0;
+    folder* b = c;
+    while(b->next){
+        count++;
+        b = b->next;
+    }
+    folder ** list = (folder**)calloc(count + 2, sizeof(folder*));
+    if(count == 0){
+        return list;
+    }
+    b = c;
+    b = b->next;
+    for(unsigned long long i = 0; i < count; i++){
+        list[i] = b;
+        b = b->next;
+    }
+    for(unsigned long long i = 0; i < count; i++){
+        for(unsigned long long j = i+1; j < count; j++){
+            if(!SORT_function(list[i], list[j])){
+                folder * temp = list[i];
+                list[i] = list[j];
+                list[j] = temp;
+            }
+        }
+    }
+    return list;
+}
 //End of main functions
 
 int main(int argc, char* argv[]){
@@ -1964,6 +2169,123 @@ int main(int argc, char* argv[]){
     }
     if(equalStrings(input[1], "branch") && len == 2){
         show_listOfAllBranches();
+        exit(0);
+    }
+    //neogit log
+    if(equalStrings(input[1], "log") && len == 2){
+        parametrs condition;
+        folder** list = neogitLOG(timeUpToDown, beInList_normal, condition);
+        if(list[0] == NULL){
+            printf("No commit history.\n");
+            exit(0);
+        }
+        for(int i = 0; list[i] != NULL; i++){
+            printf("%d: ID: %s, branch: \"%s\", massage: \"%s\", user name: \"%s\", user email: \"%s\"\n",i + 1, list[i]->name,list[i]->banch, list[i]->massage, list[i]->user_name, list[i]->email);
+            printf("count of file(s): %d, count of directory(s): %d, time of commit: ", list[i]->count_file, list[i]->count_folder); print_time(list[i]->time); printf("\n");
+        }
+        exit(0);
+    }
+    if(equalStrings(input[1], "log") && equalStrings(input[2], "-n") && strcmp(input[3], "") && len == 4){
+        int number = atoi(input[3]);
+        if(number <= 0){
+            printf("Invalid number!\n");
+            exit(-1);
+        }
+        parametrs condition;
+        folder** list = neogitLOG(timeUpToDown, beInList_normal, condition);
+        if(list[0] == NULL){
+            printf("No commit history.\n");
+            exit(0);
+        }
+        for(int i = 0; list[i] != NULL && number > 0; i++){
+            printf("%d: ID: %s, branch: \"%s\", massage: \"%s\", user name: \"%s\", user email: \"%s\"\n",i + 1, list[i]->name,list[i]->banch, list[i]->massage, list[i]->user_name, list[i]->email);
+            printf("count of file(s): %d, count of directory(s): %d, time of commit: ", list[i]->count_file, list[i]->count_folder); print_time(list[i]->time); printf("\n");
+            number--;
+        }
+        exit(0);
+    }
+    if(equalStrings(input[1], "log") && equalStrings(input[2], "-branch") && strcmp(input[3], "") && len == 4){
+        parametrs condition;
+        strcpy(condition.string, input[3]);
+        if(!is_banchName_exist(input[3])){
+            printf("%s is not in branch list. you can create it.\n", input[3]);
+            exit(0);
+        }
+        folder** list = neogitLOG(timeUpToDown, beInList_InBranch, condition);
+        if(list[0] == NULL){
+            printf("No commit history in this branch (%s).\n", input[3]);
+            exit(0);
+        }
+        for(int i = 0; list[i] != NULL; i++){
+            printf("%d: ID: %s, branch: \"%s\", massage: \"%s\", user name: \"%s\", user email: \"%s\"\n",i + 1, list[i]->name,list[i]->banch, list[i]->massage, list[i]->user_name, list[i]->email);
+            printf("count of file(s): %d, count of directory(s): %d, time of commit: ", list[i]->count_file, list[i]->count_folder); print_time(list[i]->time); printf("\n");
+        }
+        exit(0);
+    }
+    if(equalStrings(input[1], "log") && equalStrings(input[2], "-author") && strcmp(input[3], "") && len == 4){
+        parametrs condition;
+        strcpy(condition.string, input[3]);
+        folder** list = neogitLOG(timeUpToDown, beInList_InAuthor, condition);
+        if(list[0] == NULL){
+            printf("No commit history with this author (%s).\n", input[3]);
+            exit(0);
+        }
+        for(int i = 0; list[i] != NULL; i++){
+            printf("%d: ID: %s, branch: \"%s\", massage: \"%s\", user name: \"%s\", user email: \"%s\"\n",i + 1, list[i]->name,list[i]->banch, list[i]->massage, list[i]->user_name, list[i]->email);
+            printf("count of file(s): %d, count of directory(s): %d, time of commit: ", list[i]->count_file, list[i]->count_folder); print_time(list[i]->time); printf("\n");
+        }
+        exit(0);
+    }
+    if(equalStrings(input[1], "log") && equalStrings(input[2], "-since") && strcmp(input[3], "") && len == 4){
+        parametrs condition;
+        unsigned long long year = 0, month = 0, day = 0, h  = 0, m = 0, s = 0, total = 0;
+        sscanf(input[3], "%llu/%llu/%llu-%llu:%llu:%llu", &year, &month, &day, &h, &m, &s);
+        total = s + 60*m + 60*60*h + 60*60*24*day + 4000000llu * month + 4000000000llu * year;
+        condition.number_llu = total;
+        folder** list = neogitLOG(timeUpToDown, beInList_since, condition);
+        if(list[0] == NULL){
+            printf("No commit history since ");print_time(total); printf(".\n");
+            exit(0);
+        }
+        for(int i = 0; list[i] != NULL; i++){
+            printf("%d: ID: %s, branch: \"%s\", massage: \"%s\", user name: \"%s\", user email: \"%s\"\n",i + 1, list[i]->name,list[i]->banch, list[i]->massage, list[i]->user_name, list[i]->email);
+            printf("count of file(s): %d, count of directory(s): %d, time of commit: ", list[i]->count_file, list[i]->count_folder); print_time(list[i]->time); printf("\n");
+        }
+        exit(0);
+    }
+    if(equalStrings(input[1], "log") && equalStrings(input[2], "-before") && strcmp(input[3], "") && len == 4){
+        parametrs condition;
+        unsigned long long year = 0, month = 0, day = 0, h  = 0, m = 0, s = 0, total = 0;
+        sscanf(input[3], "%llu/%llu/%llu-%llu:%llu:%llu", &year, &month, &day, &h, &m, &s);
+        total = s + 60*m + 60*60*h + 60*60*24*day + 4000000llu * month + 4000000000llu * year;
+        condition.number_llu = total;
+        folder** list = neogitLOG(timeUpToDown, beInList_before, condition);
+        if(list[0] == NULL){
+            printf("No commit history before ");print_time(total); printf(".\n");
+            exit(0);
+        }
+        for(int i = 0; list[i] != NULL; i++){
+            printf("%d: ID: %s, branch: \"%s\", massage: \"%s\", user name: \"%s\", user email: \"%s\"\n",i + 1, list[i]->name,list[i]->banch, list[i]->massage, list[i]->user_name, list[i]->email);
+            printf("count of file(s): %d, count of directory(s): %d, time of commit: ", list[i]->count_file, list[i]->count_folder); print_time(list[i]->time); printf("\n");
+        }
+        exit(0);
+    }
+    if(equalStrings(input[1], "log") && equalStrings(input[2], "-search") && strcmp(input[3], "") && len >= 4){
+        char** text = (char**)calloc(((unsigned long long)len - 2), sizeof(char*));
+        for(int i = 0; i < len - 3; i++){
+            text[i] = input[i+3];
+        }
+        parametrs condition;
+        condition.list = text;
+        folder** list = neogitLOG(timeUpToDown, beInList_search, condition);
+        if(list[0] == NULL){
+            printf("No commit history with this condition\n");
+            exit(0);
+        }
+        for(int i = 0; list[i] != NULL; i++){
+            printf("%d: ID: %s, branch: \"%s\", massage: \"%s\", user name: \"%s\", user email: \"%s\"\n",i + 1, list[i]->name,list[i]->banch, list[i]->massage, list[i]->user_name, list[i]->email);
+            printf("count of file(s): %d, count of directory(s): %d, time of commit: ", list[i]->count_file, list[i]->count_folder); print_time(list[i]->time); printf("\n");
+        }
         exit(0);
     }
 
