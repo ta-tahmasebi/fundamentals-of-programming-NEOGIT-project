@@ -272,18 +272,18 @@ void changeNameGlobal(char* name){
     fclose(ff);
     long long global = -1, MAX = -1;
     ff = fopen("d://SETTINGS//config//nameCount", "r");
-    fscanf(ff, "%llu", &global);
+    fscanf(ff, "%lld", &global);
     fclose(ff);
     ff= fopen("d://SETTINGS//config//MAXnameCount", "a");
     fclose(ff);
     ff = fopen("d://SETTINGS//config//MAXnameCount", "r");
-    fscanf(ff, "%llu", &MAX);
+    fscanf(ff, "%lld", &MAX);
     fclose(ff);
     ff = fopen("d://SETTINGS//config//MAXnameCount", "w");
-    fprintf(ff, "%llu", (MAX > global)? MAX + 1: global + 1);
+    fprintf(ff, "%lld", (MAX > global)? MAX + 1: global + 1);
     fclose(ff);
     ff = fopen("d://SETTINGS//config//nameCount", "w");
-    fprintf(ff, "%llu", (MAX > global)? MAX + 1: global + 1);
+    fprintf(ff, "%lld", (MAX > global)? MAX + 1: global + 1);
     fclose(ff);
     printf("global name changed successfully\n");
 }
@@ -326,23 +326,23 @@ void changeName(char* name){
     fclose(ff);
     ff = fopen(connectTwoString(address,"//config//nameCount"), "r");
     long long countlocal = -1, countGlobal = -1, MAX = -1;
-    fscanf(ff, "%llu", &countlocal);
+    fscanf(ff, "%lld", &countlocal);
     fclose(ff);
     ff = fopen("d://SETTINGS//config//nameCount", "a");
     fclose(ff);
     ff = fopen("d://SETTINGS//config//nameCount", "r");
-    fscanf(ff, "%llu", &countGlobal);
+    fscanf(ff, "%lld", &countGlobal);
     fclose(ff);
     ff = fopen(connectTwoString(address,"//config//nameCount"), "w");
-    fprintf(ff, "%llu", (countlocal > countGlobal)? countlocal + 1 : countGlobal + 1);
+    fprintf(ff, "%lld", (countlocal > countGlobal)? countlocal + 1 : countGlobal + 1);
     fclose(ff);
     ff = fopen("d://SETTINGS//config//MAXnameCount", "a");
     fclose(ff);
     ff = fopen("d://SETTINGS//config//MAXnameCount", "r");
-    fscanf(ff, "%llu", &MAX);
+    fscanf(ff, "%lld", &MAX);
     fclose(ff);
     ff = fopen("d://SETTINGS//config//MAXnameCount", "w");
-    fprintf(ff, "%llu", (MAX > ((countlocal > countGlobal)? countlocal + 1 : countGlobal + 1))? MAX : ((countlocal > countGlobal)? countlocal + 1 : countGlobal + 1));
+    fprintf(ff, "%lld", (MAX > ((countlocal > countGlobal)? countlocal + 1 : countGlobal + 1))? MAX : ((countlocal > countGlobal)? countlocal + 1 : countGlobal + 1));
     fclose(ff);
     printf("local name changed successfully\n");
 }
@@ -366,18 +366,18 @@ void changeEmailGlobal(char* email){
     fclose(ff);
     long long global = -1, MAX = -1;
     ff = fopen("d://SETTINGS//config//emailCount", "r");
-    fscanf(ff, "%llu", &global);
+    fscanf(ff, "%lld", &global);
     fclose(ff);
     ff= fopen("d://SETTINGS//config//MAXemailCount", "a");
     fclose(ff);
     ff = fopen("d://SETTINGS//config//MAXemailCount", "r");
-    fscanf(ff, "%llu", &MAX);
+    fscanf(ff, "%lld", &MAX);
     fclose(ff);
     ff = fopen("d://SETTINGS//config//MAXemailCount", "w");
-    fprintf(ff, "%llu", (MAX > global)? MAX + 1: global + 1);
+    fprintf(ff, "%lld", (MAX > global)? MAX + 1: global + 1);
     fclose(ff);
     ff = fopen("d://SETTINGS//config//emailCount", "w");
-    fprintf(ff, "%llu", (MAX > global)? MAX + 1: global + 1);
+    fprintf(ff, "%lld", (MAX > global)? MAX + 1: global + 1);
     fclose(ff);
     printf("global email changed successfully\n");
 }
@@ -420,23 +420,23 @@ void changeEmail(char* email){
     fclose(ff);
     ff = fopen(connectTwoString(address,"//config//emailCount"), "r");
     long long countlocal = -1, countGlobal = -1, MAX = -1;
-    fscanf(ff, "%llu", &countlocal);
+    fscanf(ff, "%lld", &countlocal);
     fclose(ff);
     ff = fopen("d://SETTINGS//config//emailCount", "a");
     fclose(ff);
     ff = fopen("d://SETTINGS//config//emailCount", "r");
-    fscanf(ff, "%llu", &countGlobal);
+    fscanf(ff, "%lld", &countGlobal);
     fclose(ff);
     ff = fopen(connectTwoString(address,"//config//emailCount"), "w");
-    fprintf(ff, "%llu", (countlocal > countGlobal)? countlocal + 1 : countGlobal + 1);
+    fprintf(ff, "%lld", (countlocal > countGlobal)? countlocal + 1 : countGlobal + 1);
     fclose(ff);
     ff = fopen("d://SETTINGS//config//MAXemailCount", "a");
     fclose(ff);
     ff = fopen("d://SETTINGS//config//MAXemailCount", "r");
-    fscanf(ff, "%llu", &MAX);
+    fscanf(ff, "%lld", &MAX);
     fclose(ff);
     ff = fopen("d://SETTINGS//config//MAXemailCount", "w");
-    fprintf(ff, "%llu", (MAX > ((countlocal > countGlobal)? countlocal + 1 : countGlobal + 1))? MAX : ((countlocal > countGlobal)? countlocal + 1 : countGlobal + 1));
+    fprintf(ff, "%lld", (MAX > ((countlocal > countGlobal)? countlocal + 1 : countGlobal + 1))? MAX : ((countlocal > countGlobal)? countlocal + 1 : countGlobal + 1));
     fclose(ff);
     printf("local email changed successfully\n");
 }
@@ -486,10 +486,10 @@ char* current_name(){
     char *name = calloc(200, sizeof(char));
     long long local = -1, global = -1;
     ff = fopen(connectTwoString(address,"//config//nameCount"), "r");
-    fscanf(ff, "%llu", &local);
+    fscanf(ff, "%lld", &local);
     fclose(ff);
     ff = fopen("d://SETTINGS//config//nameCount", "r");
-    fscanf(ff, "%llu", &global);
+    fscanf(ff, "%lld", &global);
     fclose(ff);
     if(global >= local){
         ff = fopen("d://SETTINGS//config//name", "r");
@@ -551,10 +551,10 @@ char* current_email(){
     char *email = calloc(200, sizeof(char));
     long long local = -1, global = -1;
     ff = fopen(connectTwoString(address,"//config//emailCount"), "r");
-    fscanf(ff, "%llu", &local);
+    fscanf(ff, "%lld", &local);
     fclose(ff);
     ff = fopen("d://SETTINGS//config//emailCount", "r");
-    fscanf(ff, "%llu", &global);
+    fscanf(ff, "%lld", &global);
     fclose(ff);
     if(global >= local){
         ff = fopen("d://SETTINGS//config//email", "r");
@@ -696,6 +696,7 @@ void init(){
         f = fopen(".neogit\\config\\email", "w"); fclose(f);
         f = fopen(".neogit\\config\\emailCount", "w"); fclose(f);
         f = fopen(".neogit\\config\\name", "w"); fclose(f);
+        f = fopen(".neogit\\config\\shortcut", "w"); fclose(f);
         f = fopen(".neogit\\config\\nameCount", "w"); fclose(f);
         mkdir(".neogit\\config\\branch");
         f = fopen(".neogit\\config\\branch\\current", "w"); fprintf(f, "%s", "master"); fclose(f);
@@ -864,8 +865,8 @@ void addToUndo(char* name_file, char mode, char* address_undo){
         exit(-1);
     }
     if(count == 1){
-        char temp[] = "";
-        fprintf(ff, temp);
+        char* temp = (char*)calloc(10, sizeof(char));
+        fprintf(ff, "%s",temp);
         addToUndo(name_file, mode, address_undo);
         count = 0;
     }
@@ -926,7 +927,7 @@ void Undo(){
     if(count == 1){
         printf("There is no history of adding files!\n");
         char temp[] = "";
-        fprintf(ff, temp);
+        fprintf(ff, "%s",temp);
         exit(-1);
     }
     int mode;
@@ -1366,8 +1367,16 @@ char* get_current_brach(){
     fclose(f);
     return line;
 }
-int get_last_hash(){
+int get_last_hash(char mode){ // mode c = commit - exit if we are not in a branch
     char* branch = get_current_brach();
+    if(branch[0] <= '9' && branch[0] >= '0'){
+        int hash = atoi(branch);
+        if(mode == 'c'){
+            printf("Head is not on a branch. so you can't commit.\n");
+            exit(0);
+        }
+        return hash;
+    }
     char* address = gitFolder();
     address = connectTwoString(address, "//config//branch//list");
     FILE* f = fopen(address, "r");
@@ -1420,13 +1429,13 @@ void change_last_commit_id(char* branch, int id){
     fclose(f);
 }
 void commit(char* massage){
+    char* branch = get_current_brach();
     char* name = current_name();
     char* email = current_email();
     int id = current_id();
     char** date = current_dateTime();
     struct count_directory_file count = current_countOfStageFiles();
-    char* branch = get_current_brach();
-    int last_id = get_last_hash();
+    int last_id = get_last_hash('c');
     if(count.directory == 0 && count.file == 0){
         printf("There is nothing in stage area.\n");
         exit(0);
@@ -1511,7 +1520,207 @@ void commit(char* massage){
         exit(-1);
     }
 }
-
+char* extract_massage_shortcut(char* name){
+    char * address =  gitFolder();
+    char* massage = (char*)calloc(100, sizeof(char));
+    char lines[100];
+    DIR* dir = opendir(connectTwoString(address, "//config"));
+    if(dir) {
+        FILE *f = fopen(connectTwoString(address,"//config//shortcut"), "r");
+        if(f == NULL){
+            printf("an unkown problem!\n");
+            exit(-1);
+        }
+        int index = 0;
+        while(fgets(lines, 99, f) != NULL){
+            if(lines[strlen(lines) - 1] == '\n' || lines[strlen(lines) - 1] == '\r')
+                lines[strlen(lines) - 1] = 0;
+            if(lines[strlen(lines) - 1] == '\n' || lines[strlen(lines) - 1] == '\r')
+                lines[strlen(lines) - 1] = 0;
+            if(!strcmp(lines, name) && index%2 == 0){
+                fgets(lines, 99, f);
+                strcpy(massage, lines);
+                return massage;
+            }
+            index++;
+        }
+        fclose(f);
+        massage[0] = 0;
+        return massage;
+        closedir(dir);
+    } else  {
+        if (!mkdir(connectTwoString(address, "//config"))){
+            FILE *f = fopen(connectTwoString(address,"//config//shortcut"), "a");
+            if(f == NULL){
+                printf("an unkown problem!\n");
+                exit(-1);
+            }
+            fclose(f);
+        }
+        else{
+            printf("an unkown problem!\n");
+            exit(-1);
+        }
+        massage[0] = 0;
+        return massage;
+    }
+}
+void add_shortcut_massage(char* name, char* massage){
+    if(extract_massage_shortcut(name)[0] != 0){
+        printf("this name of shortcut is currently exist.\n");
+        exit(0);
+    }
+    char * address =  gitFolder();
+    DIR* dir = opendir(connectTwoString(address, "//config"));
+    if(dir) {
+        FILE *f = fopen(connectTwoString(address,"//config//shortcut"), "a");
+        if(f == NULL){
+            printf("an unkown problem!\n");
+            exit(-1);
+        }
+        fprintf(f, "%s\n%s\n", name, massage);
+        fclose(f);
+        closedir(dir);
+    } else  {
+        if (!mkdir(connectTwoString(address, "//config"))){
+            FILE *f = fopen(connectTwoString(address,"//config//shortcut"), "a");
+                if(f == NULL){
+                    printf("an unkown problem!\n");
+                    exit(-1);
+                }
+            fprintf(f, "%s\n%s\n", name, massage);
+            fclose(f);
+        }
+        else{
+            printf("an unkown problem!\n");
+            exit(-1);
+        }
+    }
+}
+void delete_shortcut_massage(char* name){
+    if(extract_massage_shortcut(name)[0] == 0){
+        printf("this name of shortcut is not currently exist.\n");
+        exit(0);    
+    }
+    char * address =  gitFolder();
+    char lines[1000][100];
+    int index = 0;
+    DIR* dir = opendir(connectTwoString(address, "//config"));
+    if(dir) {
+        FILE *f = fopen(connectTwoString(address,"//config//shortcut"), "r");
+        if(f == NULL){
+            printf("an unkown problem!\n");
+            exit(-1);
+        }
+        char flag = 1;
+        while(fgets(lines[index], 99, f) != NULL){
+            if(lines[index][strlen(lines[index]) - 1] == '\n' || lines[index][strlen(lines[index]) - 1] == '\r')
+                lines[index][strlen(lines[index]) - 1] = 0;
+            if(lines[index][strlen(lines[index]) - 1] == '\n' || lines[index][strlen(lines[index]) - 1] == '\r')
+                lines[index][strlen(lines[index]) - 1] = 0;
+            if(!strcmp(lines[index], name) && index%2 == 0){
+                flag = 0;
+                strcpy(lines[index], "");
+                index++;
+                fgets(lines[index], 99, f);
+                strcpy(lines[index], "");
+            }
+            index++;
+        }
+        fclose(f);
+        if(flag){
+            printf("can't find shortcut-name in list.\n");
+            exit(0);    
+        }
+        f = fopen(connectTwoString(address,"//config//shortcut"), "w");
+        for(int i = 0; i < index; i++){
+            if(!strcmp(lines[i],"")) continue;
+            fprintf(f, "%s\n", lines[i]);
+        }
+        fclose(f);
+        closedir(dir);
+    } else  {
+        if (!mkdir(connectTwoString(address, "//config"))){
+            FILE *f = fopen(connectTwoString(address,"//config//shortcut"), "a");
+            if(f == NULL){
+                printf("an unkown problem!\n");
+                exit(-1);
+            }
+            fclose(f);
+        }
+        else{
+            printf("an unkown problem!\n");
+            exit(-1);
+        }
+        printf("can't find shortcut-name in list.\n");
+        exit(0);
+    }
+}
+char is_banchName_exist(char* name){
+    char* address = gitFolder();
+    address = connectTwoString(address, "//config//branch//list");
+    FILE* f = fopen(address, "r");
+    char lines[100];
+    int index = 0;
+    while(fgets(lines, 99, f) != NULL){
+        if(lines[strlen(lines) - 1] == '\n' || lines[strlen(lines) - 1] == '\r')
+            lines[strlen(lines) - 1] = 0;
+        if(lines[strlen(lines) - 1] == '\n' || lines[strlen(lines) - 1] == '\r')
+            lines[strlen(lines) - 1] = 0;
+        if(!strcmp(lines, name) && index%2 == 0){
+            return 1;
+        }
+        index++;
+    }
+    fclose(f);
+    return 0;
+}
+void create_new_branch(char* name){
+    if(is_banchName_exist(name)){
+        printf("branch %s is currently exist\n", name);
+        exit(0);
+    }
+    char* address = gitFolder();
+    address = connectTwoString(address, "//config//branch//list");
+    FILE* f = fopen(address, "a");
+    fprintf(f, "%s\n%d\n", name, get_last_hash('a'));
+    fclose(f);
+}
+void show_listOfAllBranches(){
+    char* address = gitFolder();
+    address = connectTwoString(address, "//config//branch//list");
+    FILE* f = fopen(address, "r");
+    if(f==NULL){
+        printf("an unkown problem!\n");
+        exit(-1);
+    }
+    char lines[100];
+    int index = 0;
+    while(fgets(lines, 99, f) != NULL){
+        if(lines[strlen(lines) - 1] == '\n' || lines[strlen(lines) - 1] == '\r')
+            lines[strlen(lines) - 1] = 0;
+        if(lines[strlen(lines) - 1] == '\n' || lines[strlen(lines) - 1] == '\r')
+            lines[strlen(lines) - 1] = 0;
+        if(index % 2 == 0){
+            printf("branch: %s, ", lines);
+        }
+        else{
+            printf("last commit ID: %s\n", lines);
+        }
+        index++;
+    }
+    fclose(f);
+    address = gitFolder();
+    address = connectTwoString(address, "//config//branch//current");
+    f = fopen(address, "r");
+    if(f==NULL){
+        printf("an unkown problem!\n");
+        exit(-1);
+    }
+    fscanf(f, "%s", lines);
+    printf("HEAD is on: %s\n", lines);
+    fclose(f);
+}
 //End of main functions
 
 int main(int argc, char* argv[]){
@@ -1696,8 +1905,67 @@ int main(int argc, char* argv[]){
         addNDeath(".", death);
         exit(0);
     }
-    // if(equalStrings(input[1], "test")){
-    //     commit("MASSAGE");
-    // }
+    //commit
+    if(equalStrings(input[1], "commit") && !equalStrings(input[2], "-m") && !equalStrings(input[2], "-s")){
+        printf("you must write a massage to commit. (use -m or -s)\n");
+        exit(0);
+    }
+    if(equalStrings(input[1], "commit") && equalStrings(input[2], "-m")){
+        if(len > 4){
+            printf("lots of inputs!\n");
+            exit(0);
+        }
+        if(len == 3){
+            printf("you must write a massage to commit.\n");
+            exit(0);
+        }
+        if(strlen(input[3]) > 72){
+            printf("yor commit massage is too long\n");
+            exit(0);
+        }
+        commit(input[3]);
+    }
+    //shortcuts in commits
+    if(equalStrings(input[1], "set") && equalStrings(input[2] , "-m") && strcmp(input[3], "") && equalStrings(input[4] , "-s") && strcmp(input[5], "") && len == 6){
+        if(strlen(input[3]) > 72 || strlen(input[5]) > 40){
+            printf("Yor text is too long!\n");
+            exit(0);
+        }
+        add_shortcut_massage(input[5], input[3]);
+        printf("shortcut added successfully\n");
+        exit(0);
+    }
+    if(equalStrings(input[1], "remove") && equalStrings(input[2] , "-s") && strcmp(input[3], "") && len == 4){
+        delete_shortcut_massage(input[3]);
+        printf("shortcut deleted successfully\n");
+        exit(0);
+    }
+    if(equalStrings(input[1], "replace") && equalStrings(input[2] , "-m") && strcmp(input[3], "") && equalStrings(input[4] , "-s") && strcmp(input[5], "") && len == 6){
+        delete_shortcut_massage(input[5]);
+        add_shortcut_massage(input[5], input[3]);
+        printf("shortcut replaced successfully\n");
+        exit(0);
+    }
+    if(equalStrings(input[1], "commit") && equalStrings(input[2], "-s") && strcmp(input[3], "") && len == 4){
+        char* massage = extract_massage_shortcut(input[3]);
+        if(massage[0] == 0){
+            printf("this name of shortcut is not currently exist.\n");
+            exit(0);  
+        }
+        char temp[150];
+        sprintf(temp, "neogit commit -m \"%s\"", massage);
+        system(temp);
+        exit(0);
+    }
+    //create a branch
+    if(equalStrings(input[1], "branch") && strcmp(input[2], "") && len ==3){
+        create_new_branch(input[2]);
+        exit(0);
+    }
+    if(equalStrings(input[1], "branch") && len == 2){
+        show_listOfAllBranches();
+        exit(0);
+    }
+
     return 0;
 }
