@@ -1926,6 +1926,164 @@ folder** neogitLOG(char(*SORT_function)(folder*, folder*), char(*TO_BE_IN_LIST_f
     }
     return list;
 }
+char TwoFileAreSame(char* address1, char* address2){
+    char command[300];
+    if(check_type(address1) != -1 || check_type(address2) != -1){
+        return 0;
+    }
+    sprintf(command, "fc /b \"%s\" \"%s\" > ___temp___.Oneogit", address1, address2);
+    system(command);
+    FILE* f = fopen("___temp___.Oneogit", "r");
+    char temp[300];
+    fgets(temp, 299, f);
+    fgets(temp, 299, f);
+    fclose(f);
+    remove("___temp___.Oneogit");
+    if(strstr(temp, "no differences encountered")){
+        return 1;
+    }
+    return 0;
+}
+void status_a(){
+    DIR* dir;
+    dir = opendir(".");
+    struct dirent* entry;
+    if(dir == NULL){
+        printf("unable to open %s directory\n", "current");
+        return;
+    }
+    while ((entry = readdir(dir)) != NULL){
+        if(strcmp(entry->d_name, ".") && strcmp(entry->d_name, "..") && strcmp(entry->d_name, ".neogit")){
+            struct address__ address = Help_ADD(entry->d_name);
+            char* address_stage = connectTwoString(address.adress_stage_file, entry->d_name);
+            char* address_file = (char*)calloc(3, sizeof(char));
+            address_file[0] = '\0';
+            for(int i = 0; i < address.size_address_cmd; i++){
+                address_file = connectTwoString(address_file, connectTwoString(address.address_cmd[i], "\\"));
+            }
+            address_file = connectTwoString(address_file, entry->d_name);
+            char* address_commit = (char*)calloc(3, sizeof(char));
+            address_commit[0] = '\0';
+            for(int i = 0; i < address.size_address_neogit; i++){
+                address_commit = connectTwoString(address_commit, connectTwoString(address.address_neogit[i], "\\"));
+            }
+            address_commit = connectTwoString(address_commit, ".neogit\\commits\\");
+            char temp[100];
+            sprintf(temp, "%d", get_last_hash('a'));
+            address_commit = connectTwoString(address_commit, temp);
+            for(int i = address.size_address_neogit; i < address.size_address_cmd; i++){
+                address_commit = connectTwoString(address_commit, connectTwoString("\\", address.address_cmd[i]));
+            }
+            address_commit = connectTwoString(address_commit, connectTwoString("\\", entry->d_name));
+            char isInstage = check_type(address_stage);
+            char isInReal = check_type(address_file);
+            char isInCommit = check_type(address_commit);
+            if(isInReal == -1){
+                printf("%s:\tW: %d, S: %d, C: %d\t####\tcompare: W-S: %d, W-C: %d, S-C: %d\n",entry->d_name ,(isInReal == -1)? 1:0, (isInstage == -1)?1:0, (isInCommit==-1)?1:0, TwoFileAreSame(address_file,address_stage), TwoFileAreSame(address_file, address_commit), TwoFileAreSame(address_stage,address_commit));
+            }
+            if(isInReal == 1){
+                printf("%s\\:\tW: %d, S: %d, C: %d\n",entry->d_name ,(isInReal == 1)? 1:0, (isInstage == 1)?1:0, (isInCommit==1)?1:0);
+            }
+        }
+    }
+    struct address__ addressA = Help_ADD("");
+    char* address_stageA = addressA.adress_stage_file;
+    dir = opendir(address_stageA);
+    char flag = 1;
+    if(dir == NULL){
+        flag = 0;
+    }
+    if(flag){
+        while ((entry = readdir(dir)) != NULL){
+            if(strcmp(entry->d_name, ".") && strcmp(entry->d_name, "..") && strcmp(entry->d_name, ".neogit")){
+                struct address__ address = Help_ADD(entry->d_name);
+                char* address_stage = connectTwoString(address.adress_stage_file, entry->d_name);
+                char* address_file = (char*)calloc(3, sizeof(char));
+                address_file[0] = '\0';
+                for(int i = 0; i < address.size_address_cmd; i++){
+                    address_file = connectTwoString(address_file, connectTwoString(address.address_cmd[i], "\\"));
+                }
+                address_file = connectTwoString(address_file, entry->d_name);
+                char* address_commit = (char*)calloc(3, sizeof(char));
+                address_commit[0] = '\0';
+                for(int i = 0; i < address.size_address_neogit; i++){
+                    address_commit = connectTwoString(address_commit, connectTwoString(address.address_neogit[i], "\\"));
+                }
+                address_commit = connectTwoString(address_commit, ".neogit\\commits\\");
+                char temp[100];
+                sprintf(temp, "%d", get_last_hash('a'));
+                address_commit = connectTwoString(address_commit, temp);
+                for(int i = address.size_address_neogit; i < address.size_address_cmd; i++){
+                    address_commit = connectTwoString(address_commit, connectTwoString("\\", address.address_cmd[i]));
+                }
+                address_commit = connectTwoString(address_commit, connectTwoString("\\", entry->d_name));
+                char isInstage = check_type(address_stage);
+                char isInReal = check_type(address_file);
+                char isInCommit = check_type(address_commit);
+                if(isInstage == -1 && isInReal == 0){
+                    printf("%s:\tW: %d, S: %d, C: %d\t####\tcompare: W-S: %d, W-C: %d, S-C: %d\n",entry->d_name ,(isInReal == -1)? 1:0, (isInstage == -1)?1:0, (isInCommit==-1)?1:0, TwoFileAreSame(address_file,address_stage), TwoFileAreSame(address_file, address_commit), TwoFileAreSame(address_stage,address_commit));
+                }
+                if(isInstage == 1 && isInReal == 0){
+                    printf("%s\\:\tW: %d, S: %d, C: %d\n",entry->d_name ,(isInReal == 1)? 1:0, (isInstage == 1)?1:0, (isInCommit==1)?1:0);
+                }
+            }
+        }
+    }
+    struct address__ addressB = Help_ADD("");
+    char* address_commitB = (char*)calloc(3, sizeof(char));
+    address_commitB[0] = '\0';
+    for(int i = 0; i < addressB.size_address_neogit; i++){
+        address_commitB = connectTwoString(address_commitB, connectTwoString(addressB.address_neogit[i], "\\"));
+    }
+    address_commitB = connectTwoString(address_commitB, ".neogit\\commits\\");
+    char tempB[100];
+    sprintf(tempB, "%d", get_last_hash('a'));
+    address_commitB = connectTwoString(address_commitB, tempB);
+    for(int i = addressB.size_address_neogit; i < addressB.size_address_cmd; i++){
+        address_commitB = connectTwoString(address_commitB, connectTwoString("\\", addressB.address_cmd[i]));
+    }
+    dir = opendir(address_commitB);
+    flag = 1;
+    if(dir == NULL){
+        flag = 0;
+    }
+    if(flag){
+        while ((entry = readdir(dir)) != NULL){
+            if(strcmp(entry->d_name, ".") && strcmp(entry->d_name, "..") && strcmp(entry->d_name, ".neogit")){
+                struct address__ address = Help_ADD(entry->d_name);
+                char* address_stage = connectTwoString(address.adress_stage_file, entry->d_name);
+                char* address_file = (char*)calloc(3, sizeof(char));
+                address_file[0] = '\0';
+                for(int i = 0; i < address.size_address_cmd; i++){
+                    address_file = connectTwoString(address_file, connectTwoString(address.address_cmd[i], "\\"));
+                }
+                address_file = connectTwoString(address_file, entry->d_name);
+                char* address_commit = (char*)calloc(3, sizeof(char));
+                address_commit[0] = '\0';
+                for(int i = 0; i < address.size_address_neogit; i++){
+                    address_commit = connectTwoString(address_commit, connectTwoString(address.address_neogit[i], "\\"));
+                }
+                address_commit = connectTwoString(address_commit, ".neogit\\commits\\");
+                char temp[100];
+                sprintf(temp, "%d", get_last_hash('a'));
+                address_commit = connectTwoString(address_commit, temp);
+                for(int i = address.size_address_neogit; i < address.size_address_cmd; i++){
+                    address_commit = connectTwoString(address_commit, connectTwoString("\\", address.address_cmd[i]));
+                }
+                address_commit = connectTwoString(address_commit, connectTwoString("\\", entry->d_name));
+                char isInstage = check_type(address_stage);
+                char isInReal = check_type(address_file);
+                char isInCommit = check_type(address_commit);
+                if(isInCommit == -1 && isInReal == 0 && isInstage == 0){
+                    printf("%s:\tW: %d, S: %d, C: %d\t####\tcompare: W-S: %d, W-C: %d, S-C: %d\n",entry->d_name ,(isInReal == -1)? 1:0, (isInstage == -1)?1:0, (isInCommit==-1)?1:0, TwoFileAreSame(address_file,address_stage), TwoFileAreSame(address_file, address_commit), TwoFileAreSame(address_stage,address_commit));
+                }
+                if(isInCommit == 1 && isInReal == 0 && isInstage == 0){
+                    printf("%s\\:\tW: %d, S: %d, C: %d\n",entry->d_name ,(isInReal == 1)? 1:0, (isInstage == 1)?1:0, (isInCommit==1)?1:0);
+                }
+            }
+        }
+    }
+}
 //End of main functions
 
 int main(int argc, char* argv[]){
@@ -2288,6 +2446,9 @@ int main(int argc, char* argv[]){
         }
         exit(0);
     }
-
+    //neogit status
+    if(equalStrings(input[1], "status") && equalStrings(input[2], "-a") && len == 3){
+        status_a();
+    }
     return 0;
 }
