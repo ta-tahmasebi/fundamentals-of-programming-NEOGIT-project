@@ -2752,8 +2752,39 @@ int main(int argc, char* argv[]){
     if(equalStrings(input[1], "status") && equalStrings(input[2], "-a") && len == 3){
         status_a();
     }
+    //neogit checkout
+    if(equalStrings(input[1], "checkout") && strstr(input[2], "HEAD-") == input[2] && len == 3){
+        int n = 0;
+        sscanf(input[2], "HEAD-%d", &n);
+        if(n <= 0){
+            printf("Invalid number!\n");
+            exit(-1);
+        }
+        n++;
+        parametrs condition;
+        folder** list = neogitLOG(timeUpToDown, beInList_normal, condition);
+        if(list[0] == NULL){
+            printf("No commit history.\n");
+            exit(0);
+        }
+        char name[20];
+        for(int i = 0; list[i] != NULL && n > 0; i++){
+            strcpy(name,list[i]->name);
+            n--;
+        }
+        if(n == 0){
+            checkout(name);
+        }
+        else{
+            printf("No commit history with deth %d.\n", n);
+            exit(0);
+        }
+        exit(0);
+    }
     if(equalStrings(input[1], "checkout") && strcmp(input[2], "") && len == 3){
         checkout(input[2]);
+        exit(0);
     }
+
     return 0;
 }
