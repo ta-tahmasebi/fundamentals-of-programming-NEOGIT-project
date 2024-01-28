@@ -2084,7 +2084,6 @@ void status_a(){
         }
     }
 }
-
 char checkAllInCommit_Help1(char * addressO){ //if we have a change in working directory or somthing in stage, return 0
     struct count_directory_file count = current_countOfStageFiles();
     if(count.directory != 0 || count.file != 0){
@@ -2228,7 +2227,6 @@ char checkAllInCommit(){
     chdir(s);
     return 1;
 }
-
 void checkOut_byID(int ID){
     char* address = (char*)calloc(500, sizeof(char));
     strcpy(address, absolute_address_neogit());
@@ -2270,6 +2268,124 @@ void checkOut_byID(int ID){
         printf("an unknown problem!\n");
     }
 }
+void checkout(char* name){
+    int ID = 0;
+    if((name[0] > '9' || name[0] < '0') && !equalStrings(name, "HEAD")){
+        char* address = gitFolder();
+        address = connectTwoString(address, "//config//branch//list");
+        FILE* f = fopen(address, "r");
+        char line[100];
+        while(fgets(line, 99, f) != NULL){
+            if(line[strlen(line) - 1] == '\n' || line[strlen(line) - 1] == '\r')
+                line[strlen(line) - 1] = 0;
+            if(line[strlen(line) - 1] == '\n' || line[strlen(line) - 1] == '\r')
+                line[strlen(line) - 1] = 0;
+            if(!strcmp(line, name)){
+                fgets(line, 99, f);
+                if(line[strlen(line) - 1] == '\n' || line[strlen(line) - 1] == '\r')
+                    line[strlen(line) - 1] = 0;
+                if(line[strlen(line) - 1] == '\n' || line[strlen(line) - 1] == '\r')
+                    line[strlen(line) - 1] = 0;
+                if (line[0] == 'N') ID = 0;
+                ID = atoi(line);
+            }
+        }
+    }
+    else if(equalStrings(name, "HEAD")){
+        char* address = gitFolder();
+        address = connectTwoString(address, "//config//branch//list");
+        FILE* f = fopen(address, "r");
+        char line[100];
+        while(fgets(line, 99, f) != NULL){
+            if(line[strlen(line) - 1] == '\n' || line[strlen(line) - 1] == '\r')
+                line[strlen(line) - 1] = 0;
+            if(line[strlen(line) - 1] == '\n' || line[strlen(line) - 1] == '\r')
+                line[strlen(line) - 1] = 0;
+            if(!strcmp(line, "master")){
+                fgets(line, 99, f);
+                if(line[strlen(line) - 1] == '\n' || line[strlen(line) - 1] == '\r')
+                    line[strlen(line) - 1] = 0;
+                if(line[strlen(line) - 1] == '\n' || line[strlen(line) - 1] == '\r')
+                    line[strlen(line) - 1] = 0;
+                if (line[0] == 'N') ID = 0;
+                ID = atoi(line);
+            }
+        }
+    }
+    else{
+        ID = atoi(name);
+    }
+    char* address = gitFolder();
+    address = connectTwoString(address, "//commits//");
+    char temp[10];
+    sprintf(temp, "%d", ID);
+    address = connectTwoString(address, temp);
+    char mode = check_type(address);
+    if(mode != 1){
+        printf("Invalid branch name or commit ID!\n");
+        exit(0);
+    }
+    int current = get_last_hash('a');
+    if(current == ID){
+        printf("DO YOU WANT TO CHECKOUT ON COMMIT %d? YOU WILL LOSS CURRENT CHANGES. (Y, N):", ID);
+        char c = 0;
+        scanf("%c", &c);
+        if(c != 'Y') exit(0);
+        char* address_neogit = absolute_address_neogit();
+        address_neogit = connectTwoString(address_neogit, "\\stage\\");
+        DIR* dir;
+        dir = opendir(address_neogit);
+        struct dirent* entry;
+        if(dir == NULL){
+            printf("unable to open %s directory\n", address_neogit);
+            exit(-1);
+        }
+        while ((entry = readdir(dir)) != NULL){
+            if(strcmp(entry->d_name, ".") && strcmp(entry->d_name, "..")){
+                char* address_free = connectTwoString(address_neogit, entry->d_name);
+                char isDir = check_type(address_free);
+                char command[400];
+                if(isDir == 1){
+                    sprintf(command, "rmdir /s /q \"%s\"", address_free);
+                    if(system(command)){
+                        printf("an unknown problem!\n");
+                        continue;
+                    }
+                }
+                else{
+                    sprintf(command, "del /f /q \"%s\"", address_free);
+                    if(system(command)){
+                        printf("an unknown problem!\n");
+                        continue;
+                    }
+                }
+            }
+        }
+        closedir(dir);
+        FILE* f;
+        address = gitFolder();
+        address = connectTwoString(address, "//config//branch//current");
+        f = fopen(address, "w");
+        fprintf(f, "%s", (equalStrings(name, "HEAD")? "master": name));
+        fclose(f);
+        checkOut_byID(ID);
+        printf("Now you are on commit %d\n", ID);
+        exit(0);
+    }
+    if(!checkAllInCommit()){
+        printf("first make a stash.\n");
+        exit(0);
+    }
+    address = gitFolder();
+    address = connectTwoString(address, "//config//branch//current");
+    FILE * f = fopen(address, "w");
+    fprintf(f, "%s", (equalStrings(name, "HEAD")? "master": name));
+    fclose(f);
+    printf("Now you are on commit %d\n", ID);
+    checkOut_byID(ID);
+}
+
+
 //End of main functions
 
 int main(int argc, char* argv[]){
@@ -2636,10 +2752,8 @@ int main(int argc, char* argv[]){
     if(equalStrings(input[1], "status") && equalStrings(input[2], "-a") && len == 3){
         status_a();
     }
-
-
-    if(equalStrings(input[1], "test")){
-        checkOut_byID(169643);
+    if(equalStrings(input[1], "checkout") && strcmp(input[2], "") && len == 3){
+        checkout(input[2]);
     }
     return 0;
 }
