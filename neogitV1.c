@@ -88,7 +88,7 @@ void ___print(char* str, int len, char** final){ //only for deleting spaces
     int index = 0;
     while(*(final + index))
         index++;
-    char* a = (char*)calloc(300, sizeof(char));
+    char* a = (char*)calloc(1000, sizeof(char));
     for(int i = 0; i < len; i++)
         a[i] = *(str + i);
     a[len] = '\0';
@@ -201,7 +201,7 @@ char ** getAddressOfHere_tokenized(){
     }
 }
 char** delete_spaces (char* string){
-    char ** finaladdress = (char**)calloc(300,sizeof(char*));
+    char ** finaladdress = (char**)calloc(1000,sizeof(char*));
     int p = 0;
     while(1){
         char* address = ___find(string, &p);
