@@ -413,7 +413,391 @@ void grep_commit(char* address1, int ID, char* word){
     }
 }
 //end of grep and diff
+
+//hook
+char isTodo(char* line, char mode){ //1 -> c,cpp 0->txt
+    char** text = delete_spaces(line);
+    if(mode){
+        for(int i = 0; text[i] != NULL; i++){
+            if(strmatchWildcard(text[i], "//TODO", strlen(text[i]), strlen("//TODO"))){
+                return 1;
+            }
+        }
+        return 0;
+    }
+    else{
+        for(int i = 0; text[i] != NULL; i++){
+            //printf("<<%s>>", text[i]);
+            if(strmatchWildcard(text[i], "TODO", strlen(text[i]), strlen("TODO"))){
+                //printf("<%s>",text[i]);
+                return 1;
+            }
+        }
+        return 0;
+    }
+    return 0;
+}
+char* check_format(char* address){
+    char* type = (char*)calloc(100, 1);
+    int j = 0, flag = 1;;
+    for(int i = strlen(address) - 1; i >= 0; i--){
+        if(address[i] == '.'){
+            flag = 0;
+            break;
+        }
+        else{
+            type[j] = address[i];
+            j++;
+        }
+    }
+    if(j > 50 || flag == 1){
+        return "NULL"; //means no type
+    }
+    int len = strlen(type);
+    for(int i = 0; i < len / 2 ; i++){
+        if(i == len - i - 1) break;
+        type[i] ^= type[len - i - 1];
+        type[len - i - 1] ^= type[i];
+        type[i] ^= type[len - i - 1];
+    }
+    return type;
+}
+char HOOKcheck_errors(char* address){
+    char* type = check_format(address);
+    if(!strcmp(type, "cpp") || !strcmp(type, "c")){
+        FILE* f = fopen(address, "r");
+        if (f == NULL) return 0;
+        fclose(f);
+        char temp[300];
+        sprintf(temp, "gcc -fsyntax-only \"%s\" 2>___T___.neogit", address);
+        //printf("%s", temp);
+        system (temp);
+        f = fopen("___T___.neogit", "r");
+        temp[0] = 0;
+        fscanf(f, "%s", temp);
+        fclose(f);
+        remove("___T___.neogit");
+        if(temp[0] == 0) return 1;
+        return -1;
+    }
+    return 0;
+}
+char HOOKTODO_check(char* address){
+    char* type = check_format(address);
+    if(!strcmp(type, "cpp") || !strcmp(type, "c") || !strcmp(type, "txt")){
+        if(!strcmp(type, "txt")){
+            FILE* f = fopen(address, "r");
+            if(f==NULL) return 0;
+            char line[1000];
+            while(fgets(line, 199, f) != NULL){
+                while(line[strlen(line) - 1] == '\n' || line[strlen(line) - 1] == '\r' || line[strlen(line) - 1] == ' ')
+                    line[strlen(line) - 1] = 0;
+                if(isTodo(line, 0)){
+                    fclose(f);
+                    return -1;
+                }
+            }
+            fclose(f);
+            return 1;
+        }
+        else{
+            FILE* f = fopen(address, "r");
+            if(f==NULL) return 0;
+            char line[200];
+            while(fgets(line, 199, f) != NULL){
+                while(line[strlen(line) - 1] == '\n' || line[strlen(line) - 1] == '\r' || line[strlen(line) - 1] == ' ')
+                    line[strlen(line) - 1] = 0;
+                if(isTodo(line, 1)){
+                    fclose(f);
+                    return -1;
+                }
+            }
+            fclose(f);
+            return 1;
+        }
+    }
+    else{
+        return 0;
+    }
+}
+int count_ofB1(char* line){
+    int count = 0;
+    for(unsigned long long i = 0; i < strlen(line); i++){
+        if(line[i] == '('){
+            count ++;
+        }
+        if(line[i] == ')'){
+            count --;
+        }
+    }
+    return count;
+}
+int count_ofB2(char* line){
+    int count = 0;
+    for(unsigned long long i = 0; i < strlen(line); i++){
+        if(line[i] == '['){
+            count ++;
+        }
+        if(line[i] == ']'){
+            count --;
+        }
+    }
+    return count;
+}
+int count_ofB3(char* line){
+    int count = 0;
+    for(unsigned long long i = 0; i < strlen(line); i++){
+        if(line[i] == '{'){
+            count ++;
+        }
+        if(line[i] == '}'){
+            count --;
+        }
+    }
+    return count;
+}
+char HOOKbracets_check(char* address){
+    char* type = check_format(address);
+    if(!strcmp(type, "cpp") || !strcmp(type, "c") || !strcmp(type, "txt")){
+        FILE* f = fopen(address, "r");
+        if (f == NULL) return 0;
+        int c1=0,c2=0,c3=0;
+        char line[1000];
+        while(fgets(line, 199, f) != NULL){
+            while(line[strlen(line) - 1] == '\n' || line[strlen(line) - 1] == '\r' || line[strlen(line) - 1] == ' ')
+                line[strlen(line) - 1] = 0;
+            c1 += count_ofB1(line);
+            c2 += count_ofB2(line);
+            c3 += count_ofB3(line);
+        }
+        fclose(f);
+        if(c1 == c2 && c2 == c3 && c3 == 0){
+            return 1;
+        }
+        return -1;
+    }
+    return 0;
+}
+char HOOKblank(char* address){
+    char* type = check_format(address);
+    if(!strcmp(type, "cpp") || !strcmp(type, "c") || !strcmp(type, "txt")){
+        FILE* f = fopen(address, "r");
+        if (f == NULL) return 0;
+        char line[1000];
+        char is = 0;
+        while(fgets(line, 199, f) != NULL){
+            is = 0;
+            while(line[strlen(line) - 1] == '\n' || line[strlen(line) - 1] == '\r')
+                line[strlen(line) - 1] = 0;
+            if(strlen(line) == 0){
+                is = 1;
+                continue;
+            }
+            if(line[strlen(line) - 1] == ' ' || line[strlen(line) - 1] == '\t'){
+                is = 1;
+            }
+        }
+        fclose(f);
+        if(is)
+            return -1;
+        return 1;
+    }
+    return 0;
+}
+char HOOKformat_check(char* address){
+    char* format = check_format(address);
+    if(equalStrings(format, "txt") || equalStrings(format, "c") || equalStrings(format, "cpp") || equalStrings(format, "mp3") || equalStrings(format, "mp4") || equalStrings(format, "wav") || equalStrings(format, "py")){
+        return 1;
+    }
+    return -1;
+}
+char HOOKgetSizeMB(char* address){
+    FILE* f = fopen(address, "r");
+    if(f==NULL) return 0;
+    fseek(f, 0, SEEK_END);
+    unsigned long long size = ftell(f); 
+    fseek(f, 0, SEEK_SET);
+    size = size / 1024 / 1024;
+    if(size>=5)
+        return -1;
+    return 1;
+}
+char HOOKcount_char(char* address){
+    char* type = check_format(address);
+    if(!(!strcmp(type, "cpp") || !strcmp(type, "c") || !strcmp(type, "txt"))) return 0;
+    FILE* f = fopen(address, "r");
+    if(f==NULL)return 0;
+    char ch;
+    int count = 0;
+    while (1) {
+        ch = fgetc(f);
+        if (ch == EOF)
+            break;
+        ++count;
+        if(count >= 20000){
+            return -1;
+        }
+    }
+    return 1;
+}
+char checkHooks_stage(char* address, int functions, char mode){ //mode 'w' = write on screen
+    if(address[0] == 0){
+        address = absolute_address_neogit();
+        address = connectTwoString(address, "\\stage\\");
+        if(!check_type(address)){
+            printf("an unknown problem!\n");
+            exit(0);
+        }
+    }
+    char directiries[100][400];
+    int numberdir = 0;
+    char* address_free1;
+    DIR* dir;
+    dir = opendir(address);
+    struct dirent* entry;
+    if(dir == NULL){
+        printf("unable to open %s directory\n", address);
+        exit(-1);
+    }
+    while ((entry = readdir(dir)) != NULL){
+        if(strcmp(entry->d_name, ".") && strcmp(entry->d_name, "..")){
+            address_free1 = connectTwoString(address, "");
+            char isDir1;
+            address_free1 = connectTwoString(address_free1, connectTwoString("\\", entry->d_name));
+            isDir1 = check_type(address_free1);
+            if(isDir1 == 1){
+                strcpy(directiries[numberdir], address_free1);
+                numberdir++;
+            }
+            else{
+                char* a = strstr(address_free1, "\\.neogit\\stage");
+                a += 15;
+                if(mode == 'w') printf("\"%s\": \n", a);
+                if((functions & 1) == (1)){
+                    char ans = HOOKTODO_check(address_free1);
+                    if(ans == 1 && mode == 'w'){
+                        printf("\033[32mtodo-check...................PASSED\n\033[0m");
+                    }
+                    if(ans == 0 && mode =='w'){
+                        printf("\033[33mtodo-check...................SKIPPED\n\033[0m");
+                    }
+                    if(ans == -1 && mode == 'w'){
+                        printf("\033[31mtodo-check...................FAILED\n\033[0m");
+                    }
+                    if(ans == -1 && mode!= 'w'){
+                        return 0;
+                    }
+                }
+                if((functions & (1<<1)) == (1<<1)){
+                    char ans = HOOKblank(address_free1);
+                    if(ans == 1 && mode == 'w'){
+                        printf("\033[32meof-blank-space...................PASSED\n\033[0m");
+                    }
+                    if(ans == 0 && mode =='w'){
+                        printf("\033[33meof-blank-space...................SKIPPED\n\033[0m");
+                    }
+                    if(ans == -1 && mode == 'w'){
+                        printf("\033[31meof-blank-space...................FAILED\n\033[0m");
+                    }
+                    
+                    if(ans == -1 && mode!= 'w'){
+                        return 0;
+                    }
+                }
+                if((functions & (1<<2)) == (1<<2)){
+                    char ans = HOOKformat_check(address_free1);
+                    if(ans == 1 && mode == 'w'){
+                        printf("\033[32mformat-check...................PASSED\n\033[0m");
+                    }
+                    if(ans == 0 && mode =='w'){
+                        printf("\033[33mformat-check...................SKIPPED\n\033[0m");
+                    }
+                    if(ans == -1 && mode == 'w'){
+                        printf("\033[31mformat-check...................FAILED\n\033[0m");
+                    }
+                    
+                    if(ans == -1 && mode!= 'w'){
+                        return 0;
+                    }
+                }
+                if((functions & (1<<3)) == (1<<3)){
+                    char ans = HOOKbracets_check(address_free1);
+                    if(ans == 1 && mode == 'w'){
+                        printf("\033[32mbalance-bracets...................PASSED\n\033[0m");
+                    }
+                    if(ans == 0 && mode =='w'){
+                        printf("\033[33mbalance-bracets...................SKIPPED\n\033[0m");
+                    }
+                    if(ans == -1 && mode == 'w'){
+                        printf("\033[31mbalance-bracets...................FAILED\n\033[0m");
+                    }
+                    
+                    if(ans == -1 && mode!= 'w'){
+                        return 0;
+                    }
+                }
+                if((functions & (1<<4)) == (1<<4)){
+                    char ans = HOOKcheck_errors(address_free1);
+                    if(ans == 1 && mode == 'w'){
+                        printf("\033[32mstatic-error-check...................PASSED\n\033[0m");
+                    }
+                    if(ans == 0 && mode =='w'){
+                        printf("\033[33mstatic-error-check...................SKIPPED\n\033[0m");
+                    }
+                    if(ans == -1 && mode == 'w'){
+                        printf("\033[31mstatic-error-check...................FAILED\n\033[0m");
+                    }
+                    
+                    if(ans == -1 && mode!= 'w'){
+                        return 0;
+                    }
+                }
+                if((functions & (1<<5)) == (1<<5)){
+                    char ans = HOOKgetSizeMB(address_free1);
+                    if(ans == 1 && mode == 'w'){
+                        printf("\033[32mfile-size-check...................PASSED\n\033[0m");
+                    }
+                    if(ans == 0 && mode =='w'){
+                        printf("\033[33mfile-size-check...................SKIPPED\n\033[0m");
+                    }
+                    if(ans == -1 && mode == 'w'){
+                        printf("\033[31mfile-size-check...................FAILED\n\033[0m");
+                    }
+                    if(ans == -1 && mode!= 'w'){
+                        return 0;
+                    }
+                }
+                if((functions & (1<<6)) == (1<<6)){
+                    char ans = HOOKcount_char(address_free1);
+                    if(ans == 1 && mode == 'w'){
+                        printf("\033[32mcharacter-limit...................PASSED\n\033[0m");
+                    }
+                    if(ans == 0 && mode =='w'){
+                        printf("\033[33mcharacter-limit...................SKIPPED\n\033[0m");
+                    }
+                    if(ans == -1 && mode == 'w'){
+                        printf("\033[31mcharacter-limit...................FAILED\n\033[0m");
+                    }
+                    if(ans == -1 && mode!= 'w'){
+                        return 0;
+                    }
+                }
+            }
+        }
+    }
+    closedir(dir);
+    int r = 1;
+    for(int i = 0; i < numberdir; i++){
+        if(!strcmp(directiries[i], ".neogit")) continue;
+        if(!checkHooks_stage(directiries[i], functions, mode))
+            r = 0;
+    }
+    return r;
+}
+//End of hook
+
 void get_commands_V2(char**  input, int len){
+    
     //temps
     if(equalStrings(input[1], "print_double_write_L__")){
         print_double_write_L();
@@ -745,7 +1129,11 @@ void get_commands_V2(char**  input, int len){
     if(equalStrings(input[1], "grep") && equalStrings(input[2], "-c") && strcmp(input[3], "") && equalStrings(input[4], "-p") && strcmp(input[5], "") && len == 6){
         grep_commit("", atoi(input[3]), input[5]);
     }
-}
+    //hook
+    // if(equalStrings(input[1], "test")){
+    //     printf("%d",checkHooks_stage("", (1<<6)+(1<<5)+(1<<4)+(1<<3)+(1<<1)+(1<<0), 'r'));
+    // }
+}   
 
 int main(int argc, char* argv[]){
     //get inputs        #############################

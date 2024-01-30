@@ -809,6 +809,7 @@ void init(){
         FILE* f = fopen(".neogit\\config\\undo", "w"); fclose(f);
         f = fopen(".neogit\\config\\alias", "w"); fclose(f);
         f = fopen(".neogit\\config\\email", "w"); fclose(f);
+        f = fopen(".neogit\\config\\hook", "w"); fclose(f);
         f = fopen(".neogit\\config\\emailCount", "w"); fclose(f);
         f = fopen(".neogit\\config\\name", "w"); fclose(f);
         f = fopen(".neogit\\config\\shortcut", "w"); fclose(f);
