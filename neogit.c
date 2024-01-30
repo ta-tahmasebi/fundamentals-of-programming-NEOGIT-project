@@ -1130,9 +1130,69 @@ void get_commands_V2(char**  input, int len){
         grep_commit("", atoi(input[3]), input[5]);
     }
     //hook
-    // if(equalStrings(input[1], "test")){
-    //     printf("%d",checkHooks_stage("", (1<<6)+(1<<5)+(1<<4)+(1<<3)+(1<<1)+(1<<0), 'r'));
-    // }
+    if(equalStrings(input[1], "pre-commit") && equalStrings(input[2], "hooks") && equalStrings(input[3], "list") && len ==4){
+        printf("todo-check\neof-blank-space\nformat-check\nbalance-bracets\nstatic-error-check\nfile-size-check\ncharacter-limit\n");
+        exit(0);
+    }
+    if(equalStrings(input[1], "pre-commit") && equalStrings(input[2], "applied") && equalStrings(input[3], "hooks") && len ==4){
+        int number = extract_hook_status();
+        char flag = 1;
+        if((number & 1) == 1){
+            printf("todo-check\n"); flag = 0;
+        }
+        if((number & (1<<1)) == (1<<1)){
+            printf("eof-blank-space\n"); flag = 0;
+        }
+        if((number & (1<<2)) == (1<<2)){
+            printf("format-check\n"); flag = 0;
+        }
+        if((number & (1<<3)) == (1<<3)){
+            printf("balance-bracets\n"); flag = 0;
+        }
+        if((number & (1<<4)) == (1<<4)){
+            printf("static-error-check\n"); flag = 0;
+        }
+        if((number & (1<<5)) == (1<<5)){
+            printf("file-size-check\n"); flag = 0;
+        }
+        if((number & (1<<6)) == (1<<6)){
+            printf("character-limit\n"); flag = 0;
+        }
+        if(flag){
+            printf("\033[35mEMPTY\033[0m\n");
+        }
+    }
+    if(equalStrings(input[1], "pre-commit") && equalStrings(input[2], "add") && equalStrings(input[3], "hook") && strcmp(input[4], "") && len ==5){
+        int number = extract_hook_status();
+        if(equalStrings(input[4], "todo-check") && (number & 1) == 0){ number += (1 << 0);}    
+        else if(equalStrings(input[4], "eof-blank-space") && (number & (1<<1)) == 0){number += (1 << 1);}    
+        else if(equalStrings(input[4], "format-check") && (number & (1 << 2)) == 0){number += (1 << 2);}    
+        else if(equalStrings(input[4], "balance-bracets") && (number & (1 << 3)) == 0){number += (1 << 3);}    
+        else if(equalStrings(input[4], "static-error-check") && (number & (1 << 4)) == 0){number += (1 << 4);}    
+        else if(equalStrings(input[4], "file-size-check") && (number & (1 << 5)) == 0){number += (1 << 5);}    
+        else if(equalStrings(input[4], "character-limit") && (number & (1 << 6)) == 0){number += (1 << 6);} 
+        else{printf("\033[31mInvalid\033[0m hook id!\n"); exit(0);};   
+        write_new_hook_status(number);
+        printf("%s added \033[32msuccessfully\033[0m.\n", input[4]);
+    }
+    if(equalStrings(input[1], "pre-commit") && equalStrings(input[2], "remove") && equalStrings(input[3], "hook") && strcmp(input[4], "") && len ==5){
+        int number = extract_hook_status();
+        if(equalStrings(input[4], "todo-check") && (number & 1) != 0){ number -= (1 << 0);}    
+        else if(equalStrings(input[4], "eof-blank-space") && (number & (1<<1)) != 0){number -= (1 << 1);}    
+        else if(equalStrings(input[4], "format-check") && (number & (1 << 2)) != 0){number -= (1 << 2);}    
+        else if(equalStrings(input[4], "balance-bracets") && (number & (1 << 3)) != 0){number -= (1 << 3);}    
+        else if(equalStrings(input[4], "static-error-check") && (number & (1 << 4)) != 0){number -= (1 << 4);}    
+        else if(equalStrings(input[4], "file-size-check") && (number & (1 << 5)) != 0){number -= (1 << 5);}    
+        else if(equalStrings(input[4], "character-limit") && (number & (1 << 6)) != 0){number -= (1 << 6);} 
+        else{printf("\033[31mInvalid\033[0m hook id!\n"); exit(0);};   
+        write_new_hook_status(number);
+        printf("%s removed \033[32msuccessfully\033[0m.\n", input[4]);
+    }
+    if(equalStrings(input[1], "pre-commit") && len == 2){
+        int number = extract_hook_status();
+        if(!number){printf("hook list is \033[35mEMPTY\033[0m!\n"); exit(0);}
+        checkHooks_stage("", number, 'w');
+    }
 }   
 
 int main(int argc, char* argv[]){

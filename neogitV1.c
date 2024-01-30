@@ -13,6 +13,7 @@
 
 //portotypes
 char* connectTwoString(char*, char*);
+char checkHooks_stage(char* address, int functions, char mode);
 //End of portotypes
 
 //structs
@@ -1474,6 +1475,22 @@ struct count_directory_file current_countOfStageFiles(){
     b.directory = a[0];
     return b;
 }
+int extract_hook_status(){
+    char* address = absolute_address_neogit();
+    address = connectTwoString(address, "\\config\\hook");
+    FILE* f = fopen(address, "a"); fclose(f);
+    f = fopen(address, "r");
+    int number = 0;
+    fscanf(f, "%d", &number);
+    fclose(f);
+    return number;
+}
+void write_new_hook_status(int number){
+    char* address = absolute_address_neogit();
+    address = connectTwoString(address, "\\config\\hook");
+    FILE* f = fopen(address, "w"); 
+    fprintf(f, "%d", number);
+}
 char* get_current_brach(){
     char* address = gitFolder();
     address = connectTwoString(address, "//config//branch//current");
@@ -1545,6 +1562,12 @@ void change_last_commit_id(char* branch, int id){
     fclose(f);
 }
 void commit(char* massage){
+    if(!checkHooks_stage("", extract_hook_status(), 't')){
+        printf("YOU HAVE \033[31m\"HOOK FAILED\"\033[0m FILE IN STAGE. ARE YOU SHURE FOR COMMITING? (Y/N)? ");
+        char a;
+        scanf("%c", &a);
+        if(a != 'Y') exit(0);
+    }
     char* branch = get_current_brach();
     char* name = current_name();
     char* email = current_email();
