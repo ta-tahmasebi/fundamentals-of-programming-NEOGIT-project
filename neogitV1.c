@@ -107,6 +107,36 @@ char** ___split(char* name){ //c:/users\j -> c:   users    j
     }
     return a;
 }
+char strmatchWildcard(char str[], char pattern[], int n, int m) {
+    if (m == 0)
+        return (n == 0);
+    char lookup[n + 1][m + 1];
+ 
+    memset(lookup, 0, sizeof(lookup));
+ 
+    lookup[0][0] = 1;
+ 
+    for (int j = 1; j <= m; j++)
+        if (pattern[j - 1] == '*')
+            lookup[0][j] = lookup[0][j - 1];
+    for (int i = 1; i <= n; i++) {
+        for (int j = 1; j <= m; j++) {
+            
+            if (pattern[j - 1] == '*')
+                lookup[i][j]
+                    = lookup[i][j - 1] || lookup[i - 1][j];
+ 
+            else if (pattern[j - 1] == '?'
+                     || str[i - 1] == pattern[j - 1])
+                lookup[i][j] = lookup[i - 1][j - 1];
+ 
+            else
+                lookup[i][j] = 0;
+        }
+    }
+    return lookup[n][m];
+}
+
 int getLevelofAddress(char* address){
     int i = 0;
     for(int k = 0; address[k] != 0; k++){
@@ -314,7 +344,7 @@ char beInList_before(folder a, parametrs b){
 char beInList_search(folder a, parametrs b){
     int i = 0;
     while(b.list[i] != NULL){
-        if(strstr(a.massage, b.list[i])){
+        if(strmatchWildcard(a.massage, b.list[i], strlen(a.massage), strlen(b.list[i]))){
             return 1;
         } 
         i++;
