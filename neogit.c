@@ -6,6 +6,17 @@
 #include <fcntl.h>
 #include "neogitV1.c"
 
+void check_near_main(){
+    char address[500];
+    strcpy(address, absolute_address_neogit());
+    address[strlen(address) - 8] = 0;
+    char s [500];
+    getcwd(s, 499);
+    if(strcmp(s, address)){
+        printf("\033[33mfirst cd in main folder of project.\033[0m\n");
+        exit(0);
+    }
+}
 //grep and diff
 char compare_two_tokenized_string(char** line1, char** line2, int* number1, int* number2, int i, char* name1, char* name2){
     if(line1 == NULL){
@@ -138,7 +149,7 @@ void Help_checkAllFiles_compare_commits(char* address1, char* address2, int id1,
         address2 = connectTwoString(address2, temp);
         //printf("%s %s\n", address1,address2);
         if(!check_type(address1) || !check_type(address2)){
-            printf("invalid ID!\n");
+            printf("\033[31minvalid ID\033[0m!\n");
             exit(0);
         }
     }
@@ -150,7 +161,7 @@ void Help_checkAllFiles_compare_commits(char* address1, char* address2, int id1,
     dir = opendir(address1);
     struct dirent* entry;
     if(dir == NULL){
-        printf("unable to open %s directory\n", address1);
+        printf("\033[31munable to open %s directory\033[0m\n", address1);
         exit(-1);
     }
     while ((entry = readdir(dir)) != NULL){
@@ -210,7 +221,7 @@ void Help_checkAllFiles_compare_commits2(char* address1, char* address2, int id1
         address2 = connectTwoString(address2, temp);
         //printf("%s %s\n", address1,address2);
         if(!check_type(address1) || !check_type(address2)){
-            printf("invalid ID!\n");
+            printf("\033[31minvalid ID\033[0m!\n");
             exit(0);
         }
     }
@@ -222,7 +233,7 @@ void Help_checkAllFiles_compare_commits2(char* address1, char* address2, int id1
     dir = opendir(address1);
     struct dirent* entry;
     if(dir == NULL){
-        printf("unable to open %s directory\n", address1);
+        printf("\033[31munable to open %s directory\033[0m\n", address1);
         exit(-1);
     }
     while ((entry = readdir(dir)) != NULL){
@@ -645,7 +656,7 @@ char checkHooks_stage(char* address, int functions, char mode){ //mode 'w' = wri
         address = absolute_address_neogit();
         address = connectTwoString(address, "\\stage\\");
         if(!check_type(address)){
-            printf("an unknown problem!\n");
+            printf("\033[31man unknown problem\033[0m!\n");
             exit(0);
         }
     }
@@ -656,7 +667,7 @@ char checkHooks_stage(char* address, int functions, char mode){ //mode 'w' = wri
     dir = opendir(address);
     struct dirent* entry;
     if(dir == NULL){
-        printf("unable to open %s directory\n", address);
+        printf("\033[31munable to open %s directory\033[0m\n", address);
         exit(-1);
     }
     while ((entry = readdir(dir)) != NULL){
@@ -917,15 +928,248 @@ char checkHooks_file(char* address, int functions, char mode){ //mode 'w' = writ
     }
     return 1;
 }
-
-
-
-
-
 //End of hook
+//stash
+void push_stash(char* address, int id){
+    if(equalStrings(address, ".") || equalStrings(address, "..") || equalStrings(address, ".neogit")) return;
+    char mode = check_type(address);
+    char address_stash[100];
+    sprintf(address_stash, ".neogit\\stash\\%d\\", id);
+    char command[200];
+    if(mode == 1){
+        mkdir(connectTwoString(address_stash, address));
+        sprintf(command, "xcopy \"%s\\*\" \"%s\\*\" /e/h/c/i/y > NUL",  address, connectTwoString(address_stash, address));
+        if(system(command)) {printf("\033[31man unknown problem\033[0m!\n"); return;}
+    }
+    if(mode == -1){
+        sprintf(command, "copy \"%s\" \"%s\" > NUL",  address, address_stash);
+        if(system(command)) {printf("\033[31man unknown problem\033[0m!\n"); return;}
+    }
+}
+void clear_stage(){
+    char* address_neogit = absolute_address_neogit();
+    address_neogit = connectTwoString(address_neogit, "\\stage\\");
+    DIR* dir;
+    dir = opendir(address_neogit);
+    struct dirent* entry;
+    if(dir == NULL){
+        printf("unable to open %s directory\n", address_neogit);
+        exit(-1);
+    }
+    while ((entry = readdir(dir)) != NULL){
+        if(strcmp(entry->d_name, ".") && strcmp(entry->d_name, "..")){
+            char* address_free = connectTwoString(address_neogit, entry->d_name);
+            char isDir = check_type(address_free);
+            char command[400];
+            if(isDir == 1){
+                sprintf(command, "rmdir /s /q \"%s\"", address_free);
+                if(system(command)){
+                    printf("\033[31man unknown problem\033[0m!\n");
+                    continue;
+                }
+            }
+            else{
+                sprintf(command, "del /f /q \"%s\"", address_free);
+                if(system(command)){
+                    printf("\033[31man unknown problem\033[0m!\n");
+                    continue;
+                }
+            }
+        }
+    }
+}
+void append_end_stash_list(int id){ // YOU should be on main folder!
+    FILE* f = fopen(".neogit\\stash\\list", "r");
+    char line[200][100];
+    int a = 0;
+    while(fgets(line[a], 99, f) != NULL){
+        while(line[a][strlen(line[a]) - 1] == '\n' || line[a][strlen(line[a]) - 1] == '\r' || line[a][strlen(line[a]) - 1] == ' ')
+            line[a][strlen(line[a]) - 1] = 0;
+        a++;
+    }
+    fclose(f);
+    f = fopen(".neogit\\stash\\list", "w");
+    fprintf(f,"%d\n", id);
+    for(int i = 0; i < a; i++){
+        fprintf(f,"%s\n", line[i]);
+    }
+    fclose(f);
+}
+void show_list_stash(){
+    char* address = absolute_address_neogit();
+    address = connectTwoString(address, "\\stash\\list");
+    FILE* f = fopen(address, "r");
+    char line[100];
+    int a = 0;
+    while(fgets(line, 99, f) != NULL){
+        while(line[strlen(line) - 1] == '\n' || line[strlen(line) - 1] == '\r' || line[strlen(line) - 1] == ' ')
+            line[strlen(line) - 1] = 0;
+        if(line[0] == 0) continue;;
+        printf("ID: \033[36m%d\033[0m; ", a);
+        address = absolute_address_neogit();
+        address = connectTwoString(address, "\\stash\\");
+        char temp[100];
+        sprintf(temp, "%d_info\\", atoi(line));
+        address = connectTwoString(address, temp);
+        char* branch_A = connectTwoString(address, "branch");
+        char branch[20];
+        FILE*ff = fopen(branch_A, "r"); fscanf(ff, "%s", branch); fclose(ff);
+        printf("BRANCH: <\033[36m%s\033[0m>; ", branch);
+        char* mas_A = connectTwoString(address, "massage");
+        char massage[200];
+        ff = fopen(mas_A, "r"); fscanf(ff, "%[^\n]s", massage); fclose(ff);
+        printf("MASSAGE: <\033[36m%s\033[0m>\n", massage);
+        a++;
+    }
+} 
+int findHash_stash(int id){
+    //printf("%d", id);
+    char* address = absolute_address_neogit();
+    address = connectTwoString(address, "\\stash\\list");
+    FILE* f = fopen(address, "r");
+    char line[100];
+    int a = 0;
+    while(fgets(line, 99, f) != NULL){
+        while(line[strlen(line) - 1] == '\n' || line[strlen(line) - 1] == '\r' || line[strlen(line) - 1] == ' ')
+            line[strlen(line) - 1] = 0;
+        if(line[0] == 0) continue;
+        if(id == a){
+            return atoi(line);
+        }
+        a++;
+    }
+    return 0;
+} 
+void delete_stash(int id){
+    //printf("%d", id);
+    char* address = absolute_address_neogit();
+    address = connectTwoString(address, "\\stash\\");
+    char temp[100];
+    sprintf(temp, "%d", id);
+    address = connectTwoString(address, temp);
+    char command[200];
+    sprintf(command, "rmdir /s /q \"%s\"", address);
+    if(system(command)){
+        printf("\033[31man unknown problem\033[0m!\n");
+        return;
+    }
+    sprintf(command, "rmdir /s /q \"%s_info\"", address);
+    if(system(command)){
+        printf("\033[31man unknown problem\033[0m!\n");
+        return;
+    }
+    FILE* f = fopen(".neogit\\stash\\list", "r");
+    char line[200][100];
+    int a = 0;
+    while(fgets(line[a], 99, f) != NULL){
+        while(line[a][strlen(line[a]) - 1] == '\n' || line[a][strlen(line[a]) - 1] == '\r' || line[a][strlen(line[a]) - 1] == ' ')
+            line[a][strlen(line[a]) - 1] = 0;
+        if(atoi(line[a]) == id){
+            line[a][0] = 0;
+        }
+        else{
+            a++;
+        }
+        //printf("%s|", line[a-1]);
+    }
+    fclose(f);
+    f = fopen(".neogit\\stash\\list", "w");
+    for(int i = 0; i < a; i++){
+        if(line[i][0] != 0){
+            fprintf(f,"%s\n", line[i]);
+            //printf("%s\n", line[i]);
+            //printf("Y");
+        }
+    }
+    fclose(f);
+}
+void Help_checkAllFiles_compare_stash_commits(char* address1, char* address2, int id1, int id2, int id3){
+    // printf("<%s><%s>\n", address1, address2);
+    if(address1[0] == 0){
+        address1 = absolute_address_neogit();
+        address1 = connectTwoString(address1, "\\stash\\");
+        char temp[10];
+        sprintf(temp, "%d", id1);
+        address1 = connectTwoString(address1, temp);
+        address2 = absolute_address_neogit();
+        address2 = connectTwoString(address2, "\\commits\\");
+        sprintf(temp, "%d", id2);
+        address2 = connectTwoString(address2, temp);
+        //printf("%s %s\n", address1,address2);
+        if(!check_type(address1) || !check_type(address2)){
+            printf("\033[31minvalid ID\033[0m!\n");
+            exit(0);
+        }
+    }
+    char directiries[100][400];
+    int numberdir = 0;
+    char* address_free1;
+    char* address_free2;
+    DIR* dir;
+    dir = opendir(address1);
+    struct dirent* entry;
+    if(dir == NULL){
+        printf("\033[31munable to open %s directory\033[0m\n", address1);
+        exit(-1);
+    }
+    while ((entry = readdir(dir)) != NULL){
+        if(strcmp(entry->d_name, ".") && strcmp(entry->d_name, "..")){
+            address_free1 = connectTwoString(address1, "");
+            address_free2 = connectTwoString(address2, "");
+            char isDir1, isDir2;
+            address_free1 = connectTwoString(address_free1, connectTwoString("\\", entry->d_name));
+            address_free2 = connectTwoString(address_free2, connectTwoString("\\", entry->d_name));
+            isDir1 = check_type(address_free1);
+            isDir2 = check_type(address_free2);
+            if(isDir1 == 1){
+                if(isDir2 != 1){
+                    char* a = strstr(address_free1, "\\.neogit\\stash\\");
+                    a = a + 21;
+                    printf("<%s><%s>\n", address_free1, address_free2);
+                    printf("\033[94m%s\\\033[0m is in stash \033[94m%d\033[0m but it is \033[31mnot\033[0m in commit \033[94m%d\033[0m\n", a, id3,id2);
+                    continue;
+                }
+                strcpy(directiries[numberdir], address_free1);
+                numberdir++;
+            }
+            else{
+                char* a = strstr(address_free1, "\\.neogit\\stash\\");
+                a = a + 21;
+                if(isDir2 != -1){
+                    // printf("<%s><%s>\n", address_free1, address_free2);
+                    printf("\033[94m%s\033[0m is in stash \033[94m%d\033[0m but it is \033[31mnot\033[0m in commit \033[94m%d\033[0m\n", a,id3 ,id2);
+                    continue;
+                }
+                printf("comparing \033[94m%s\033[0m in stash \033[94m%d\033[0m and commit \033[94m%d\033[0m:\n", a, id3, id2);
+                char temp[200];
+                sprintf(temp, "neogit diff -f \"%s\" \"%s\"", address_free1, address_free2);
+                system(temp);
+            }
+        }
+    }
+    closedir(dir);
+    for(int i = 0; i < numberdir; i++){
+        if(!strcmp(directiries[i], ".neogit")) continue;
+        char* name = connectTwoString(directiries[i], "");
+        char* temp = strstr(name, ".neogit\\stash\\");
+        temp = temp + 8;
+        sprintf(temp, "commits\\%d", id2);
+        temp[strlen(temp) + 1] = '\0';
+        temp[strlen(temp)] = '\\';
+        temp = strstr(directiries[i], ".neogit\\stash\\");
+        temp = temp + 21;
+        name = connectTwoString(name, temp);
+        Help_checkAllFiles_compare_stash_commits(directiries[i], name, id1, id2, id3);
+    }
+}
+
+
+void compare_stash_commit(int stash, int commit, int index){
+    Help_checkAllFiles_compare_stash_commits("", "", stash, commit, index);
+}
+//end ofstash
 
 void get_commands_V2(char**  input, int len){
-    
     //temps
     if(equalStrings(input[1], "print_double_write_L__")){
         print_double_write_L();
@@ -1332,8 +1576,207 @@ void get_commands_V2(char**  input, int len){
             system(temp);
         }
     }
-    //end of hook
+    //stash
+    if(equalStrings(input[1], "stash") && equalStrings(input[2], "push") && len == 3){
+        check_near_main();
+        char s [500];
+        getcwd(s, 499);
+        char address[500];
+        strcpy(address, absolute_address_neogit());
+        address[strlen(address) - 8] = 0;
+        int id = current_id();
+        chdir(address);
+        char* dir_ = ".neogit\\stash";
+        char command[300];
+        if(check_type(dir_) != 1) {
+            sprintf(command, "mkdir \"%s\"", dir_);
+            system(command);
+        }
+        DIR* dir;
+        dir = opendir(".");
+        struct dirent* entry;
+        if(dir == NULL){
+            printf("unable to open %s directory\n", address);
+            exit(-1);
+        }
+        while ((entry = readdir(dir)) != NULL){
+            push_stash(entry->d_name, id);
+        }
+        //stash created!
+        char address_info[200];
+        char address_info_commit[200];
+        sprintf(address_info, ".neogit\\stash\\%d_info", id);
+        sprintf(command, "mkdir \"%s\"", address_info);
+        system(command);
+        char* branch = calloc(100, sizeof(char));
+        FILE* f = fopen(connectTwoString(address_info, "\\branch"), "w");
+        int last_commit = get_last_hash('a');
+        sprintf(address_info_commit, ".neogit\\commits\\%d_info\\", last_commit);
 
+        //check branch
+        char* branch_current = get_current_brach();
+        if(last_commit == 0) strcpy(branch, "master");
+        else{
+            FILE* ff = fopen(connectTwoString(address_info_commit, "branch"), "r");
+            fscanf(ff, "%[^\n]s", branch);
+            fclose(ff);
+        }
+        if((branch_current[0] > '9' || branch_current[0] < '0') && last_commit != 0){
+            strcpy(branch, branch_current);
+        }
+        fprintf(f, "%s", branch);
+        fclose(f);
+        //end of branch
+        //massage
+        f = fopen(connectTwoString(address_info, "\\massage"), "w");
+        fprintf(f, "%s", "NULL");
+        fclose(f);
+        //end of massage
+        //commit
+        f = fopen(connectTwoString(address_info, "\\commit"), "w");
+        fprintf(f, "%d", last_commit);
+        fclose(f);
+        //end of commit
+
+        clear_stage();
+        if(last_commit != 0)
+            checkOut_byID(last_commit);
+        else{
+            printf("\033[35mNO COMMIT YET\033[0m.\n");
+        }
+        closedir(dir);
+        append_end_stash_list(id);
+        printf("\033[32mData are in stash now.\033[0m Now rou are on commit \033[34m%d\033[0m\n", last_commit);
+        chdir(s);
+    }
+    if(equalStrings(input[1], "stash") && equalStrings(input[2], "push") && equalStrings(input[3], "-m") && strcmp(input[4], "") && len == 5){
+        check_near_main();
+        char s [500];
+        getcwd(s, 499);
+        char address[500];
+        strcpy(address, absolute_address_neogit());
+        address[strlen(address) - 8] = 0;
+        int id = current_id();
+        chdir(address);
+        char* dir_ = ".neogit\\stash";
+        char command[300];
+        if(check_type(dir_) != 1) {
+            sprintf(command, "mkdir \"%s\"", dir_);
+            system(command);
+        }
+        DIR* dir;
+        dir = opendir(".");
+        struct dirent* entry;
+        if(dir == NULL){
+            printf("unable to open %s directory\n", address);
+            exit(-1);
+        }
+        while ((entry = readdir(dir)) != NULL){
+            push_stash(entry->d_name, id);
+        }
+        //stash created!
+        char address_info[200];
+        char address_info_commit[200];
+        sprintf(address_info, ".neogit\\stash\\%d_info", id);
+        sprintf(command, "mkdir \"%s\"", address_info);
+        system(command);
+        char* branch = calloc(100, sizeof(char));
+        FILE* f = fopen(connectTwoString(address_info, "\\branch"), "w");
+        int last_commit = get_last_hash('a');
+        sprintf(address_info_commit, ".neogit\\commits\\%d_info\\", last_commit);
+
+        //check branch
+        char* branch_current = get_current_brach();
+        if(last_commit == 0) strcpy(branch, "master");
+        else{
+            FILE* ff = fopen(connectTwoString(address_info_commit, "branch"), "r");
+            fscanf(ff, "%[^\n]s", branch);
+            fclose(ff);
+        }
+        if((branch_current[0] > '9' || branch_current[0] < '0') && last_commit != 0){
+            strcpy(branch, branch_current);
+        }
+        fprintf(f, "%s", branch);
+        fclose(f);
+        //end of branch
+
+        f = fopen(connectTwoString(address_info, "\\massage"), "w");
+        fprintf(f, "%s", input[4]);
+        fclose(f);
+        f = fopen(connectTwoString(address_info, "\\commit"), "w");
+        fprintf(f, "%d", last_commit);
+        fclose(f);
+
+
+        clear_stage();
+        if(last_commit != 0)
+            checkOut_byID(last_commit);
+        else{
+            printf("\033[35mNO COMMIT YET\033[0m.\n");
+        }
+        closedir(dir);
+        append_end_stash_list(id);
+        printf("\033[32mData are in stash now.\033[0m Now rou are on commit \033[34m%d\033[0m\n", last_commit);
+        chdir(s);
+    }
+    if(equalStrings(input[1], "stash") && equalStrings(input[2], "list") && len == 3){
+        if(!findHash_stash(0)){
+            printf("stash area is \033[35mempty\033[0m.\n");
+            exit(0);
+        }
+        show_list_stash();
+    }
+    if(equalStrings(input[1], "stash") && equalStrings(input[2], "drop") && equalStrings(input[3], "-n") && strcmp(input[4], "") && len == 5){
+        int id = findHash_stash(atoi(input[4]));
+        if(id == 0){
+            printf("\033[31mInvalid number\033[0m!\n");
+            exit(0);
+        }
+        delete_stash(id);
+        printf("\033[32mDeleted\033[0m.\n");
+    }
+    if(equalStrings(input[1], "stash") && equalStrings(input[2], "clear") && len == 3){
+        int flag = 1;
+        while(findHash_stash(0) != 0){
+            flag = 0;
+            delete_stash(findHash_stash(0));
+        } 
+        if(flag){
+            printf("stash area is \033[35mempty\033[0m.\n");
+        }
+        else{
+            printf("\033[32mDeleted\033[0m.\n");
+        }
+    }
+    if(equalStrings(input[1], "stash") && equalStrings(input[2], "drop") && len == 3){
+        int flag = 1;
+        if(findHash_stash(0) != 0){
+            flag = 0;
+            delete_stash(findHash_stash(0));
+        } 
+        if(flag){
+            printf("stash area is \033[35mempty\033[0m.\n");
+        }
+        else{
+            printf("\033[32mDeleted\033[0m.\n");
+        }
+    }
+    if(equalStrings(input[1], "stash") && equalStrings(input[2], "show") && strcmp(input[3], "") && len == 4){
+        int id = findHash_stash(atoi(input[3]));
+        if(id == 0){
+            printf("\033[31mInvalid number\033[0m!\n");
+            exit(0);
+        }
+        char* address = absolute_address_neogit();
+        address = connectTwoString(address, "\\stash\\");
+        char temp[100];
+        sprintf(temp, "%d_info\\", id);
+        address = connectTwoString(address, temp);
+        FILE* f = fopen(connectTwoString(address, "commit"), "r");
+        int commit = 0;
+        fscanf(f, "%d", &commit);
+        compare_stash_commit(id, commit, atoi(input[3]));
+    }
 }   
 
 int main(int argc, char* argv[]){

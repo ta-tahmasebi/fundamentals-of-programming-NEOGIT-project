@@ -182,7 +182,7 @@ char* GetAddressHere(){
     if(!system("cd > .____neogit_temp")){
         FILE* f = fopen(".____neogit_temp", "r");
         if(f == NULL){
-            printf("an unkown problem!\n");
+            printf("\033[31man unkown problem\033[0m!\n");
             exit(-1);
         }
         fscanf(f, "%[^\n]s", address);
@@ -190,7 +190,7 @@ char* GetAddressHere(){
         remove(".____neogit_temp");
     }
     else{
-        printf("an unkown problem!\n");
+        printf("\033[31man unkown problem\033[0m!\n");
         exit(-1);   
     }
     return address;
@@ -198,7 +198,7 @@ char* GetAddressHere(){
 char ** getAddressOfHere_tokenized(){
     FILE* f = fopen(".__E__neogit_temp.bat", "w");
     if(f == NULL){
-        printf("an unkown problem!\n");
+        printf("\033[31man unkown problem\033[0m!\n");
         exit(-1);
     }
     fprintf(f, "%s\n%s\n%s%s\n%s\n%s\n", "@ECHO OFF", "call set PARENT_DIR=%CD%","set PARENT_DIR=%PARENT_DIR:", " =+%", "set PARENT_DIR=%PARENT_DIR:\\= %", "FOR %%i IN (%PARENT_DIR%) DO (echo %%i>> .____neogit_temp)");
@@ -207,7 +207,7 @@ char ** getAddressOfHere_tokenized(){
         remove(".__E__neogit_temp.bat");
         f = fopen(".____neogit_temp", "r");
         if(f == NULL){
-            printf("an unkown problem!\n");
+            printf("\033[31man unkown problem\033[0m!\n");
             exit(-1);
         }
         char** text = (char **)calloc(100, sizeof(char*));
@@ -227,7 +227,7 @@ char ** getAddressOfHere_tokenized(){
         return text;
     }
     else{
-        printf("an unkown problem!\n");
+        printf("\033[31man unkown problem\033[0m!\n");
         exit(-1);
     }
 }
@@ -379,7 +379,7 @@ void changeNameGlobal(char* name){
     }
     FILE * f = fopen("d://SETTINGS//config//name", "w");
     if(f == NULL){
-        printf("an unkown problem!\n");
+        printf("\033[31man unkown problem\033[0m!\n");
         exit(-1);
     }
     fprintf(f, "%s", name);
@@ -417,7 +417,7 @@ void changeName(char* name){
     if(dir) {
         FILE *f = fopen(connectTwoString(address,"//config//name"), "w");
         if(f == NULL){
-            printf("an unkown problem!\n");
+            printf("\033[31man unkown problem\033[0m!\n");
             exit(-1);
         }
         fprintf(f, "%s", name);
@@ -427,14 +427,14 @@ void changeName(char* name){
         if (!mkdir(connectTwoString(address, "//config"))){
             FILE *f = fopen(connectTwoString(address,"//config//name"), "w");
                 if(f == NULL){
-                    printf("an unkown problem!\n");
+                    printf("\033[31man unkown problem\033[0m!\n");
                     exit(-1);
                 }
             fprintf(f, "%s", name);
             fclose(f);
         }
         else{
-            printf("an unkown problem!\n");
+            printf("\033[31man unkown problem\033[0m!\n");
             exit(-1);
         }
     }
@@ -473,7 +473,7 @@ void changeEmailGlobal(char* email){
     }
     FILE * f = fopen("d://SETTINGS//config//email", "w");
     if(f == NULL){
-        printf("an unkown problem!\n");
+        printf("\033[31man unkown problem\033[0m!\n");
         exit(-1);
     }
     fprintf(f,"%s", email);
@@ -511,7 +511,7 @@ void changeEmail(char* email){
     if(dir) {
         FILE *f = fopen(connectTwoString(address,"//config//email"), "w");
         if(f == NULL){
-            printf("an unkown problem!\n");
+            printf("\033[31man unkown problem\033[0m!\n");
             exit(-1);
         }
         fprintf(f, "%s", email);
@@ -521,14 +521,14 @@ void changeEmail(char* email){
         if (!mkdir(connectTwoString(address,"//config"))){
             FILE *f = fopen(connectTwoString(address,"//config//email"), "w");
                 if(f == NULL){
-                    printf("an unkown problem!\n");
+                    printf("\033[31man unkown problem\033[0m!\n");
                     exit(-1);
                 }
             fprintf(f, "%s", email);
             fclose(f);
         }
         else{
-            printf("an unkown problem!\n");
+            printf("\033[31man unkown problem\033[0m!\n");
             exit(-1);
         }
     }
@@ -562,13 +562,13 @@ char* current_name(){
     if(dir) {
         FILE *f = fopen(connectTwoString(address,"//config//name"), "a");
         if(f == NULL){
-            printf("an unkown problem!\n");
+            printf("\033[31man unkown problem\033[0m!\n");
             exit(-1);
         }
         fclose(f);
         f = fopen(connectTwoString(address,"//config//nameCount"), "a");
             if(f == NULL){
-                printf("an unkown problem!\n");
+                printf("\033[31man unkown problem\033[0m!\n");
                 exit(-1);
             }
         fclose(f);
@@ -577,19 +577,19 @@ char* current_name(){
         if (!mkdir(connectTwoString(address, "//config"))){
             FILE *f = fopen(connectTwoString(address,"//config//name"), "a");
                 if(f == NULL){
-                    printf("an unkown problem!\n");
+                    printf("\033[31man unkown problem\033[0m!\n");
                     exit(-1);
                 }
             fclose(f);
             f = fopen(connectTwoString(address,"//config//nameCount"), "a");
                 if(f == NULL){
-                    printf("an unkown problem!\n");
+                    printf("\033[31man unkown problem\033[0m!\n");
                     exit(-1);
                 }
             fclose(f);
         }
         else{
-            printf("an unkown problem!\n");
+            printf("\033[31man unkown problem\033[0m!\n");
             exit(-1);
         }
     }
@@ -627,13 +627,13 @@ char* current_email(){
     if(dir) {
         FILE *f = fopen(connectTwoString(address,"//config//email"), "a");
         if(f == NULL){
-            printf("an unkown problem!\n");
+            printf("\033[31man unkown problem\033[0m!\n");
             exit(-1);
         }
         fclose(f);
         f = fopen(connectTwoString(address,"//config//emailCount"), "a");
             if(f == NULL){
-                printf("an unkown problem!\n");
+                printf("\033[31man unkown problem\033[0m!\n");
                 exit(-1);
             }
         fclose(f);
@@ -642,19 +642,19 @@ char* current_email(){
         if (!mkdir(connectTwoString(address, "//config"))){
             FILE *f = fopen(connectTwoString(address,"//config//email"), "a");
                 if(f == NULL){
-                    printf("an unkown problem!\n");
+                    printf("\033[31man unkown problem\033[0m!\n");
                     exit(-1);
                 }
             fclose(f);
             f = fopen(connectTwoString(address,"//config//emailCount"), "a");
                 if(f == NULL){
-                    printf("an unkown problem!\n");
+                    printf("\033[31man unkown problem\033[0m!\n");
                     exit(-1);
                 }
             fclose(f);
         }
         else{
-            printf("an unkown problem!\n");
+            printf("\033[31man unkown problem\033[0m!\n");
             exit(-1);
         }
     }
@@ -736,7 +736,7 @@ void GlobalAlias(char* newName, char** command){
     }
     FILE * f = fopen("d://SETTINGS//config//alias", "a");
     if(f == NULL){
-        printf("an unkown problem!\n");
+        printf("\033[31man unkown problem\033[0m!\n");
         exit(-1);
     }
     fprintf(f, "%s\n", newName);
@@ -763,7 +763,7 @@ void Alias(char* newName, char** command){
     if(dir) {
         FILE *f = fopen(connectTwoString(address,"//config//alias"), "a");
         if(f == NULL){
-            printf("an unkown problem!\n");
+            printf("\033[31man unkown problem\033[0m!\n");
             exit(-1);
         }
         fprintf(f, "%s\n", newName);
@@ -779,7 +779,7 @@ void Alias(char* newName, char** command){
         if (!mkdir(connectTwoString(address, "//config"))){
             FILE *f = fopen(connectTwoString(address,"//config//alias"), "a");
                 if(f == NULL){
-                    printf("an unkown problem!\n");
+                    printf("\033[31man unkown problem\033[0m!\n");
                     exit(-1);
                 }
             fprintf(f, "%s\n", newName);
@@ -792,7 +792,7 @@ void Alias(char* newName, char** command){
             fclose(f);
         }
         else{
-            printf("an unkown problem!\n");
+            printf("\033[31man unkown problem\033[0m!\n");
             exit(-1);
         }
     }
@@ -807,7 +807,10 @@ void init(){
         system("attrib +h .neogit");
         mkdir(".neogit\\stage");
         mkdir(".neogit\\config");
+        mkdir(".neogit\\stash");
+
         FILE* f = fopen(".neogit\\config\\undo", "w"); fclose(f);
+        f = fopen(".neogit\\stash\\list", "w"); fclose(f);
         f = fopen(".neogit\\config\\alias", "w"); fclose(f);
         f = fopen(".neogit\\config\\email", "w"); fclose(f);
         f = fopen(".neogit\\config\\hook", "w"); fclose(f);
@@ -822,7 +825,7 @@ void init(){
         mkdir(".neogit\\commits");
     }
     else{
-        printf("an unkown problem!\n");
+        printf("\033[31man unkown problem\033[0m!\n");
         exit(-1);
     }
 }
@@ -841,7 +844,7 @@ char check_type(char* name){ // 1 -> folder 0-> not found  -1->file
                 if(!system(connectTwoString("if exist \"", connectTwoString(name, "\" echo W > .____neogit_temp")))){
                     f = fopen(".____neogit_temp", "r");
                     if(f == NULL){
-                        printf("an unkown problem!\n");
+                        printf("\033[31man unkown problem\033[0m!\n");
                         exit(-1);
                     }
                     fscanf(f, "%c", &check);
@@ -857,12 +860,12 @@ char check_type(char* name){ // 1 -> folder 0-> not found  -1->file
             }
         }
         else{
-            printf("an unkown problem!\n");
+            printf("\033[31man unkown problem\033[0m!\n");
             exit(-1);   
         }
     }
     else{
-        printf("an unkown problem!\n");
+        printf("\033[31man unkown problem\033[0m!\n");
         exit(-1);   
     }
     return 0;
@@ -876,7 +879,7 @@ struct address__ Help_ADD(char* name){
         if (!mkdir(connectTwoString(address_stage, "//stage"))){
         }
         else{
-            printf("an unkown problem!\n");
+            printf("\033[31man unkown problem\033[0m!\n");
             exit(-1);
         }
     }
@@ -884,7 +887,7 @@ struct address__ Help_ADD(char* name){
     char ** address_neogit = getAddressOfHere_tokenized();
     FILE* f = fopen(".__E__neogit_temp.bat", "w");
     if(f == NULL){
-        printf("an unkown problem!\n");
+        printf("\033[31man unkown problem\033[0m!\n");
         exit(-1);
     }
     fprintf(f, "%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n", "@ECHO OFF", "call set PARENT_DIR=%%CD%%" , "set /A j = 0" , ":while", "if  not exist \".neogit/*\" (", "	set /a j += 1" , "	cd ..", "	goto :while" , ")", "cd %PARENT_DIR%", "echo %j% > .____neogit_temp");
@@ -894,7 +897,7 @@ struct address__ Help_ADD(char* name){
         remove(".__E__neogit_temp.bat");
         f = fopen(".____neogit_temp", "r");
         if(f == NULL){
-            printf("an unkown problem!\n");
+            printf("\033[31man unkown problem\033[0m!\n");
             exit(-1);
         }
         fscanf(f, "%d", &ch);
@@ -902,7 +905,7 @@ struct address__ Help_ADD(char* name){
         remove(".____neogit_temp");
     }
     else{
-        printf("an unkown problem!\n");
+        printf("\033[31man unkown problem\033[0m!\n");
         exit(-1);
     }
     int a = 0;
@@ -961,12 +964,12 @@ void addToUndo(char* name_file, char mode, char* address_undo){
         char oo[1000];
         sprintf(oo, "echo.> %s", address_undo);
         if(system(oo)){
-            printf("an unkown problem!\n");
+            printf("\033[31man unkown problem\033[0m!\n");
             exit(-1);
         }
         f = fopen(address_undo, "r");
         if(f == NULL){
-            printf("an unkown problem!\n");
+            printf("\033[31man unkown problem\033[0m!\n");
             exit(-1);
         }
     }
@@ -978,7 +981,7 @@ void addToUndo(char* name_file, char mode, char* address_undo){
     fclose(f);
     FILE* ff = fopen(address_undo, "w");
     if(ff == NULL){
-        printf("an unkown problem!\n");
+        printf("\033[31man unkown problem\033[0m!\n");
         exit(-1);
     }
     if(count == 1){
@@ -1012,12 +1015,12 @@ void Undo(){
         char oo[1000];
         sprintf(oo, "echo.> %s", address_undo);
         if(system(oo)){
-            printf("an unkown problem!\n");
+            printf("\033[31man unkown problem\033[0m!\n");
             exit(-1);
         }
         f = fopen(address_undo, "r");
         if(f == NULL){
-            printf("an unkown problem!\n");
+            printf("\033[31man unkown problem\033[0m!\n");
             exit(-1);
         }
 
@@ -1030,7 +1033,7 @@ void Undo(){
     fclose(f);
     FILE* ff = fopen(address_undo, "w");
     if(ff == NULL){
-        printf("an unkown problem!\n");
+        printf("\033[31man unkown problem\033[0m!\n");
         exit(-1);
     }
     for(int i = 0; i < count-2; i++){
@@ -1099,7 +1102,7 @@ void Undo(){
             exit(0);
         }
         else{
-            printf("an unkown problem!\n");
+            printf("\033[31man unkown problem\033[0m!\n");
             exit(-1);
         }
     }
@@ -1150,12 +1153,12 @@ void Undo(){
             exit(0);
         }
         else{
-            printf("an unkown problem!\n");
+            printf("\033[31man unkown problem\033[0m!\n");
             exit(-1);
         }
     }
     else{
-        printf("an unkown problem!\n");
+        printf("\033[31man unkown problem\033[0m!\n");
         exit(-1);
     }
 }
@@ -1173,7 +1176,7 @@ void add(char *name){
         if (!mkdir(connectTwoString(address_stage, "//stage"))){
         }
         else{
-            printf("an unkown problem!\n");
+            printf("\033[31man unkown problem\033[0m!\n");
             exit(-1);
         }
     }
@@ -1181,7 +1184,7 @@ void add(char *name){
     char ** address_neogit = getAddressOfHere_tokenized();
     FILE* f = fopen(".__E__neogit_temp.bat", "w");
     if(f == NULL){
-        printf("an unkown problem!\n");
+        printf("\033[31man unkown problem\033[0m!\n");
         exit(-1);
     }
     fprintf(f, "%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n", "@ECHO OFF", "call set PARENT_DIR=%%CD%%" , "set /A j = 0" , ":while", "if  not exist \".neogit/*\" (", "	set /a j += 1" , "	cd ..", "	goto :while" , ")", "cd %PARENT_DIR%", "echo %j% > .____neogit_temp");
@@ -1191,7 +1194,7 @@ void add(char *name){
         remove(".__E__neogit_temp.bat");
         f = fopen(".____neogit_temp", "r");
         if(f == NULL){
-            printf("an unkown problem!\n");
+            printf("\033[31man unkown problem\033[0m!\n");
             exit(-1);
         }
         fscanf(f, "%d", &ch);
@@ -1199,7 +1202,7 @@ void add(char *name){
         remove(".____neogit_temp");
     }
     else{
-        printf("an unkown problem!\n");
+        printf("\033[31man unkown problem\033[0m!\n");
         exit(-1);
     }
     int a = 0;
@@ -1241,12 +1244,12 @@ void add(char *name){
         dis = connectTwoString(dis, "\\");
     }
     if(mode == -1){
-        char* command = (char*)calloc(10000,sizeof(char));
+        char* command = (char*)calloc(1000,sizeof(char));
         sprintf(command, "if not exist \"%s\\*\" mkdir \"%s\"", dis, dis);
         if(!system(command)){
             f = fopen(".__E__neogit_temp.bat", "w");
             if(f == NULL){
-                printf("an unkown problem!\n");
+                printf("\033[31man unkown problem\033[0m!\n");
                 exit(-1);
             }
             fprintf(f, "@ECHO OFF\ncopy \"%s\" \"%s\" > NUL", name, dis);
@@ -1261,12 +1264,12 @@ void add(char *name){
             }
             else{
                 remove(".__E__neogit_temp.bat");
-                printf("an unkown problem!\n");
+                printf("\033[31man unkown problem\033[0m!\n");
                 exit(-1); 
             }
         }
         else{
-            printf("an unkown problem!\n");
+            printf("\033[31man unkown problem\033[0m!\n");
             exit(-1);
         }
     }
@@ -1279,7 +1282,7 @@ void add(char *name){
         if(!system(command)){
             f = fopen(".__E__neogit_temp.bat", "w");
             if(f == NULL){
-                printf("an unkown problem!\n");
+                printf("\033[31man unkown problem\033[0m!\n");
                 exit(-1);
             }
             fprintf(f, "@ECHO OFF\nxcopy \"%s\\*\" \"%s\\*\" /e/h/c/i/y > NUL", name, dis);
@@ -1294,12 +1297,12 @@ void add(char *name){
             }
             else{
                 remove(".__E__neogit_temp.bat");
-                printf("an unkown problem!\n");
+                printf("\033[31man unkown problem\033[0m!\n");
                 exit(-1); 
             }
         }
         else{
-            printf("an unkown problem!\n");
+            printf("\033[31man unkown problem\033[0m!\n");
             exit(-1);
         }
     }
@@ -1320,7 +1323,7 @@ void rest(char * name){
             exit(0);
         }
         else{
-            printf("an unkown problem!\n");
+            printf("\033[31man unkown problem\033[0m!\n");
             exit(-1);
         }
     }
@@ -1332,7 +1335,7 @@ void rest(char * name){
             exit(0);
         }
         else{
-            printf("an unkown problem!\n");
+            printf("\033[31man unkown problem\033[0m!\n");
             exit(-1);
         }
     }
@@ -1531,7 +1534,7 @@ int get_last_hash(char mode){ // mode c = commit - exit if we are not in a branc
             return number;
         }
     }
-    printf("an unknown problem!\n");
+    printf("\033[31man unknown problem\033[0m!\n");
     exit(-1);
     return 0;
 }
@@ -1624,7 +1627,7 @@ void commit(char* massage){
         char command[400];
         sprintf(command, "xcopy \"%s\\*\" \"%s\" /e/h/c/i/y > NUL", address_neogit, address_commit_absolut);
         if(system(command)){
-            printf("an unknown problem!\n");
+            printf("\033[31man unknown problem\033[0m!\n");
             exit(-1);
         }
         while ((entry = readdir(dir)) != NULL){
@@ -1636,14 +1639,14 @@ void commit(char* massage){
                 if(isDir == 1){
                     sprintf(command, "rmdir /s /q \"%s\"", address_free);
                     if(system(command)){
-                        printf("an unknown problem!\n");
+                        printf("\033[31man unknown problem\033[0m!\n");
                         continue;
                     }
                 }
                 else{
                     sprintf(command, "del /f /q \"%s\"", address_free);
                     if(system(command)){
-                        printf("an unknown problem!\n");
+                        printf("\033[31man unknown problem\033[0m!\n");
                         continue;
                     }
                 }
@@ -1655,7 +1658,7 @@ void commit(char* massage){
         printf("commit massage is: %s", massage);
     }
     else{
-        printf("an unkown problem!\n");
+        printf("\033[31man unkown problem\033[0m!\n");
         exit(-1);
     }
 }
@@ -1667,7 +1670,7 @@ char* extract_massage_shortcut(char* name){
     if(dir) {
         FILE *f = fopen(connectTwoString(address,"//config//shortcut"), "r");
         if(f == NULL){
-            printf("an unkown problem!\n");
+            printf("\033[31man unkown problem\033[0m!\n");
             exit(-1);
         }
         int index = 0;
@@ -1691,13 +1694,13 @@ char* extract_massage_shortcut(char* name){
         if (!mkdir(connectTwoString(address, "//config"))){
             FILE *f = fopen(connectTwoString(address,"//config//shortcut"), "a");
             if(f == NULL){
-                printf("an unkown problem!\n");
+                printf("\033[31man unkown problem\033[0m!\n");
                 exit(-1);
             }
             fclose(f);
         }
         else{
-            printf("an unkown problem!\n");
+            printf("\033[31man unkown problem\033[0m!\n");
             exit(-1);
         }
         massage[0] = 0;
@@ -1714,7 +1717,7 @@ void add_shortcut_massage(char* name, char* massage){
     if(dir) {
         FILE *f = fopen(connectTwoString(address,"//config//shortcut"), "a");
         if(f == NULL){
-            printf("an unkown problem!\n");
+            printf("\033[31man unkown problem\033[0m!\n");
             exit(-1);
         }
         fprintf(f, "%s\n%s\n", name, massage);
@@ -1724,14 +1727,14 @@ void add_shortcut_massage(char* name, char* massage){
         if (!mkdir(connectTwoString(address, "//config"))){
             FILE *f = fopen(connectTwoString(address,"//config//shortcut"), "a");
                 if(f == NULL){
-                    printf("an unkown problem!\n");
+                    printf("\033[31man unkown problem\033[0m!\n");
                     exit(-1);
                 }
             fprintf(f, "%s\n%s\n", name, massage);
             fclose(f);
         }
         else{
-            printf("an unkown problem!\n");
+            printf("\033[31man unkown problem\033[0m!\n");
             exit(-1);
         }
     }
@@ -1748,7 +1751,7 @@ void delete_shortcut_massage(char* name){
     if(dir) {
         FILE *f = fopen(connectTwoString(address,"//config//shortcut"), "r");
         if(f == NULL){
-            printf("an unkown problem!\n");
+            printf("\033[31man unkown problem\033[0m!\n");
             exit(-1);
         }
         char flag = 1;
@@ -1782,13 +1785,13 @@ void delete_shortcut_massage(char* name){
         if (!mkdir(connectTwoString(address, "//config"))){
             FILE *f = fopen(connectTwoString(address,"//config//shortcut"), "a");
             if(f == NULL){
-                printf("an unkown problem!\n");
+                printf("\033[31man unkown problem\033[0m!\n");
                 exit(-1);
             }
             fclose(f);
         }
         else{
-            printf("an unkown problem!\n");
+            printf("\033[31man unkown problem\033[0m!\n");
             exit(-1);
         }
         printf("can't find shortcut-name in list.\n");
@@ -1830,7 +1833,7 @@ void show_listOfAllBranches(){
     address = connectTwoString(address, "//config//branch//list");
     FILE* f = fopen(address, "r");
     if(f==NULL){
-        printf("an unkown problem!\n");
+        printf("\033[31man unkown problem\033[0m!\n");
         exit(-1);
     }
     char lines[100];
@@ -1853,7 +1856,7 @@ void show_listOfAllBranches(){
     address = connectTwoString(address, "//config//branch//current");
     f = fopen(address, "r");
     if(f==NULL){
-        printf("an unkown problem!\n");
+        printf("\033[31man unkown problem\033[0m!\n");
         exit(-1);
     }
     fscanf(f, "%s", lines);
@@ -2288,7 +2291,7 @@ void checkOut_byID(int ID){
     DIR* dir = opendir(address);
     struct dirent* entry;
     if(dir == NULL){
-        printf("an unknown problem\n");
+        printf("\033[31man unknown problem\033[0m\n");
         exit(0);
     }
     while ((entry = readdir(dir)) != NULL){
@@ -2298,14 +2301,14 @@ void checkOut_byID(int ID){
                 char command[300];
                 sprintf(command, "rmdir /s /q \"%s\"", connectTwoString(address, entry->d_name));
                 if(system(command)){
-                    printf("an unknown problem.!\n");
+                    printf("\033[31man unknown problem\033[0m.!\n");
                 }
             }
             if(mode == -1){
                 char command[300];
                 sprintf(command, "del /f /q \"%s\"", connectTwoString(address, entry->d_name));
                 if(system(command)){
-                    printf("an unknown problem.!\n");
+                    printf("\033[31man unknown problem\033[0m.!\n");
                 }
             }
         }
@@ -2319,7 +2322,7 @@ void checkOut_byID(int ID){
     char command[300];
     sprintf(command, "xcopy \"%s\\*\" \"%s\" /e/h/c/i/y > NUL", addressO, address);
     if(system(command)){
-        printf("an unknown problem!\n");
+        printf("\033[31man unknown problem\033[0m!\n");
     }
 }
 void checkout(char* name){
@@ -2402,14 +2405,14 @@ void checkout(char* name){
                 if(isDir == 1){
                     sprintf(command, "rmdir /s /q \"%s\"", address_free);
                     if(system(command)){
-                        printf("an unknown problem!\n");
+                        printf("\033[31man unknown problem\033[0m!\n");
                         continue;
                     }
                 }
                 else{
                     sprintf(command, "del /f /q \"%s\"", address_free);
                     if(system(command)){
-                        printf("an unknown problem!\n");
+                        printf("\033[31man unknown problem\033[0m!\n");
                         continue;
                     }
                 }
@@ -2435,8 +2438,8 @@ void checkout(char* name){
     FILE * f = fopen(address, "w");
     fprintf(f, "%s", (equalStrings(name, "HEAD")? "master": name));
     fclose(f);
-    printf("Now you are on commit %d\n", ID);
     checkOut_byID(ID);
+    printf("Now you are on commit %d\n", ID);
 }
 void get_commands_V1(char ** input, int len){
     // neogit config -global user.name
@@ -2821,6 +2824,15 @@ void get_commands_V1(char ** input, int len){
         exit(0);
     }
     if(equalStrings(input[1], "checkout") && strcmp(input[2], "") && len == 3){
+        char address[500];
+        strcpy(address, absolute_address_neogit());
+        address[strlen(address) - 8] = 0;
+        char s [500];
+        getcwd(s, 499);
+        if(strcmp(s, address)){
+            printf("\033[33mfirst cd in main folder of project.\033[0m\n");
+            exit(0);
+        }
         checkout(input[2]);
         exit(0);
     }
