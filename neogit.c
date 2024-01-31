@@ -794,6 +794,134 @@ char checkHooks_stage(char* address, int functions, char mode){ //mode 'w' = wri
     }
     return r;
 }
+char checkHooks_file(char* address, int functions, char mode){ //mode 'w' = write on screen
+    char modeF = check_type(address);
+    if(modeF == 0){printf("\033[31mNO\033[0m such a file in working directory. (%s)\n", address); exit(0);}
+    if(modeF == 1){printf("\033[31mNOT file!\033[0m this is a folder in working directory. (%s)\n", address); exit(0);}
+    struct address__  addr = Help_ADD(address);
+    address = connectTwoString(addr.adress_stage_file, addr.address_given[addr.size_address_given - 1]);
+    modeF = check_type(address);
+    if(modeF == 0){printf("\033[31mNO\033[0m such a file in stage area. (%s)\n", address); exit(0);}
+    if(modeF == 1){printf("\033[31mNOT file!\033[0m this is a folder in stage area. (%s)\n", address); exit(0);}
+    char* a = strstr(address, "\\.neogit\\stage");
+    a += 15;
+    if(mode == 'w') printf("\"%s\": \n", a);
+    if((functions & 1) == (1)){
+        char ans = HOOKTODO_check(address);
+        if(ans == 1 && mode == 'w'){
+            printf("\033[32mtodo-check...................PASSED\n\033[0m");
+        }
+        if(ans == 0 && mode =='w'){
+            printf("\033[33mtodo-check...................SKIPPED\n\033[0m");
+        }
+        if(ans == -1 && mode == 'w'){
+            printf("\033[31mtodo-check...................FAILED\n\033[0m");
+        }
+        if(ans == -1 && mode!= 'w'){
+            return 0;
+        }
+    }
+    if((functions & (1<<1)) == (1<<1)){
+        char ans = HOOKblank(address);
+        if(ans == 1 && mode == 'w'){
+            printf("\033[32meof-blank-space...................PASSED\n\033[0m");
+        }
+        if(ans == 0 && mode =='w'){
+            printf("\033[33meof-blank-space...................SKIPPED\n\033[0m");
+        }
+        if(ans == -1 && mode == 'w'){
+            printf("\033[31meof-blank-space...................FAILED\n\033[0m");
+        }
+        
+        if(ans == -1 && mode!= 'w'){
+            return 0;
+        }
+    }
+    if((functions & (1<<2)) == (1<<2)){
+        char ans = HOOKformat_check(address);
+        if(ans == 1 && mode == 'w'){
+            printf("\033[32mformat-check...................PASSED\n\033[0m");
+        }
+        if(ans == 0 && mode =='w'){
+            printf("\033[33mformat-check...................SKIPPED\n\033[0m");
+        }
+        if(ans == -1 && mode == 'w'){
+            printf("\033[31mformat-check...................FAILED\n\033[0m");
+        }
+        
+        if(ans == -1 && mode!= 'w'){
+            return 0;
+        }
+    }
+    if((functions & (1<<3)) == (1<<3)){
+        char ans = HOOKbracets_check(address);
+        if(ans == 1 && mode == 'w'){
+            printf("\033[32mbalance-bracets...................PASSED\n\033[0m");
+        }
+        if(ans == 0 && mode =='w'){
+            printf("\033[33mbalance-bracets...................SKIPPED\n\033[0m");
+        }
+        if(ans == -1 && mode == 'w'){
+            printf("\033[31mbalance-bracets...................FAILED\n\033[0m");
+        }
+        
+        if(ans == -1 && mode!= 'w'){
+            return 0;
+        }
+    }
+    if((functions & (1<<4)) == (1<<4)){
+        char ans = HOOKcheck_errors(address);
+        if(ans == 1 && mode == 'w'){
+            printf("\033[32mstatic-error-check...................PASSED\n\033[0m");
+        }
+        if(ans == 0 && mode =='w'){
+            printf("\033[33mstatic-error-check...................SKIPPED\n\033[0m");
+        }
+        if(ans == -1 && mode == 'w'){
+            printf("\033[31mstatic-error-check...................FAILED\n\033[0m");
+        }
+        
+        if(ans == -1 && mode!= 'w'){
+            return 0;
+        }
+    }
+    if((functions & (1<<5)) == (1<<5)){
+        char ans = HOOKgetSizeMB(address);
+        if(ans == 1 && mode == 'w'){
+            printf("\033[32mfile-size-check...................PASSED\n\033[0m");
+        }
+        if(ans == 0 && mode =='w'){
+            printf("\033[33mfile-size-check...................SKIPPED\n\033[0m");
+        }
+        if(ans == -1 && mode == 'w'){
+            printf("\033[31mfile-size-check...................FAILED\n\033[0m");
+        }
+        if(ans == -1 && mode!= 'w'){
+            return 0;
+        }
+    }
+    if((functions & (1<<6)) == (1<<6)){
+        char ans = HOOKcount_char(address);
+        if(ans == 1 && mode == 'w'){
+            printf("\033[32mcharacter-limit...................PASSED\n\033[0m");
+        }
+        if(ans == 0 && mode =='w'){
+            printf("\033[33mcharacter-limit...................SKIPPED\n\033[0m");
+        }
+        if(ans == -1 && mode == 'w'){
+            printf("\033[31mcharacter-limit...................FAILED\n\033[0m");
+        }
+        if(ans == -1 && mode!= 'w'){
+            return 0;
+        }
+    }
+    return 1;
+}
+
+
+
+
+
 //End of hook
 
 void get_commands_V2(char**  input, int len){
@@ -1193,6 +1321,19 @@ void get_commands_V2(char**  input, int len){
         if(!number){printf("hook list is \033[35mEMPTY\033[0m!\n"); exit(0);}
         checkHooks_stage("", number, 'w');
     }
+    if(equalStrings(input[1], "pre-commit") && equalStrings(input[2], "-f") && strcmp(input[3], "") && len == 4){
+        int number = extract_hook_status();
+        checkHooks_file(input[3], number, 'w');
+    }
+    if(equalStrings(input[1], "pre-commit") && equalStrings(input[2], "-f") && strcmp(input[3], "") && len > 4){
+        for(int i = 3; i < len; i++){
+            char temp[300];
+            sprintf(temp, "neogit pre-commit -f \"%s\"", input[i]);
+            system(temp);
+        }
+    }
+    //end of hook
+
 }   
 
 int main(int argc, char* argv[]){
