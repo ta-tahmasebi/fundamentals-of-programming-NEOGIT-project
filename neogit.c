@@ -1723,6 +1723,12 @@ void get_commands_V2(char**  input, int len){
             printf("unable to open %s directory\n", address);
             exit(-1);
         }
+
+        char address_st[200];
+        sprintf(address_st, ".neogit\\stash\\%d", id);
+        sprintf(command, "mkdir \"%s\"", address_st);
+        system(command);
+
         while ((entry = readdir(dir)) != NULL){
             push_stash(entry->d_name, id);
         }
@@ -1795,6 +1801,12 @@ void get_commands_V2(char**  input, int len){
             printf("unable to open %s directory\n", address);
             exit(-1);
         }
+
+        char address_st[200];
+        sprintf(address_st, ".neogit\\stash\\%d", id);
+        sprintf(command, "mkdir \"%s\"", address_st);
+        system(command);
+
         while ((entry = readdir(dir)) != NULL){
             push_stash(entry->d_name, id);
         }
