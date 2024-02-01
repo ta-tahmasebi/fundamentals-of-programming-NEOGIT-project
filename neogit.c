@@ -1162,10 +1162,81 @@ void Help_checkAllFiles_compare_stash_commits(char* address1, char* address2, in
         Help_checkAllFiles_compare_stash_commits(directiries[i], name, id1, id2, id3);
     }
 }
+void Help_checkAllFiles_compare_stash_commits2(char* address1, char* address2, int id1, int id2, int id3){
+    if(address1[0] == 0){
+        address1 = absolute_address_neogit();
+        address1 = connectTwoString(address1, "\\stash\\");
+        char temp[10];
+        sprintf(temp, "%d", id1);
+        address1 = connectTwoString(address1, temp);
+        address2 = absolute_address_neogit();
+        address2 = connectTwoString(address2, "\\commits\\");
+        sprintf(temp, "%d", id2);
+        address2 = connectTwoString(address2, temp);
+        if(!check_type(address1) || !check_type(address2)){
+            printf("\033[31minvalid ID\033[0m!\n");
+            exit(0);
+        }
+    }
 
-
+    char directiries[100][400];
+    int numberdir = 0;
+    char* address_free1;
+    char* address_free2;
+    DIR* dir;
+    dir = opendir(address2);
+    struct dirent* entry;
+    if(dir == NULL){
+        printf("\033[31munable to open %s directory\033[0m\n", address2);
+        exit(-1);
+    }
+    while ((entry = readdir(dir)) != NULL){
+        if(strcmp(entry->d_name, ".") && strcmp(entry->d_name, "..")){
+            address_free1 = connectTwoString(address1, "");
+            address_free2 = connectTwoString(address2, "");
+            char isDir1, isDir2;
+            address_free1 = connectTwoString(address_free1, connectTwoString("\\", entry->d_name));
+            address_free2 = connectTwoString(address_free2, connectTwoString("\\", entry->d_name));
+            isDir1 = check_type(address_free1);
+            isDir2 = check_type(address_free2);
+            if(isDir2 == 1){
+                if(isDir1 != 1){
+                    char* a = strstr(address_free2, "\\.neogit\\commits\\");
+                    a = a + 24;
+                    printf("\033[94m%s\\\033[0m is in commit \033[94m%d\033[0m but it is \033[31mnot\033[0m in stash \033[94m%d\033[0m\n", a, id2,id3);
+                    continue;
+                }
+                strcpy(directiries[numberdir], address_free2);
+                numberdir++;
+            }
+            else{
+                char* a = strstr(address_free2, "\\.neogit\\commits");
+                a = a + 24;
+                if(isDir1 != -1){
+                    printf("\033[94m%s\033[0m is in commit \033[94m%d\033[0m but it is \033[31mnot\033[0m in stash \033[94m%d\033[0m\n", a,id2 ,id3);
+                    continue;
+                }
+            }
+        }
+    }
+    closedir(dir);
+    for(int i = 0; i < numberdir; i++){
+        if(!strcmp(directiries[i], ".neogit")) continue;
+        char* name = connectTwoString(directiries[i], "");
+        char* temp = strstr(name, ".neogit\\commits\\");
+        temp = temp + 8;
+        sprintf(temp, "stash\\%d", id1);
+        temp[strlen(temp) + 1] = '\0';
+        temp[strlen(temp)] = '\\';
+        temp = strstr(directiries[i], ".neogit\\commits\\");
+        temp = temp + 23;
+        name = connectTwoString(name, temp);
+        Help_checkAllFiles_compare_stash_commits2(name, directiries[i], id1, id2, id3);
+    }
+}
 void compare_stash_commit(int stash, int commit, int index){
     Help_checkAllFiles_compare_stash_commits("", "", stash, commit, index);
+    Help_checkAllFiles_compare_stash_commits2("", "", stash, commit, index);
 }
 //end ofstash
 

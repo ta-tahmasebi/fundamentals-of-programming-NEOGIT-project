@@ -137,7 +137,6 @@ char strmatchWildcard(char str[], char pattern[], int n, int m) {
     }
     return lookup[n][m];
 }
-
 int getLevelofAddress(char* address){
     int i = 0;
     for(int k = 0; address[k] != 0; k++){
