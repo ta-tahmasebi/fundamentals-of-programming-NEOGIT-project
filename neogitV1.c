@@ -364,6 +364,29 @@ void print_time(unsigned long long number){
     number -= number / 60 * 60;
     printf("%02llu", number);
 }
+void fprint_time(FILE* f, unsigned long long number){
+    fprintf(f, "%04llu", number / 4000000000llu);
+    number -= number / 4000000000llu * 4000000000llu;
+    fprintf(f, "/%02llu", number / 4000000llu);
+    number -= number / 4000000llu * 4000000llu;
+    fprintf(f, "/%02llu-", number / (60*60*24));
+    number -= number / (60*60*24) * (60*60*24);
+    fprintf(f, "%02llu:", number / (60*60));
+    number -= number / (60*60) * 60 * 60;
+    fprintf(f, "%02llu:", number / (60));
+    number -= number / 60 * 60;
+    fprintf(f, "%02llu", number);
+}
+char* dayOfNow(){
+    char* buffer = calloc(32, sizeof(char));
+    struct tm *ts;
+    size_t last;
+    time_t timestamp = time(NULL);
+    ts   = localtime(&timestamp);
+    last = strftime(buffer, 32, "%A", ts);
+    buffer[last] = '\0';
+    return buffer;
+}
 //end of log
 
 //main functions
@@ -811,6 +834,7 @@ void init(){
         FILE* f = fopen(".neogit\\config\\undo", "w"); fclose(f);
         f = fopen(".neogit\\stash\\list", "w"); fclose(f);
         f = fopen(".neogit\\config\\alias", "w"); fclose(f);
+        f = fopen(".neogit\\config\\tag", "w"); fclose(f);
         f = fopen(".neogit\\config\\email", "w"); fclose(f);
         f = fopen(".neogit\\config\\hook", "w"); fclose(f);
         f = fopen(".neogit\\config\\emailCount", "w"); fclose(f);

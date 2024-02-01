@@ -1239,7 +1239,60 @@ void compare_stash_commit(int stash, int commit, int index){
     Help_checkAllFiles_compare_stash_commits2("", "", stash, commit, index);
 }
 //end ofstash
-
+//tag
+void append_new_tag(char* name, int commit_id, char* userName, char* userEmail, unsigned long long date, char* day, char*massage){
+    char* address = absolute_address_neogit();
+    address = connectTwoString(address, "\\config\\tag");
+    FILE* f = fopen(address, "a");
+    fprintf(f, "tag %s\ncommit %d\nAuthor: %s <%s>\nDate: <%s> ", name, commit_id,userName, userEmail , day);
+    fprint_time(f, date);
+    fprintf(f, "\nMassage: \"%s\"\n", massage);
+}
+int is_Exist_tag(char* name){ // -1 -> not found    != -1 -> line number
+    char* address = absolute_address_neogit();
+    address = connectTwoString(address, "\\config\\tag");
+    FILE* f = fopen(address, "r");
+    char line[100];
+    int a = 0;
+    while(fgets(line, 99, f) != NULL){
+        while(line[strlen(line) - 1] == '\n' || line[strlen(line) - 1] == '\r' || line[strlen(line) - 1] == ' ')
+            line[strlen(line) - 1] = 0;
+        if(line[0] == 0) continue;
+        char nameI[200];
+        nameI[0] = 0;
+        sscanf(line, "tag %[^\n]s", nameI);
+        if(equalStrings(name, nameI)) return a;
+        a++;
+    }
+    return -1;
+}
+void delete_tag(char* name){
+    char* address = absolute_address_neogit();
+    address = connectTwoString(address, "\\config\\tag");
+    FILE* f = fopen(address, "r");
+    char line[2000][100];
+    int a = 0;
+    while(fgets(line[a], 99, f) != NULL){
+        while(line[a][strlen(line[a]) - 1] == '\n' || line[a][strlen(line[a]) - 1] == '\r' || line[a][strlen(line[a]) - 1] == ' ')
+            line[a][strlen(line[a]) - 1] = 0;
+        if(line[a][0] == 0) continue;
+        char nameI[200];
+        nameI[0] = 0;
+        sscanf(line[a], "tag %[^\n]s", nameI);
+        if(equalStrings(name, nameI)){
+            fgets(line[a], 99, f);fgets(line[a], 99, f);fgets(line[a], 99, f);fgets(line[a], 99, f);
+            a--;
+        }
+        a++;
+    }
+    fclose(f);
+    f = fopen(address, "w");
+    for(int i = 0; i < a; i++){
+        fprintf(f, "%s\n", line[i]);
+    }
+    fclose(f);
+}
+//end of tag
 void get_commands_V2(char**  input, int len){
     //temps
     if(equalStrings(input[1], "print_double_write_L__")){
@@ -1848,6 +1901,130 @@ void get_commands_V2(char**  input, int len){
         fscanf(f, "%d", &commit);
         compare_stash_commit(id, commit, atoi(input[3]));
     }
+    //tag
+    if(equalStrings(input[1], "tag") && equalStrings(input[2], "-a") && strcmp(input[3], "")){
+        char* massage = (char*)calloc(200, sizeof(char));
+        strcpy(massage, "NULL");
+        for(int i = 0; i < len; i++){
+            if(equalStrings(input[i], "-m")){
+                strcpy(massage, input[i+1]);
+                break;
+            }
+        }
+        int id = get_last_hash('a');
+        for(int i = 0; i < len; i++){
+            if(equalStrings(input[i], "-c")){
+                id = atoi(input[i+1]);
+                break;
+            }
+        }
+        char f = 0;
+        for(int i = 0; i < len; i++){
+            if(equalStrings(input[i], "-f")){
+                f = 1;
+                break;
+            }
+        }
+
+        if(is_Exist_tag(input[3]) != -1 && f == 0){
+            printf("\033[35mtag name is existed!\033[0m\n");
+            exit(0);
+        }
+        if(is_Exist_tag(input[3]) != -1 && f){
+            delete_tag(input[3]);
+        }
+        if(id == 0){
+            printf("\033[35mNo commit yet\033[0m\n");
+            exit(0);
+        }
+        char* address1 = absolute_address_neogit();
+        address1 = connectTwoString(address1, "\\commits\\");
+        char temp[10];
+        sprintf(temp, "%d", id);
+        address1 = connectTwoString(address1, temp);
+        if(!check_type(address1)){
+            printf("\033[31minvalid\033[0m commit ID!\n");
+            exit(0);
+        }
+        char** t = current_dateTime();
+        unsigned long long total = atoi(t[5]) + 60*atoi(t[4]) + 60*60*atoi(t[3]) + 60*60*24*atoi(t[2]) + 4000000llu * atoi(t[1]) + 4000000000llu * atoi(t[0]);
+        append_new_tag(input[3], id, current_name(), current_email(), total, dayOfNow(), massage);
+        printf("a new tag \033[32mcreated\033[0m.\n");
+    }
+    if(equalStrings(input[1], "tag") && len == 2){
+        char* address = absolute_address_neogit();
+        char** names = calloc(200, sizeof(char));
+        int index = 0;
+        address = connectTwoString(address, "\\config\\tag");
+        FILE* f = fopen(address, "r");
+        char line[100];
+        while(fgets(line, 99, f) != NULL){
+            while(line[strlen(line) - 1] == '\n' || line[strlen(line) - 1] == '\r' || line[strlen(line) - 1] == ' ')
+                line[strlen(line) - 1] = 0;
+            if(line[0] == 0) continue;
+            char nameI[200];
+            nameI[0] = 0;
+            sscanf(line, "tag %[^\n]s", nameI);
+            if(!equalStrings("", nameI)){
+                names[index] = calloc(200, sizeof(char));
+                strcpy(names[index], nameI);
+                index++;
+            }
+        }
+        fclose(f);
+        for(int i = 0; names[i] != NULL; i++){
+            for (int j = i+1; names[j] != NULL; j++){
+                if(strcmp(names[i], names[j]) == 1){
+                    char* temp = names[i];
+                    names[i] = names[j];
+                    names[j] = temp;
+                }
+            }
+        }
+        int flag = 1;
+        for(int i = 0; names[i] != NULL; i++){
+            flag = 0;
+            printf("\033[36m{\033[0m%s\033[36m}\033[0m\n", names[i]);
+        }
+        if(flag){
+            printf("\033[35mNo tag found\033[0m!\n");
+        }
+    }
+    if(equalStrings(input[1], "tag") && equalStrings(input[2], "show") && strcmp(input[3], "") && len == 4){
+        int lineN;
+        if((lineN = is_Exist_tag(input[3])) == -1){
+            printf("tag \033[31mnot found\033[0m!\n"); exit(0);
+        }
+        printf("\033[34m#############\033[0m\n");
+        char* address = absolute_address_neogit();
+        address = connectTwoString(address, "\\config\\tag");
+        FILE* f = fopen(address, "r");
+        char line[100];
+        int a = 0;
+        while(fgets(line, 99, f) != NULL){
+            while(line[strlen(line) - 1] == '\n' || line[strlen(line) - 1] == '\r' || line[strlen(line) - 1] == ' ')
+                line[strlen(line) - 1] = 0;
+            if(line[0] == 0) continue;
+            char nameI[200];
+            nameI[0] = 0;
+            sscanf(line, "tag %[^\n]s", nameI);
+            if(a == lineN){
+                printf("%s\n", line);
+                fgets(line, 99, f);
+                printf("%s", line);
+                fgets(line, 99, f);
+                printf("%s", line);
+                fgets(line, 99, f);
+                printf("%s", line);
+                fgets(line, 99, f);
+                printf("%s", line);
+                break;
+            }
+            a++;
+        }
+        printf("\033[34m#############\033[0m\n");
+    }
+    //end of tags
 }   
 
 int main(int argc, char* argv[]){
