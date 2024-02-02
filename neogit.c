@@ -116,6 +116,8 @@ char compare_two_tokenized_string(char** line1, char** line2, int* number1, int*
     }
     return 0;
 }
+
+
 void print_double_write_L(){
     _setmode(_fileno(stdout), _O_U16TEXT);
     wprintf(L"%s\n", L"«««««");
@@ -1293,6 +1295,397 @@ void delete_tag(char* name){
     fclose(f);
 }
 //end of tag
+//merge
+void check_no_conflict_two_branch(char* address1, char* address2, int id1, int id2){
+    if(address1[0] == 0){
+        address1 = absolute_address_neogit();
+        address1 = connectTwoString(address1, "\\commits\\");
+        char temp[10];
+        sprintf(temp, "%d", id1);
+        address1 = connectTwoString(address1, temp);
+        address2 = absolute_address_neogit();
+        address2 = connectTwoString(address2, "\\commits\\");
+        sprintf(temp, "%d", id2);
+        address2 = connectTwoString(address2, temp);
+        //printf("%s %s\n", address1,address2);
+        if(!check_type(address1) || !check_type(address2)){
+            printf("\033[31minvalid ID\033[0m!\n");
+            exit(0);
+        }
+    }
+    char directiries[100][400];
+    int numberdir = 0;
+    char* address_free1;
+    char* address_free2;
+    DIR* dir;
+    dir = opendir(address1);
+    struct dirent* entry;
+    if(dir == NULL){
+        printf("\033[31munable to open %s directory\033[0m\n", address1);
+        exit(-1);
+    }
+    while ((entry = readdir(dir)) != NULL){
+        if(strcmp(entry->d_name, ".") && strcmp(entry->d_name, "..")){
+            address_free1 = connectTwoString(address1, "");
+            address_free2 = connectTwoString(address2, "");
+            char isDir1, isDir2;
+            address_free1 = connectTwoString(address_free1, connectTwoString("\\", entry->d_name));
+            address_free2 = connectTwoString(address_free2, connectTwoString("\\", entry->d_name));
+            isDir1 = check_type(address_free1);
+            isDir2 = check_type(address_free2);
+            if(isDir1 == 1){
+                if(isDir2 != 1){
+                    char* address_merge = connectTwoString(address_free1, "");
+                    char* temp = strstr(address_merge, "\\.neogit\\commits");
+                    temp += 9;
+                    *temp = 0;
+                    address_merge = connectTwoString(address_merge, "merge\\");
+                    temp = strstr(address_free1, "\\.neogit\\commits");
+                    temp += 24;
+                    address_merge = connectTwoString(address_merge, temp);
+                    char command[200];
+                    sprintf(command, "mkdir \"%s\"", address_merge);
+                    system(command);
+                    sprintf(command, "xcopy \"%s\\*\" \"%s\\*\" /e/h/c/i/y > NUL",  address_free1, address_merge);
+                    if(system(command)) {printf("\033[31man unknown problem\033[0m!\n");}
+                    continue;
+                }
+                char* address_merge = connectTwoString(address_free1, "");
+                char* temp = strstr(address_merge, "\\.neogit\\commits");
+                temp += 9;
+                *temp = 0;
+                address_merge = connectTwoString(address_merge, "merge\\");
+                temp = strstr(address_free1, "\\.neogit\\commits");
+                temp += 24;
+                address_merge = connectTwoString(address_merge, temp);
+                char command[200];
+                sprintf(command, "mkdir \"%s\"", address_merge);
+                system(command);
+                strcpy(directiries[numberdir], address_free1);
+                numberdir++;
+            }
+            else{
+                char* a = strstr(address_free1, "\\.neogit\\commits\\");
+                a = a + 23;
+                if(isDir2 != -1){
+                    char* address_merge = connectTwoString(address_free1, "");
+                    char* temp = strstr(address_merge, "\\.neogit\\commits");
+                    temp += 9;
+                    *temp = 0;
+                    address_merge = connectTwoString(address_merge, "merge\\");
+                    temp = strstr(address_free1, "\\.neogit\\commits");
+                    temp += 24;
+                    address_merge = connectTwoString(address_merge, temp);
+                    char command[200];
+                    sprintf(command, "copy \"%s\" \"%s\" > NUL",  address_free1, address_merge);
+                    if(system(command)) {printf("\033[31man unknown problem\033[0m!\n");}
+                    continue;
+                }
+                if(!TwoFileAreSame(address_free1, address_free2)){
+                    printf("you have \033[31mconflict\033[0m in %s!\n", a);
+                    char temp[200];
+                    sprintf(temp, "neogit diff_conflict_neogit -f \"%s\" \"%s\"", address_free1, address_free2);
+                    system(temp);
+                    exit(0);
+                }
+                else{
+                    char* address_merge = connectTwoString(address_free1, "");
+                    char* temp = strstr(address_merge, "\\.neogit\\commits");
+                    temp += 9;
+                    *temp = 0;
+                    address_merge = connectTwoString(address_merge, "merge\\");
+                    temp = strstr(address_free1, "\\.neogit\\commits");
+                    temp += 24;
+                    address_merge = connectTwoString(address_merge, temp);
+                    char command[200];
+                    sprintf(command, "copy \"%s\" \"%s\" > NUL",  address_free1, address_merge);
+                    if(system(command)) {printf("\033[31man unknown problem\033[0m!\n");}
+                    continue;
+                }
+            }
+        }
+    }
+    closedir(dir);
+    for(int i = 0; i < numberdir; i++){
+        if(!strcmp(directiries[i], ".neogit")) continue;
+        char* name = connectTwoString(directiries[i], "");
+        char* temp = strstr(name, ".neogit\\commits\\");
+        temp = temp + 16;
+        sprintf(temp, "%d", id2);
+        temp[strlen(temp)] = '\\';
+        check_no_conflict_two_branch(directiries[i], name, id1, id2);
+    }
+}
+void check_no_conflict_two_branch2(char* address1, char* address2, int id1, int id2){
+    if(address1[0] == 0){
+        address1 = absolute_address_neogit();
+        address1 = connectTwoString(address1, "\\commits\\");
+        char temp[10];
+        sprintf(temp, "%d", id1);
+        address1 = connectTwoString(address1, temp);
+        address2 = absolute_address_neogit();
+        address2 = connectTwoString(address2, "\\commits\\");
+        sprintf(temp, "%d", id2);
+        address2 = connectTwoString(address2, temp);
+        //printf("%s %s\n", address1,address2);
+        if(!check_type(address1) || !check_type(address2)){
+            printf("\033[31minvalid ID\033[0m!\n");
+            exit(0);
+        }
+    }
+    char directiries[100][400];
+    int numberdir = 0;
+    char* address_free1;
+    char* address_free2;
+    DIR* dir;
+    dir = opendir(address1);
+    struct dirent* entry;
+    if(dir == NULL){
+        printf("\033[31munable to open %s directory\033[0m\n", address1);
+        exit(-1);
+    }
+    while ((entry = readdir(dir)) != NULL){
+        if(strcmp(entry->d_name, ".") && strcmp(entry->d_name, "..")){
+            address_free1 = connectTwoString(address1, "");
+            address_free2 = connectTwoString(address2, "");
+            char isDir1, isDir2;
+            address_free1 = connectTwoString(address_free1, connectTwoString("\\", entry->d_name));
+            address_free2 = connectTwoString(address_free2, connectTwoString("\\", entry->d_name));
+            isDir1 = check_type(address_free1);
+            isDir2 = check_type(address_free2);
+            if(isDir1 == 1){
+                if(isDir2 != 1){
+                    char* address_merge = connectTwoString(address_free1, "");
+                    char* temp = strstr(address_merge, "\\.neogit\\commits");
+                    temp += 9;
+                    *temp = 0;
+                    address_merge = connectTwoString(address_merge, "merge\\");
+                    temp = strstr(address_free1, "\\.neogit\\commits");
+                    temp += 24;
+                    address_merge = connectTwoString(address_merge, temp);
+                    char command[200];
+                    sprintf(command, "mkdir \"%s\"", address_merge);
+                    system(command);
+                    sprintf(command, "xcopy \"%s\\*\" \"%s\\*\" /e/h/c/i/y > NUL",  address_free1, address_merge);
+                    if(system(command)) {printf("\033[31man unknown problem\033[0m!\n");}
+                    continue;
+                }
+                strcpy(directiries[numberdir], address_free1);
+                numberdir++;
+            }
+            else{
+                char* a = strstr(address_free1, "\\.neogit\\commits\\");
+                a = a + 23;
+                if(isDir2 != -1){
+                    char* address_merge = connectTwoString(address_free1, "");
+                    char* temp = strstr(address_merge, "\\.neogit\\commits");
+                    temp += 9;
+                    *temp = 0;
+                    address_merge = connectTwoString(address_merge, "merge\\");
+                    temp = strstr(address_free1, "\\.neogit\\commits");
+                    temp += 24;
+                    address_merge = connectTwoString(address_merge, temp);
+                    char command[200];
+                    sprintf(command, "copy \"%s\" \"%s\" > NUL",  address_free1, address_merge);
+                    if(system(command)) {printf("\033[31man unknown problem\033[0m!\n");}
+                    continue;
+                }
+            }
+        }
+    }
+    closedir(dir);
+    for(int i = 0; i < numberdir; i++){
+        if(!strcmp(directiries[i], ".neogit")) continue;
+        char* name = connectTwoString(directiries[i], "");
+        char* temp = strstr(name, ".neogit\\commits\\");
+        temp = temp + 16;
+        sprintf(temp, "%d", id2);
+        temp[strlen(temp)] = '\\';
+        check_no_conflict_two_branch2(directiries[i], name, id1, id2);
+    }
+}
+int* Help_current_countOfMergeFiles(char* address){
+    if(address[0] == 0){
+        address = absolute_address_neogit();
+        address = connectTwoString(address, "\\merge");
+    }
+    char directiries[100][400];
+    int numberdir = 0;
+    int numberfile = 0;
+    char* address_free;
+    DIR* dir;
+    dir = opendir(address);
+    struct dirent* entry;
+    if(dir == NULL){
+        printf("unable to open %s directory\n", address);
+        exit(-1);
+    }
+    while ((entry = readdir(dir)) != NULL){
+        if(strcmp(entry->d_name, ".") && strcmp(entry->d_name, "..")){
+            address_free = connectTwoString(address, "");
+            char isDir;
+            address_free = connectTwoString(address_free, connectTwoString("\\", entry->d_name));
+            isDir = check_type(address_free);
+            if(isDir == 1){
+                strcpy(directiries[numberdir], address_free);
+                numberdir++;
+            }
+            else{
+                numberfile++;
+            }
+        }
+    }
+    closedir(dir);
+    int* count = (int*)calloc(2, sizeof(int));
+    count[1] += numberfile;
+    for(int i = 0; i < numberdir; i++){
+        if(!strcmp(directiries[i], ".neogit")) continue;
+        count[0] += 1;
+        int* temp = Help_current_countOfStageFiles(directiries[i]);
+        count[0] += temp[0];
+        count[1] += temp[1];
+    }
+    return count;
+}
+struct count_directory_file current_countOfMergeFiles(){
+    int* a = Help_current_countOfMergeFiles("");
+    struct count_directory_file b;
+    b.file = a[1];
+    b.directory = a[0];
+    return b;
+}
+void delete_branch_from_list(char* name){
+    char* address = gitFolder();
+    address = connectTwoString(address, "//config//branch//list");
+    FILE* f = fopen(address, "r");
+    char line[1000][100];
+    int i = 0;
+    while(fgets(line[i], 99, f) != NULL){
+        if(line[i][strlen(line[i]) - 1] == '\n' || line[i][strlen(line[i]) - 1] == '\r')
+            line[i][strlen(line[i]) - 1] = 0;
+        if(line[i][strlen(line[i]) - 1] == '\n' || line[i][strlen(line[i]) - 1] == '\r')
+            line[i][strlen(line[i]) - 1] = 0;
+        if(!strcmp(line[i], name)){
+            char temp[100];
+            fgets(temp, 99, f);
+            i--;
+        }
+        i++;
+    }
+    fclose(f);
+    f = fopen(address, "w");
+    for(int j = 0; j < i; j++){
+        fprintf(f, "%s\n", line[j]);
+    }
+    fclose(f);
+}
+void append_merge_list(char* name,int scr ,int dis){
+    char* address = gitFolder();
+    address = connectTwoString(address, "//config//merge");
+    FILE* f = fopen(address, "a");
+    fprintf(f, "%s\n%d %d\n", name, scr, dis);
+
+}
+
+void commit_merge_list(char* branch, int last_id, char* branch1, char*branch2, int id2){
+    char* name = current_name();
+    char* email = current_email();
+    int id = current_id();
+    char** date = current_dateTime();
+    struct count_directory_file count = current_countOfMergeFiles();
+    if(count.directory == 0 && count.file == 0){
+        printf("There is \033[31mnothing\033[0m in mearge area.\n");
+        exit(0);
+    }
+    char* maasage = calloc(200, 1);
+    change_last_commit_id(branch, id);
+    char* address = gitFolder();
+    char temp[100];
+    sprintf(temp, "%d", id);
+    char* address_commit = connectTwoString(address, connectTwoString("//commits//", temp));
+    sprintf(temp, "%d_info", id);
+    char* address_commit_info = connectTwoString(address, connectTwoString("//commits//", temp));
+    if(!mkdir(address_commit) && !mkdir(address_commit_info)){
+        FILE* f = fopen(connectTwoString(address_commit_info, "//name"), "w");
+        fprintf(f, "%s", name);
+        fclose(f);
+        f = fopen(connectTwoString(address_commit_info, "//email"), "w");
+        fprintf(f, "%s", email);
+        fclose(f);
+        f = fopen(connectTwoString(address_commit_info, "//count"), "w");
+        fprintf(f, "%d %d", count.directory, count.file);
+        fclose(f);
+        f = fopen(connectTwoString(address_commit_info, "//branch"), "w");
+        fprintf(f, "%s", branch);
+        fclose(f);
+        f = fopen(connectTwoString(address_commit_info, "//parent"), "w");
+        fprintf(f, "%d", last_id);
+        fclose(f);
+        f = fopen(connectTwoString(address_commit_info, "//date"), "w");
+        fprintf(f, "%s %s %s %s %s %s", date[0], date[1], date[2], date[3], date[4], date[5]);
+        fclose(f);
+        f = fopen(connectTwoString(address_commit_info, "//massage"), "w");
+        sprintf(maasage, "merge branch %s and %s", branch1, branch2);
+        fprintf(f, "%s", maasage);
+        fclose(f);
+        char* address_neogit = absolute_address_neogit();
+        address_neogit = connectTwoString(address_neogit, "\\merge");
+        ///////////////////// commiting
+        DIR* dir;
+        dir = opendir(address_neogit);
+        struct dirent* entry;
+        if(dir == NULL){
+            printf("\033[31munable to open %s directory\033[0m\n", address_neogit);
+            exit(-1);
+        }
+        char* address_free;
+        sprintf(temp, "%d", id);
+        char* address_commit_absolut = connectTwoString(absolute_address_neogit(), connectTwoString("\\commits\\", temp));
+        char command[400];
+        sprintf(command, "xcopy \"%s\\*\" \"%s\" /e/h/c/i/y > NUL", address_neogit, address_commit_absolut);
+        if(system(command)){
+            printf("\033[31man unknown problem\033[0m!\n");
+            exit(-1);
+        }
+        while ((entry = readdir(dir)) != NULL){
+            if(strcmp(entry->d_name, ".") && strcmp(entry->d_name, "..")){
+                address_free = connectTwoString(address_neogit, "");
+                char isDir;
+                address_free = connectTwoString(address_free, connectTwoString("\\", entry->d_name));
+                isDir = check_type(address_free);
+                if(isDir == 1){
+                    sprintf(command, "rmdir /s /q \"%s\"", address_free);
+                    if(system(command)){
+                        printf("\033[31man unknown problem\033[0m!\n");
+                        continue;
+                    }
+                }
+                else{
+                    sprintf(command, "del /f /q \"%s\"", address_free);
+                    if(system(command)){
+                        printf("\033[31man unknown problem\033[0m!\n");
+                        continue;
+                    }
+                }
+            }
+        }
+        closedir(dir);
+        /////////////////////
+        append_merge_list(branch2,id2 ,id);
+        delete_branch_from_list(branch2);
+        printf("\033[93m%d\033[0m \033[35mdirectory(s)\033[0m and \033[93m%d\033[0m \033[35mfile(s)\033[0m \033[32mcommited\033[0m by ID \033[93m%d\033[0m  at \033[94m%s/%s/%s-%s:%s:%s\033[0m on branch \033[93m%s\033[0m\n", count.directory, count.file, id, date[0],date[1],date[2],date[3],date[4],date[5], branch);
+        printf("\033[90mcommit massage is\033[0m: \033[96m%s\033[0m\n", maasage);
+    }
+    else{
+        printf("\033[31man unkown problem\033[0m!\n");
+        exit(-1);
+    }
+}
+void merge(int id1, int id2, char*branch1, char*branch2){
+    check_no_conflict_two_branch("", "", id1, id2);
+    check_no_conflict_two_branch2("", "", id2, id1);
+    commit_merge_list(branch1, id1, branch1, branch2, id2);
+}
 void get_commands_V2(char**  input, int len){
     //temps
     if(equalStrings(input[1], "print_double_write_L__")){
@@ -1381,6 +1774,78 @@ void get_commands_V2(char**  input, int len){
         if(flag){
             printf("this files are the \033[32msame\033[0m.\n");
         }
+    }
+    if(equalStrings(input[1], "diff_conflict_neogit") && equalStrings(input[2], "-f") && strcmp(input[3], "") && strcmp(input[4], "") && len == 5){
+        FILE* f1 = fopen(input[3], "r");
+        FILE* f2 = fopen(input[4], "r");
+        if(f1 == NULL || f2 == NULL){
+            printf("Invalid address!\n");
+            exit(0);
+        }
+        char *** lines1 = (char***)calloc(1000, sizeof(char**));
+        int index1 = 0;
+        int* numbers1 = (int*)calloc(1000, sizeof(int));
+        int a = 1;
+        char *** lines2 = (char***)calloc(1000, sizeof(char**));
+        int index2 = 0;
+        int* numbers2 = (int*)calloc(1000, sizeof(int));
+        int b = 1;
+        char* lines = (char*)calloc(1000, sizeof(char));
+        while(fgets(lines, 999, f1) != NULL){
+            if(lines[strlen(lines) - 1] == '\n' || lines[strlen(lines) - 1] == '\r')
+                lines[strlen(lines) - 1] = 0;
+            if(lines[strlen(lines) - 1] == '\n' || lines[strlen(lines) - 1] == '\r')
+                lines[strlen(lines) - 1] = 0;
+            while(lines[strlen(lines) - 1] == ' '){
+                lines[strlen(lines) - 1] = 0;
+                if(strlen(lines) == 0)
+                    break;
+            }
+            if(lines[0] != 0){
+                lines1[index1] = delete_spaces(lines);
+                numbers1[index1] = a;
+                index1++;
+            }
+            a++;
+        }
+        while(fgets(lines, 999, f2) != NULL){
+            if(lines[strlen(lines) - 1] == '\n' || lines[strlen(lines) - 1] == '\r')
+                lines[strlen(lines) - 1] = 0;
+            if(lines[strlen(lines) - 1] == '\n' || lines[strlen(lines) - 1] == '\r')
+                lines[strlen(lines) - 1] = 0;
+            while(lines[strlen(lines) - 1] == ' '){
+                lines[strlen(lines) - 1] = 0;
+                if(strlen(lines) == 0)
+                    break;
+            }
+            if(lines[0] != 0){
+                lines2[index2] = delete_spaces(lines);
+                numbers2[index2] = b;
+                index2++;
+            }
+            b++;
+        }
+        char flag = 1;
+        for(int i = 0; lines2[i] != NULL || lines1[i] != NULL; i++){
+            if(!compare_two_tokenized_string(lines1[i], lines2[i], numbers1, numbers2, i, input[3], input[4])){
+                flag = 0;
+            }
+        }
+        if(flag){
+            printf("\033[31mfiles are binary or they have some differents in null spaces\033[0m!\n");
+        }
+        char* address = absolute_address_neogit();
+        address = connectTwoString(address, "\\merge");
+        char command[200];
+        char type = check_type(address);
+        if(type){
+            printf("%d %s", type, address);
+            sprintf(command, "rmdir /s /q \"%s\\\"", address);
+            system(command);
+            sprintf(command, "mkdir \"%s\"", address);
+            system(command);
+        }
+        exit(0);
     }
     if(equalStrings(input[1], "diff") && equalStrings(input[2], "-f") && strcmp(input[3], "") && strcmp(input[4], "") && strstr(input[5], "-line1") && strcmp(input[6], "") && len == 7){
         int line_a1 = 0;
@@ -2036,7 +2501,16 @@ void get_commands_V2(char**  input, int len){
         }
         printf("\033[34m#############\033[0m\n");
     }
-    //end of tags
+    //merge
+    if(equalStrings(input[1], "merge") && equalStrings(input[2], "-b") && strcmp(input[3], "") && strcmp(input[4], "") && len == 5){
+        int a = extract_last_id_branch(input[3]);
+        int b = extract_last_id_branch(input[4]);
+        if(a <= 0 || b <= 0){
+            printf("\033[31mInvalid branch name or no commit yet in branch!\033[0m\n");
+            exit(0);
+        }
+        merge(a, b, input[3], input[4]);
+    }
 }   
 
 int main(int argc, char* argv[]){

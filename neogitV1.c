@@ -830,9 +830,11 @@ void init(){
         mkdir(".neogit\\stage");
         mkdir(".neogit\\config");
         mkdir(".neogit\\stash");
+        mkdir(".neogit\\merge");
 
         FILE* f = fopen(".neogit\\config\\undo", "w"); fclose(f);
         f = fopen(".neogit\\stash\\list", "w"); fclose(f);
+        f = fopen(".neogit\\config\\merge", "w"); fclose(f);
         f = fopen(".neogit\\config\\alias", "w"); fclose(f);
         f = fopen(".neogit\\config\\tag", "w"); fclose(f);
         f = fopen(".neogit\\config\\email", "w"); fclose(f);
@@ -1587,6 +1589,24 @@ void change_last_commit_id(char* branch, int id){
     }
     fclose(f);
 }
+int extract_last_id_branch(char* branch){
+    char* address = gitFolder();
+    address = connectTwoString(address, "//config//branch//list");
+    FILE* f = fopen(address, "r");
+    char line[100];
+    while(fgets(line, 99, f) != NULL){
+        if(line[strlen(line) - 1] == '\n' || line[strlen(line) - 1] == '\r')
+            line[strlen(line) - 1] = 0;
+        if(line[strlen(line) - 1] == '\n' || line[strlen(line) - 1] == '\r')
+            line[strlen(line) - 1] = 0;
+        if(!strcmp(line, branch)){
+            char temp[100];
+            fgets(temp, 99, f);
+            return (atoi(temp));
+        }
+    }
+    return -1;
+}
 void commit(char* massage){
     if(!checkHooks_stage("", extract_hook_status(), 't')){
         printf("YOU HAVE \033[31m\"HOOK FAILED\"\033[0m FILE IN STAGE. ARE YOU SHURE FOR COMMITING? (Y/N)? ");
@@ -1602,7 +1622,7 @@ void commit(char* massage){
     struct count_directory_file count = current_countOfStageFiles();
     int last_id = get_last_hash('c');
     if(count.directory == 0 && count.file == 0){
-        printf("There is nothing in stage area.\n");
+        printf("\033[31mThere is nothing in stage area.\033[0m\n");
         exit(0);
     }
     change_last_commit_id(branch, id);
@@ -1641,7 +1661,7 @@ void commit(char* massage){
         dir = opendir(address_neogit);
         struct dirent* entry;
         if(dir == NULL){
-            printf("unable to open %s directory\n", address_neogit);
+            printf("\033[31munable to open %s directory\033[0m\n", address_neogit);
             exit(-1);
         }
         char* address_free;
@@ -1677,9 +1697,8 @@ void commit(char* massage){
         }
         closedir(dir);
     /////////////////////
-        printf("%d directory(s) and %d file(s) commited by ID %d  at %s/%s/%s-%s:%s:%s on branch %s\n", count.directory, count.file, id, date[0],date[1],date[2],date[3],date[4],date[5], branch);
-        printf("commit massage is: %s", massage);
-    }
+        printf("\033[93m%d\033[0m \033[35mdirectory(s)\033[0m and \033[93m%d\033[0m \033[35mfile(s)\033[0m \033[32mcommited\033[0m by ID \033[93m%d\033[0m  at \033[94m%s/%s/%s-%s:%s:%s\033[0m on branch \033[93m%s\033[0m\n", count.directory, count.file, id, date[0],date[1],date[2],date[3],date[4],date[5], branch);
+        printf("\033[90mcommit massage is\033[0m: \033[96m%s\033[0m\n", massage);    }
     else{
         printf("\033[31man unkown problem\033[0m!\n");
         exit(-1);
