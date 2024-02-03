@@ -1586,7 +1586,6 @@ void append_merge_list(char* name,int scr ,int dis){
     fprintf(f, "%s\n%d %d\n", name, scr, dis);
 
 }
-
 void commit_merge_list(char* branch, int last_id, char* branch1, char*branch2, int id2){
     char* name = current_name();
     char* email = current_email();
@@ -1686,19 +1685,23 @@ void merge(int id1, int id2, char*branch1, char*branch2){
     check_no_conflict_two_branch2("", "", id2, id1);
     commit_merge_list(branch1, id1, branch1, branch2, id2);
 }
+//end of merge
+
+
+
 void get_commands_V2(char**  input, int len){
     //temps
     if(equalStrings(input[1], "print_double_write_L__")){
-        print_double_write_L();
+        print_double_write_L(); exit(0);
     }
     if(equalStrings(input[1], "print_double_write_L__M")){
-        print_double_write_LM();
+        print_double_write_LM(); exit(0);
     }
     if(equalStrings(input[1], "print_double_write_R__M")){
-        print_double_write_RM();
+        print_double_write_RM(); exit(0);
     }
     if(equalStrings(input[1], "print_double_write_R__")){
-        print_double_write_R();
+        print_double_write_R(); exit(0);
     }
     //diff normal files
     if(equalStrings(input[1], "diff") && equalStrings(input[2], "-b") && strcmp(input[3], "") && strcmp(input[4], "") && len == 5){
@@ -1714,6 +1717,7 @@ void get_commands_V2(char**  input, int len){
         else{
             printf("this files are \033[31mnot\033[0m the same(binary mode).\n");
         }
+        exit(0);
     }
     if(equalStrings(input[1], "diff") && equalStrings(input[2], "-f") && strcmp(input[3], "") && strcmp(input[4], "") && len == 5){
         FILE* f1 = fopen(input[3], "r");
@@ -1774,6 +1778,7 @@ void get_commands_V2(char**  input, int len){
         if(flag){
             printf("this files are the \033[32msame\033[0m.\n");
         }
+        exit(0);
     }
     if(equalStrings(input[1], "diff_conflict_neogit") && equalStrings(input[2], "-f") && strcmp(input[3], "") && strcmp(input[4], "") && len == 5){
         FILE* f1 = fopen(input[3], "r");
@@ -1909,6 +1914,7 @@ void get_commands_V2(char**  input, int len){
         if(flag){
             printf("this files are the \033[32msame\033[0m.\n");
         }    
+        exit(0);
     }
     if(equalStrings(input[1], "diff") && equalStrings(input[2], "-f") && strcmp(input[3], "") && strcmp(input[4], "") && strstr(input[5], "-line2") && strcmp(input[6], "") && len == 7){
         int line_a2 = 0;
@@ -1972,6 +1978,7 @@ void get_commands_V2(char**  input, int len){
         if(flag){
             printf("this files are the \033[32msame\033[0m.\n");
         }    
+        exit(0);
     }
     if(equalStrings(input[1], "diff") && equalStrings(input[2], "-f") && strcmp(input[3], "") && strcmp(input[4], "") && strstr(input[5], "-line1") && strcmp(input[6], "") &&  strstr(input[7], "-line2") && strcmp(input[8], "")  && len == 9){
         int line_a2 = 0;
@@ -2038,10 +2045,12 @@ void get_commands_V2(char**  input, int len){
         if(flag){
             printf("this files are the \033[32msame\033[0m.\n");
         }    
+        exit(0);
     }
     //dif commits
     if(equalStrings(input[1], "diff") && equalStrings(input[2] , "-c") && strcmp(input[3], "") && strcmp(input[4], "") && len == 5){
         compare_two_commit(atoi(input[3]), atoi(input[4]));
+        exit(0);
     }
     //grep
     if(equalStrings(input[1], "grep") && equalStrings(input[2], "-f") && strcmp(input[3], "") && equalStrings(input[4], "-p") && strcmp(input[5], "") && len == 6){
@@ -2062,6 +2071,7 @@ void get_commands_V2(char**  input, int len){
         if(flag){
             printf("\033[31No\033[0m line fount that contains \"%s\"\n", input[5]);
         }
+        exit(0);
     }
     if(equalStrings(input[1], "grep") && equalStrings(input[2], "-f") && strcmp(input[3], "") && equalStrings(input[4], "-p") && strcmp(input[5], "") && equalStrings(input[6], "-n") && len == 7){
         FILE* f1 = fopen(input[3], "r");
@@ -2083,12 +2093,15 @@ void get_commands_V2(char**  input, int len){
         if(flag){
             printf("\033[31mNo\033[0m line fount that contains \"%s\"\n", input[5]);
         }
+        exit(0);
     }
     if(equalStrings(input[1], "grep") && equalStrings(input[2], "-c") && strcmp(input[3], "") && equalStrings(input[4], "-p") && strcmp(input[5], "") && equalStrings(input[6], "-n") && len == 7){
         grep_n_commit("", atoi(input[3]), input[5]);
+        exit(0);
     }
     if(equalStrings(input[1], "grep") && equalStrings(input[2], "-c") && strcmp(input[3], "") && equalStrings(input[4], "-p") && strcmp(input[5], "") && len == 6){
         grep_commit("", atoi(input[3]), input[5]);
+        exit(0);
     }
     //hook
     if(equalStrings(input[1], "pre-commit") && equalStrings(input[2], "hooks") && equalStrings(input[3], "list") && len ==4){
@@ -2122,6 +2135,7 @@ void get_commands_V2(char**  input, int len){
         if(flag){
             printf("\033[35mEMPTY\033[0m\n");
         }
+        exit(0);
     }
     if(equalStrings(input[1], "pre-commit") && equalStrings(input[2], "add") && equalStrings(input[3], "hook") && strcmp(input[4], "") && len ==5){
         int number = extract_hook_status();
@@ -2135,6 +2149,7 @@ void get_commands_V2(char**  input, int len){
         else{printf("\033[31mInvalid\033[0m hook id!\n"); exit(0);};   
         write_new_hook_status(number);
         printf("%s added \033[32msuccessfully\033[0m.\n", input[4]);
+        exit(0);
     }
     if(equalStrings(input[1], "pre-commit") && equalStrings(input[2], "remove") && equalStrings(input[3], "hook") && strcmp(input[4], "") && len ==5){
         int number = extract_hook_status();
@@ -2148,15 +2163,18 @@ void get_commands_V2(char**  input, int len){
         else{printf("\033[31mInvalid\033[0m hook id!\n"); exit(0);};   
         write_new_hook_status(number);
         printf("%s removed \033[32msuccessfully\033[0m.\n", input[4]);
+        exit(0);
     }
     if(equalStrings(input[1], "pre-commit") && len == 2){
         int number = extract_hook_status();
         if(!number){printf("hook list is \033[35mEMPTY\033[0m!\n"); exit(0);}
         checkHooks_stage("", number, 'w');
+        exit(0);
     }
     if(equalStrings(input[1], "pre-commit") && equalStrings(input[2], "-f") && strcmp(input[3], "") && len == 4){
         int number = extract_hook_status();
         checkHooks_file(input[3], number, 'w');
+        exit(0);
     }
     if(equalStrings(input[1], "pre-commit") && equalStrings(input[2], "-f") && strcmp(input[3], "") && len > 4){
         for(int i = 3; i < len; i++){
@@ -2164,6 +2182,7 @@ void get_commands_V2(char**  input, int len){
             sprintf(temp, "neogit pre-commit -f \"%s\"", input[i]);
             system(temp);
         }
+        exit(0);
     }
     //stash
     if(equalStrings(input[1], "stash") && equalStrings(input[2], "push") && len == 3){
@@ -2243,6 +2262,7 @@ void get_commands_V2(char**  input, int len){
         append_end_stash_list(id);
         printf("\033[32mData are in stash now.\033[0m Now rou are on commit \033[34m%d\033[0m\n", last_commit);
         chdir(s);
+        exit(0);
     }
     if(equalStrings(input[1], "stash") && equalStrings(input[2], "push") && equalStrings(input[3], "-m") && strcmp(input[4], "") && len == 5){
         check_near_main();
@@ -2319,6 +2339,7 @@ void get_commands_V2(char**  input, int len){
         append_end_stash_list(id);
         printf("\033[32mData are in stash now.\033[0m Now rou are on commit \033[34m%d\033[0m\n", last_commit);
         chdir(s);
+        exit(0);
     }
     if(equalStrings(input[1], "stash") && equalStrings(input[2], "list") && len == 3){
         if(!findHash_stash(0)){
@@ -2326,6 +2347,7 @@ void get_commands_V2(char**  input, int len){
             exit(0);
         }
         show_list_stash();
+        exit(0);
     }
     if(equalStrings(input[1], "stash") && equalStrings(input[2], "drop") && equalStrings(input[3], "-n") && strcmp(input[4], "") && len == 5){
         int id = findHash_stash(atoi(input[4]));
@@ -2335,6 +2357,7 @@ void get_commands_V2(char**  input, int len){
         }
         delete_stash(id);
         printf("\033[32mDeleted\033[0m.\n");
+        exit(0);
     }
     if(equalStrings(input[1], "stash") && equalStrings(input[2], "clear") && len == 3){
         int flag = 1;
@@ -2348,6 +2371,7 @@ void get_commands_V2(char**  input, int len){
         else{
             printf("\033[32mDeleted\033[0m.\n");
         }
+        exit(0);
     }
     if(equalStrings(input[1], "stash") && equalStrings(input[2], "drop") && len == 3){
         int flag = 1;
@@ -2361,6 +2385,7 @@ void get_commands_V2(char**  input, int len){
         else{
             printf("\033[32mDeleted\033[0m.\n");
         }
+        exit(0);
     }
     if(equalStrings(input[1], "stash") && equalStrings(input[2], "show") && strcmp(input[3], "") && len == 4){
         int id = findHash_stash(atoi(input[3]));
@@ -2377,6 +2402,7 @@ void get_commands_V2(char**  input, int len){
         int commit = 0;
         fscanf(f, "%d", &commit);
         compare_stash_commit(id, commit, atoi(input[3]));
+        exit(0);
     }
     //tag
     if(equalStrings(input[1], "tag") && equalStrings(input[2], "-a") && strcmp(input[3], "")){
@@ -2427,6 +2453,7 @@ void get_commands_V2(char**  input, int len){
         unsigned long long total = atoi(t[5]) + 60*atoi(t[4]) + 60*60*atoi(t[3]) + 60*60*24*atoi(t[2]) + 4000000llu * atoi(t[1]) + 4000000000llu * atoi(t[0]);
         append_new_tag(input[3], id, current_name(), current_email(), total, dayOfNow(), massage);
         printf("a new tag \033[32mcreated\033[0m.\n");
+        exit(0);
     }
     if(equalStrings(input[1], "tag") && len == 2){
         char* address = absolute_address_neogit();
@@ -2466,6 +2493,7 @@ void get_commands_V2(char**  input, int len){
         if(flag){
             printf("\033[35mNo tag found\033[0m!\n");
         }
+        exit(0);
     }
     if(equalStrings(input[1], "tag") && equalStrings(input[2], "show") && strcmp(input[3], "") && len == 4){
         int lineN;
@@ -2500,6 +2528,7 @@ void get_commands_V2(char**  input, int len){
             a++;
         }
         printf("\033[34m#############\033[0m\n");
+        exit(0);
     }
     //merge
     if(equalStrings(input[1], "merge") && equalStrings(input[2], "-b") && strcmp(input[3], "") && strcmp(input[4], "") && len == 5){
@@ -2510,8 +2539,48 @@ void get_commands_V2(char**  input, int len){
             exit(0);
         }
         merge(a, b, input[3], input[4]);
+        exit(0);
     }
 }   
+void get_commands_alias(char* name){
+    //global
+    char* address;
+    FILE*f;
+    char line[1000];
+    int index = 0;
+    address = connectTwoString("D:\\SETTINGS\\config\\alias", "");
+    f = fopen(address, "r");
+    while(fgets(line, 199, f) != NULL){
+        while(line[strlen(line) - 1] == '\n' || line[strlen(line) - 1] == '\r' || line[strlen(line) - 1] == ' ')
+            line[strlen(line) - 1] = 0;
+        if(equalStrings(line, name) && index % 2 == 0){
+            fgets(line, 199, f);
+            while(line[strlen(line) - 1] == '\n' || line[strlen(line) - 1] == '\r' || line[strlen(line) - 1] == ' ')
+                line[strlen(line) - 1] = 0;
+            system(line);
+            exit(0);
+        }
+        index++;
+    }
+    //local
+    address =  gitFolder();
+    address = connectTwoString(address,"//config//alias");
+    f = fopen(address, "r");
+    index = 0;
+    while(fgets(line, 199, f) != NULL){
+        while(line[strlen(line) - 1] == '\n' || line[strlen(line) - 1] == '\r' || line[strlen(line) - 1] == ' ')
+            line[strlen(line) - 1] = 0;
+        if(equalStrings(line, name) && index % 2 == 0){
+            fgets(line, 199, f);
+            while(line[strlen(line) - 1] == '\n' || line[strlen(line) - 1] == '\r' || line[strlen(line) - 1] == ' ')
+                line[strlen(line) - 1] = 0;
+            system(line);
+            exit(0);
+        }
+        index++;
+    }
+}
+
 
 int main(int argc, char* argv[]){
     //get inputs        #############################
@@ -2520,5 +2589,7 @@ int main(int argc, char* argv[]){
     //end of getting    #############################
     get_commands_V1(input, len);
     get_commands_V2(input, len);
+    get_commands_alias(input[1]);
+    printf("\033[31mInvalid inputs\033[0m!\n");
     return 0;
 }

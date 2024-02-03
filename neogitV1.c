@@ -154,7 +154,7 @@ int gitFoldeerCheck(char* foldername, int nowLevel, int finalLevel){
     } 
     else {
         if(nowLevel == finalLevel){
-            printf("not a neogit repository (or any of the parent directories): .neogit\n");
+            printf("\033[31mnot\033[0m a \033[31mneogit\033[0m repository (or any of the parent directories): .neogit\n");
             exit(-1);
         }
         return 1 + gitFoldeerCheck(connectTwoString("..//", foldername), nowLevel+1, finalLevel);
@@ -277,7 +277,7 @@ char* gitFolder(){ // return address ..//..//..//.neogit //type no if no git fol
 }
 char ** tokenizeInput(int* len, char** argv){
     if(*len > 95){
-        printf("Too many arguments!\n");
+        printf("\033[31mToo many arguments\033[0m!\n");
         exit(-1);
     }
     char** input = (char**)calloc(110, sizeof(char*));
@@ -289,9 +289,20 @@ char ** tokenizeInput(int* len, char** argv){
     return input;
 }
 char checkIfACommandIsOk(char** command){ //return 1 for accept. //********* for alias
-    return 1;
-}
-char checkIfANameRezerved(char* name){ //return 1 for is rezerved. //******** for alias
+    char* Scommand = calloc(100, 1);
+    int i = 0;
+    while(command[i] != NULL){
+        Scommand = connectTwoString(Scommand, connectTwoString(" \"", connectTwoString(command[i], "\" ")));
+        i++;
+    }
+    Scommand = connectTwoString("D:\\SETTINGS\\codes\\alias1.exe ", Scommand);
+    system(Scommand);
+    FILE* f= fopen("temp_neogit", "r");
+    if(f == NULL){
+        return 1;
+    }
+    fclose(f);
+    remove("temp_neogit");
     return 0;
 }
 char initgitFolder(){ //1 -> there is a neogit folder. 0-> there is no neo git folder
@@ -352,6 +363,7 @@ char beInList_search(folder a, parametrs b){
     return 0;
 }
 void print_time(unsigned long long number){
+    printf("\033[34m");
     printf("%04llu", number / 4000000000llu);
     number -= number / 4000000000llu * 4000000000llu;
     printf("/%02llu", number / 4000000llu);
@@ -363,6 +375,7 @@ void print_time(unsigned long long number){
     printf("%02llu:", number / (60));
     number -= number / 60 * 60;
     printf("%02llu", number);
+    printf("\033[0m");
 }
 void fprint_time(FILE* f, unsigned long long number){
     fprintf(f, "%04llu", number / 4000000000llu);
@@ -392,11 +405,11 @@ char* dayOfNow(){
 //main functions
 void changeNameGlobal(char* name){
     if(strlen(name) > 70){
-        printf("Your name is too long!\n");
+        printf("\033[31mYour name is too long\033[0m!\n");
         exit(-1);
     }
     if(strcheck(name, '\"')){
-        printf("Your name is invalid!\n");
+        printf("\033[31mYour name is invalid\033[0m!\n");
         exit(-1);
     }
     FILE * f = fopen("d://SETTINGS//config//name", "w");
@@ -423,15 +436,15 @@ void changeNameGlobal(char* name){
     ff = fopen("d://SETTINGS//config//nameCount", "w");
     fprintf(ff, "%lld", (MAX > global)? MAX + 1: global + 1);
     fclose(ff);
-    printf("global name changed successfully\n");
+    printf("global name \033[32mchanged\033[0m successfully\n");
 }
 void changeName(char* name){
     if(strlen(name) > 70){
-        printf("Your name is too long!\n");
+        printf("\033[31mYour name is too long\033[0m!\n");
         exit(-1);
     }
     if(strcheck(name, '\"')){
-        printf("Your name is invalid!\n");
+        printf("\033[31mYour name is invalid\033[0m!\n");
         exit(-1);
     }
     char * address =  gitFolder();
@@ -482,15 +495,15 @@ void changeName(char* name){
     ff = fopen("d://SETTINGS//config//MAXnameCount", "w");
     fprintf(ff, "%lld", (MAX > ((countlocal > countGlobal)? countlocal + 1 : countGlobal + 1))? MAX : ((countlocal > countGlobal)? countlocal + 1 : countGlobal + 1));
     fclose(ff);
-    printf("local name changed successfully\n");
+    printf("local name changed \033[32msuccessfully\033[0m\n");
 }
 void changeEmailGlobal(char* email){
     if(strlen(email) > 150){
-        printf("Your email is too long!\n");
+        printf("\033[31mYour email is too long\033[0m!\n");
         exit(-1);
     }
     if(strcheck(email, '\"')){
-        printf("Your email is invalid!\n");
+        printf("\033[31mYour email is invalid\033[0m!\n");
         exit(-1);
     }
     FILE * f = fopen("d://SETTINGS//config//email", "w");
@@ -517,15 +530,15 @@ void changeEmailGlobal(char* email){
     ff = fopen("d://SETTINGS//config//emailCount", "w");
     fprintf(ff, "%lld", (MAX > global)? MAX + 1: global + 1);
     fclose(ff);
-    printf("global email changed successfully\n");
+    printf("global email changed \033[32msuccessfully\033[0m\n");
 }
 void changeEmail(char* email){
     if(strlen(email) > 150){
-        printf("Your email is too long!\n");
+        printf("\033[31mYour email is too long\033[0m!\n");
         exit(-1);
     }
     if(strcheck(email, '\"')){
-        printf("Your name is invalid!\n");
+        printf("\033[31mYour name is invalid\033[0m!\n");
         exit(-1);
     }
     char* address = gitFolder();
@@ -576,7 +589,7 @@ void changeEmail(char* email){
     ff = fopen("d://SETTINGS//config//MAXemailCount", "w");
     fprintf(ff, "%lld", (MAX > ((countlocal > countGlobal)? countlocal + 1 : countGlobal + 1))? MAX : ((countlocal > countGlobal)? countlocal + 1 : countGlobal + 1));
     fclose(ff);
-    printf("local email changed successfully\n");
+    printf("local email changed \033[32msuccessfully\033[0m\n");
 }
 char* current_name(){
     char * address =  gitFolder();
@@ -748,12 +761,8 @@ char ** current_dateTime(){
     return dateTime;
 }
 void GlobalAlias(char* newName, char** command){
-    if(checkIfANameRezerved(newName)){
-        printf("The new name is invalid! (alias.*)\n");
-        exit(-1);
-    }
     if(!checkIfACommandIsOk(command)){
-        printf("The command is invalid!\n");
+        printf("\033[31mThe command is invalid\033[0m!\n");
         exit(-1);
     }
     FILE * f = fopen("d://SETTINGS//config//alias", "a");
@@ -769,15 +778,11 @@ void GlobalAlias(char* newName, char** command){
     }
     fprintf(f, "\n");
     fclose(f);
-    printf("global alias updated successfully\n");
+    printf("global alias \033[32mupdated successfully\033[0m\n");
 }
 void Alias(char* newName, char** command){
-    if(checkIfANameRezerved(newName)){
-        printf("The new name is invalid! (alias.*)\n");
-        exit(-1);
-    }
     if(!checkIfACommandIsOk(command)){
-        printf("The command is invalid!\n");
+        printf("\033[31mThe command is invalid\033[0m!\n");
         exit(-1);
     }
     char * address =  gitFolder();
@@ -818,11 +823,11 @@ void Alias(char* newName, char** command){
             exit(-1);
         }
     }
-    printf("local alias updated successfully\n");
+    printf("local alias \033[32mupdated successfully\033[0m\n");
 }
 void init(){
     if(initgitFolder()){
-        printf("a neoit repository is existed!\n");
+        printf("a neoit repository is \033[31mexisted\033[0m!\n");
         exit(-1);
     }
     if (!mkdir(".neogit")){
@@ -846,7 +851,7 @@ void init(){
         mkdir(".neogit\\config\\branch");
         f = fopen(".neogit\\config\\branch\\current", "w"); fprintf(f, "%s", "master"); fclose(f);
         f = fopen(".neogit\\config\\branch\\list", "w"); fprintf(f, "%s\n%s", "master", "NULL"); fclose(f);
-        printf("Initialized empty neogit repository\n");
+        printf("\033[32mInitialized\033[0m empty neogit repository\n");
         mkdir(".neogit\\commits");
     }
     else{
@@ -1066,11 +1071,11 @@ void Undo(){
     }
     fclose(ff);
     if(count == 0){
-        printf("There is no history of adding files!\n");
+        printf("There is \033[31mno history\033[0m of adding files!\n");
         exit(-1);
     }
     if(count == 1){
-        printf("There is no history of adding files!\n");
+        printf("There is\033[31m no history \033[0mof adding files!\n");
         char temp[] = "";
         fprintf(ff, "%s",temp);
         exit(-1);
@@ -1101,7 +1106,7 @@ void Undo(){
                     break;
                 }
             }
-            printf("%s is unstage now!\n", address);
+            printf("%s is \033[31mun\033[0mstage now!\n", address);
             exit(-1);
         }
         fclose(ooo);
@@ -1123,7 +1128,7 @@ void Undo(){
                     break;
                 }
             }
-            printf("%s unstaged successfully\n", address);
+            printf("%s \033[32munstaged successfully\033[0m\n", address);
             exit(0);
         }
         else{
@@ -1152,7 +1157,7 @@ void Undo(){
                     break;
                 }
             }
-            printf("%s is unstage now!\n", address);
+            printf("%s is \033[31mun\033[0mstage now!\n", address);
             exit(-1);
         }
         fclose(ooo);
@@ -1174,7 +1179,7 @@ void Undo(){
                     break;
                 }
             }
-            printf("%s unstaged successfully\n", address);
+            printf("%s \033[32munstaged successfully\033[0m\n", address);
             exit(0);
         }
         else{
@@ -1191,7 +1196,7 @@ void add(char *name){
     char * address_stage = gitFolder();
     char mode = check_type(name);
     if(!mode){
-        printf("<%s> not found!\n", name);
+        printf("<%s> \033[31mnot found\033[0m!\n", name);
         exit(-1);
     }
     DIR* dir = opendir(connectTwoString(address_stage, "//stage"));
@@ -1284,7 +1289,7 @@ void add(char *name){
                 for(int i = 0; i < size_address_given-1; i++)
                     printf("%s\\", address_given[i]);
                 addToUndo(connectTwoString(dis,address_given[size_address_given - 1]), -1, address_undo);
-                printf("%s added successfully\n", address_given[size_address_given - 1]);
+                printf("%s \033[32madded successfully\033[0m\n", address_given[size_address_given - 1]);
                 exit(0);
             }
             else{
@@ -1317,7 +1322,7 @@ void add(char *name){
                 for(int i = 0; i < size_address_given-1; i++)
                     printf("%s\\", address_given[i]);
                 addToUndo(dis, 1, address_undo);
-                printf("%s\\ added successfully\n", address_given[size_address_given - 1]);
+                printf("%s\\ \033[32madded successfully\033[0m\n", address_given[size_address_given - 1]);
                 exit(0);
             }
             else{
@@ -1337,14 +1342,14 @@ void rest(char * name){
     adress.adress_stage_file = connectTwoString(adress.adress_stage_file, adress.address_given[adress.size_address_given - 1]);
     char mode = check_type(adress.adress_stage_file);
     if(!mode){
-        printf("<%s> is not in stage now!\n", name);
+        printf("<%s> \033[31mis not\033[0m in stage now!\n", name);
         exit(-1);
     }
     if(mode == -1){
         char dastoor[1000];
         sprintf(dastoor, "del /f/q \"%s\"", adress.adress_stage_file);
         if(!system(dastoor)){
-            printf("%s unstaged successfully\n", name);
+            printf("%s \033[32munstaged successfully\033[0m\n", name);
             exit(0);
         }
         else{
@@ -1356,7 +1361,7 @@ void rest(char * name){
         char dastoor[1000];
         sprintf(dastoor, "RMDIR /s/q \"%s\"", adress.adress_stage_file);
         if(!system(dastoor)){
-            printf("%s\\ unstaged successfully\n", name);
+            printf("%s\\ \033[32munstaged successfully\033[0m\n", name);
             exit(0);
         }
         else{
@@ -1375,12 +1380,12 @@ void checkFileInStage(char* name, int mode){
         system(command);
         FILE* f = fopen("___T____.neogit","r");
         if(f == NULL){
-            printf("%s\\ is not in stage area.\n", name);
+            printf("%s\\ is \033[31mnot\033[0m in stage area.\n", name);
             exit(0);
         }
         fclose(f);
         remove("___T____.neogit");
-        printf("%s\\ is in stage area.\n", name);
+        printf("%s\\ \033[32mis\033[0m in stage area.\n", name);
         exit(0);
     }
     if(mode == -1){
@@ -1388,12 +1393,12 @@ void checkFileInStage(char* name, int mode){
         system(command);
         FILE* f = fopen("___T____.neogit","r");
         if(f == NULL){
-            printf("%s is not in stage area\n", name);
+            printf("%s \033[31mis not\033[0m in stage area\n", name);
             exit(0);
         }
         fclose(f);
         remove("___T____.neogit");
-        printf("%s is in stage area\n", name);
+        printf("%s \033[32mis in\033[0m stage area\n", name);
         exit(0);
     }
 }
@@ -1411,7 +1416,7 @@ void addNDeath(char* address, int death){
     dir = opendir(address);
     struct dirent* entry;
     if(dir == NULL){
-        printf("unable to open %s directory\n", address);
+        printf("\033[31munable to open %s directory\033[0m\n", address);
         return;
     }
     while ((entry = readdir(dir)) != NULL){
@@ -1466,7 +1471,7 @@ int* Help_current_countOfStageFiles(char* address){
     dir = opendir(address);
     struct dirent* entry;
     if(dir == NULL){
-        printf("unable to open %s directory\n", address);
+        printf("\033[31munable to open %s directory\033[0m\n", address);
         exit(-1);
     }
     while ((entry = readdir(dir)) != NULL){
@@ -1533,7 +1538,7 @@ int get_last_hash(char mode){ // mode c = commit - exit if we are not in a branc
     if(branch[0] <= '9' && branch[0] >= '0'){
         int hash = atoi(branch);
         if(mode == 'c'){
-            printf("Head is not on a branch. so you can't commit.\n");
+            printf("Head is \033[31mnot\033[0m on a branch. so you can't commit.\n");
             exit(0);
         }
         return hash;
@@ -1751,7 +1756,7 @@ char* extract_massage_shortcut(char* name){
 }
 void add_shortcut_massage(char* name, char* massage){
     if(extract_massage_shortcut(name)[0] != 0){
-        printf("this name of shortcut is currently exist.\n");
+        printf("this name of shortcut is currently \033[31mexist\033[0m.\n");
         exit(0);
     }
     char * address =  gitFolder();
@@ -1783,7 +1788,7 @@ void add_shortcut_massage(char* name, char* massage){
 }
 void delete_shortcut_massage(char* name){
     if(extract_massage_shortcut(name)[0] == 0){
-        printf("this name of shortcut is not currently exist.\n");
+        printf("this name of shortcut is \033[31mnot\033[0m currently exist.\n");
         exit(0);    
     }
     char * address =  gitFolder();
@@ -1813,7 +1818,7 @@ void delete_shortcut_massage(char* name){
         }
         fclose(f);
         if(flag){
-            printf("can't find shortcut-name in list.\n");
+            printf("\033[31mcan't\033[0m find shortcut-name in list.\n");
             exit(0);    
         }
         f = fopen(connectTwoString(address,"//config//shortcut"), "w");
@@ -1836,7 +1841,7 @@ void delete_shortcut_massage(char* name){
             printf("\033[31man unkown problem\033[0m!\n");
             exit(-1);
         }
-        printf("can't find shortcut-name in list.\n");
+        printf("\033[31mcan't\033[0m find shortcut-name in list.\n");
         exit(0);
     }
 }
@@ -1861,7 +1866,7 @@ char is_banchName_exist(char* name){
 }
 void create_new_branch(char* name){
     if(is_banchName_exist(name)){
-        printf("branch %s is currently exist\n", name);
+        printf("branch %s is currently \033[31mexist\033[0m\n", name);
         exit(0);
     }
     char* address = gitFolder();
@@ -1886,10 +1891,10 @@ void show_listOfAllBranches(){
         if(lines[strlen(lines) - 1] == '\n' || lines[strlen(lines) - 1] == '\r')
             lines[strlen(lines) - 1] = 0;
         if(index % 2 == 0){
-            printf("branch: %s, ", lines);
+            printf("\033[34mbranch\033[0m: %s, ", lines);
         }
         else{
-            printf("last commit ID: %s\n", lines);
+            printf("last commit ID: \033[34m%s\033[0m\n", lines);
         }
         index++;
     }
@@ -1902,7 +1907,7 @@ void show_listOfAllBranches(){
         exit(-1);
     }
     fscanf(f, "%s", lines);
-    printf("HEAD is on: %s\n", lines);
+    printf("\033[34mHEAD\033[0m is on: %s\n", lines);
     fclose(f);
 }
 folder extract_data_from_commit(char* name, char* address_folder_info){
@@ -1965,7 +1970,7 @@ folder* log_conditional(parametrs a, char(*function)(folder, parametrs)){
     dir = opendir(address);
     struct dirent* entry;
     if(dir == NULL){
-        printf("unable to open %s directory\n", address);
+        printf("\033[31munable to open %s directory\033[0m\n", address);
         return list;
     }
     folder ff;
@@ -2048,7 +2053,7 @@ void status_a(){
     dir = opendir(".");
     struct dirent* entry;
     if(dir == NULL){
-        printf("unable to open %s directory\n", "current");
+        printf("\033[31munable to open %s directory\033[0m\n", "current");
         return;
     }
     while ((entry = readdir(dir)) != NULL){
@@ -2078,10 +2083,10 @@ void status_a(){
             char isInReal = check_type(address_file);
             char isInCommit = check_type(address_commit);
             if(isInReal == -1){
-                printf("%s:\tW: %d, S: %d, C: %d\t####\tcompare: W-S: %d, W-C: %d, S-C: %d\n",entry->d_name ,(isInReal == -1)? 1:0, (isInstage == -1)?1:0, (isInCommit==-1)?1:0, TwoFileAreSame(address_file,address_stage), TwoFileAreSame(address_file, address_commit), TwoFileAreSame(address_stage,address_commit));
+                printf("%s:\tW: \033[34m%d\033[0m, S: \033[34m%d\033[0m, C: \033[34m%d\033[0m\t####\tcompare: W-S: \033[34m%d\033[0m, W-C: \033[34m%d\033[0m, S-C: \033[34m%d\033[0m\n",entry->d_name ,(isInReal == -1)? 1:0, (isInstage == -1)?1:0, (isInCommit==-1)?1:0, TwoFileAreSame(address_file,address_stage), TwoFileAreSame(address_file, address_commit), TwoFileAreSame(address_stage,address_commit));
             }
             if(isInReal == 1){
-                printf("%s\\:\tW: %d, S: %d, C: %d\n",entry->d_name ,(isInReal == 1)? 1:0, (isInstage == 1)?1:0, (isInCommit==1)?1:0);
+                printf("%s\\:\tW: \033[34m%d\033[0m, S: \033[34m%d\033[0m, C: \033[34m%d\033[0m\n",entry->d_name ,(isInReal == 1)? 1:0, (isInstage == 1)?1:0, (isInCommit==1)?1:0);
             }
         }
     }
@@ -2120,10 +2125,10 @@ void status_a(){
                 char isInReal = check_type(address_file);
                 char isInCommit = check_type(address_commit);
                 if(isInstage == -1 && isInReal == 0){
-                    printf("%s:\tW: %d, S: %d, C: %d\t####\tcompare: W-S: %d, W-C: %d, S-C: %d\n",entry->d_name ,(isInReal == -1)? 1:0, (isInstage == -1)?1:0, (isInCommit==-1)?1:0, TwoFileAreSame(address_file,address_stage), TwoFileAreSame(address_file, address_commit), TwoFileAreSame(address_stage,address_commit));
+                    printf("%s:\tW: \033[34m%d\033[0m, S: \033[34m%d\033[0m, C: \033[34m%d\033[0m\t####\tcompare: W-S: \033[34m%d\033[0m, W-C: \033[34m%d\033[0m, S-C: \033[34m%d\033[0m\n",entry->d_name ,(isInReal == -1)? 1:0, (isInstage == -1)?1:0, (isInCommit==-1)?1:0, TwoFileAreSame(address_file,address_stage), TwoFileAreSame(address_file, address_commit), TwoFileAreSame(address_stage,address_commit));
                 }
                 if(isInstage == 1 && isInReal == 0){
-                    printf("%s\\:\tW: %d, S: %d, C: %d\n",entry->d_name ,(isInReal == 1)? 1:0, (isInstage == 1)?1:0, (isInCommit==1)?1:0);
+                    printf("%s\\:\tW: \033[34m%d\033[0m, S: \033[34m%d\033[0m, C: \033[34m%d\033[0m\n",entry->d_name ,(isInReal == 1)? 1:0, (isInstage == 1)?1:0, (isInCommit==1)?1:0);
                 }
             }
         }
@@ -2174,10 +2179,10 @@ void status_a(){
                 char isInReal = check_type(address_file);
                 char isInCommit = check_type(address_commit);
                 if(isInCommit == -1 && isInReal == 0 && isInstage == 0){
-                    printf("%s:\tW: %d, S: %d, C: %d\t####\tcompare: W-S: %d, W-C: %d, S-C: %d\n",entry->d_name ,(isInReal == -1)? 1:0, (isInstage == -1)?1:0, (isInCommit==-1)?1:0, TwoFileAreSame(address_file,address_stage), TwoFileAreSame(address_file, address_commit), TwoFileAreSame(address_stage,address_commit));
+                    printf("%s:\tW: \033[34m%d\033[0m, S: \033[34m%d\033[0m, C: \033[34m%d\033[0m\t####\tcompare: W-S: \033[34m%d\033[0m, W-C: \033[34m%d\033[0m, S-C: \033[34m%d\033[0m\n",entry->d_name ,(isInReal == -1)? 1:0, (isInstage == -1)?1:0, (isInCommit==-1)?1:0, TwoFileAreSame(address_file,address_stage), TwoFileAreSame(address_file, address_commit), TwoFileAreSame(address_stage,address_commit));
                 }
                 if(isInCommit == 1 && isInReal == 0 && isInstage == 0){
-                    printf("%s\\:\tW: %d, S: %d, C: %d\n",entry->d_name ,(isInReal == 1)? 1:0, (isInstage == 1)?1:0, (isInCommit==1)?1:0);
+                    printf("%s\\:\tW: \033[34m%d\033[0m, S: \033[34m%d\033[0m, C: \033[34m%d\033[0m\n",entry->d_name ,(isInReal == 1)? 1:0, (isInstage == 1)?1:0, (isInCommit==1)?1:0);
                 }
             }
         }
@@ -2194,7 +2199,7 @@ char checkAllInCommit_Help1(char * addressO){ //if we have a change in working d
     dir = opendir(".");
     struct dirent* entry;
     if(dir == NULL){
-        printf("unable to open %s directory\n", addressO);
+        printf("\033[31munable to open %s directory\033[0m\n", addressO);
         return 0;
     }
     while ((entry = readdir(dir)) != NULL){
@@ -2228,7 +2233,7 @@ char checkAllInCommit_Help1(char * addressO){ //if we have a change in working d
                     continue;
                 }
                 else{
-                    printf("some changes are in: %s\n", address_file);
+                    printf("some \033[31mchanges\033[0m are in: %s\n", address_file);
                     return 0;
                 }
             }
@@ -2240,7 +2245,7 @@ char checkAllInCommit_Help1(char * addressO){ //if we have a change in working d
                 chdir(addressO);
             }
             else{
-                printf("some changes are in: %s\n", address_file);
+                printf("some \033[31mchanges\033[0m are in: %s\n", address_file);
                 return 0;
             }
         }
@@ -2266,7 +2271,7 @@ char checkAllInCommit_Help2(char * addressO){
     DIR* dir = opendir(address_commitB);
     struct dirent* entry;
     if(dir == NULL){
-        printf("unable to open %s directory\n", addressO);
+        printf("\033[31munable to open %s directory\033[0m\n", addressO);
         return 0;
     }
     while ((entry = readdir(dir)) != NULL){
@@ -2296,11 +2301,11 @@ char checkAllInCommit_Help2(char * addressO){
             char isInReal = check_type(address_file);
             char isInCommit = check_type(address_commit);
             if(isInCommit == -1 && isInReal == 0 && isInstage == 0){
-                printf("some changes are in: %s\n", address_file);
+                printf("some \033[31mchanges\033[0m are in: %s\n", address_file);
                 return 0;
             }
             if(isInCommit == 1 && isInReal == 0 && isInstage == 0){
-                printf("some changes are in: %s\n", address_file);
+                printf("some \033[31mchanges\033[0m are in: %s\n", address_file);
                 return 0;
             }
             if(isInCommit == 1){
@@ -2421,12 +2426,12 @@ void checkout(char* name){
     address = connectTwoString(address, temp);
     char mode = check_type(address);
     if(mode != 1){
-        printf("Invalid branch name or commit ID!\n");
+        printf("\033[31mInvalid\033[0m branch name or commit ID!\n");
         exit(0);
     }
     int current = get_last_hash('a');
     if(current == ID){
-        printf("DO YOU WANT TO CHECKOUT ON COMMIT %d? YOU WILL LOSS CURRENT CHANGES. (Y, N):", ID);
+        printf("DO YOU WANT TO CHECKOUT ON COMMIT %d? YOU WILL \033[31mLOSS\033[0m CURRENT CHANGES. (Y, N):", ID);
         char c = 0;
         scanf("%c", &c);
         if(c != 'Y') exit(0);
@@ -2436,7 +2441,7 @@ void checkout(char* name){
         dir = opendir(address_neogit);
         struct dirent* entry;
         if(dir == NULL){
-            printf("unable to open %s directory\n", address_neogit);
+            printf("\033[31munable to open %s directory\033[0m\n", address_neogit);
             exit(-1);
         }
         while ((entry = readdir(dir)) != NULL){
@@ -2468,11 +2473,11 @@ void checkout(char* name){
         fprintf(f, "%s", (equalStrings(name, "HEAD")? "master": name));
         fclose(f);
         checkOut_byID(ID);
-        printf("Now you are on commit %d\n", ID);
+        printf("\033[32mNow you are on\033[0m commit %d\n", ID);
         exit(0);
     }
     if(!checkAllInCommit()){
-        printf("first make a stash.\n");
+        printf("\033[34mfirst make a stash\033[0m.\n");
         exit(0);
     }
     address = gitFolder();
@@ -2481,56 +2486,268 @@ void checkout(char* name){
     fprintf(f, "%s", (equalStrings(name, "HEAD")? "master": name));
     fclose(f);
     checkOut_byID(ID);
-    printf("Now you are on commit %d\n", ID);
+    printf("\033[32mNow you are on\033[0m commit %d\n", ID);
 }
+void status(){
+    DIR* dir;
+    dir = opendir(".");
+    struct dirent* entry;
+    if(dir == NULL){
+        printf("\033[31munable to open %s directory\033[0m\n", "current");
+        return;
+    }
+    while ((entry = readdir(dir)) != NULL){
+        if(strcmp(entry->d_name, ".") && strcmp(entry->d_name, "..") && strcmp(entry->d_name, ".neogit")){
+            struct address__ address = Help_ADD(entry->d_name);
+            char* address_stage = connectTwoString(address.adress_stage_file, entry->d_name);
+            char* address_file = (char*)calloc(3, sizeof(char));
+            address_file[0] = '\0';
+            for(int i = 0; i < address.size_address_cmd; i++){
+                address_file = connectTwoString(address_file, connectTwoString(address.address_cmd[i], "\\"));
+            }
+            address_file = connectTwoString(address_file, entry->d_name);
+            char* address_commit = (char*)calloc(3, sizeof(char));
+            address_commit[0] = '\0';
+            for(int i = 0; i < address.size_address_neogit; i++){
+                address_commit = connectTwoString(address_commit, connectTwoString(address.address_neogit[i], "\\"));
+            }
+            address_commit = connectTwoString(address_commit, ".neogit\\commits\\");
+            char temp[100];
+            sprintf(temp, "%d", get_last_hash('a'));
+            address_commit = connectTwoString(address_commit, temp);
+            for(int i = address.size_address_neogit; i < address.size_address_cmd; i++){
+                address_commit = connectTwoString(address_commit, connectTwoString("\\", address.address_cmd[i]));
+            }
+            address_commit = connectTwoString(address_commit, connectTwoString("\\", entry->d_name));
+            char isInstage = check_type(address_stage);
+            char isInReal = check_type(address_file);
+            char isInCommit = check_type(address_commit);
+            if(isInReal == -1){
+                char* name = connectTwoString(entry->d_name, "");
+                isInReal = (isInReal == -1)? 1:0;
+                isInstage = (isInstage == -1)?1:0;
+                isInCommit = (isInCommit==-1)?1:0;
+                char W_S =  TwoFileAreSame(address_file,address_stage);
+                char W_C = TwoFileAreSame(address_file, address_commit);
+                char S_C = TwoFileAreSame(address_stage,address_commit);
+                if(W_C == 1){
+                    continue;
+                }
+                printf("\033[35m%s: \033[0m", name);
+                if(isInstage){
+                    printf("+");
+                }
+                else{
+                    printf("-");
+                }
+                if(isInCommit == 0){
+                    printf("A\n");
+                }
+                else if(isInReal == 0){
+                    printf("D\n");
+                }
+                else{
+                    printf("M\n");
+                }
+            }
+        }
+    }
+    struct address__ addressA = Help_ADD("");
+    char* address_stageA = addressA.adress_stage_file;
+    dir = opendir(address_stageA);
+    char flag = 1;
+    if(dir == NULL){
+        flag = 0;
+    }
+    if(flag){
+        while ((entry = readdir(dir)) != NULL){
+            if(strcmp(entry->d_name, ".") && strcmp(entry->d_name, "..") && strcmp(entry->d_name, ".neogit")){
+                struct address__ address = Help_ADD(entry->d_name);
+                char* address_stage = connectTwoString(address.adress_stage_file, entry->d_name);
+                char* address_file = (char*)calloc(3, sizeof(char));
+                address_file[0] = '\0';
+                for(int i = 0; i < address.size_address_cmd; i++){
+                    address_file = connectTwoString(address_file, connectTwoString(address.address_cmd[i], "\\"));
+                }
+                address_file = connectTwoString(address_file, entry->d_name);
+                char* address_commit = (char*)calloc(3, sizeof(char));
+                address_commit[0] = '\0';
+                for(int i = 0; i < address.size_address_neogit; i++){
+                    address_commit = connectTwoString(address_commit, connectTwoString(address.address_neogit[i], "\\"));
+                }
+                address_commit = connectTwoString(address_commit, ".neogit\\commits\\");
+                char temp[100];
+                sprintf(temp, "%d", get_last_hash('a'));
+                address_commit = connectTwoString(address_commit, temp);
+                for(int i = address.size_address_neogit; i < address.size_address_cmd; i++){
+                    address_commit = connectTwoString(address_commit, connectTwoString("\\", address.address_cmd[i]));
+                }
+                address_commit = connectTwoString(address_commit, connectTwoString("\\", entry->d_name));
+                char isInstage = check_type(address_stage);
+                char isInReal = check_type(address_file);
+                char isInCommit = check_type(address_commit);
+                if(isInstage == -1 && isInReal == 0){
+                    char* name = connectTwoString(entry->d_name, "");
+                    isInReal = (isInReal == -1)? 1:0;
+                    isInstage = (isInstage == -1)?1:0;
+                    isInCommit = (isInCommit==-1)?1:0;
+                    char W_S =  TwoFileAreSame(address_file,address_stage);
+                    char W_C = TwoFileAreSame(address_file, address_commit);
+                    char S_C = TwoFileAreSame(address_stage,address_commit);
+                    if(W_C == 1){
+                        continue;
+                    }
+                    printf("\033[35m%s: \033[0m", name);
+                    if(isInstage){
+                        printf("+");
+                    }
+                    else{
+                        printf("-");
+                    }
+                    if(isInCommit == 0){
+                        printf("A\n");
+                    }
+                    else if(isInReal == 0){
+                        printf("D\n");
+                    }
+                    else{
+                        printf("M\n");
+                    }    
+                }            
+            }
+        }
+    }
+    struct address__ addressB = Help_ADD("");
+    char* address_commitB = (char*)calloc(3, sizeof(char));
+    address_commitB[0] = '\0';
+    for(int i = 0; i < addressB.size_address_neogit; i++){
+        address_commitB = connectTwoString(address_commitB, connectTwoString(addressB.address_neogit[i], "\\"));
+    }
+    address_commitB = connectTwoString(address_commitB, ".neogit\\commits\\");
+    char tempB[100];
+    sprintf(tempB, "%d", get_last_hash('a'));
+    address_commitB = connectTwoString(address_commitB, tempB);
+    for(int i = addressB.size_address_neogit; i < addressB.size_address_cmd; i++){
+        address_commitB = connectTwoString(address_commitB, connectTwoString("\\", addressB.address_cmd[i]));
+    }
+    dir = opendir(address_commitB);
+    flag = 1;
+    if(dir == NULL){
+        flag = 0;
+    }
+    if(flag){
+        while ((entry = readdir(dir)) != NULL){
+            if(strcmp(entry->d_name, ".") && strcmp(entry->d_name, "..") && strcmp(entry->d_name, ".neogit")){
+                struct address__ address = Help_ADD(entry->d_name);
+                char* address_stage = connectTwoString(address.adress_stage_file, entry->d_name);
+                char* address_file = (char*)calloc(3, sizeof(char));
+                address_file[0] = '\0';
+                for(int i = 0; i < address.size_address_cmd; i++){
+                    address_file = connectTwoString(address_file, connectTwoString(address.address_cmd[i], "\\"));
+                }
+                address_file = connectTwoString(address_file, entry->d_name);
+                char* address_commit = (char*)calloc(3, sizeof(char));
+                address_commit[0] = '\0';
+                for(int i = 0; i < address.size_address_neogit; i++){
+                    address_commit = connectTwoString(address_commit, connectTwoString(address.address_neogit[i], "\\"));
+                }
+                address_commit = connectTwoString(address_commit, ".neogit\\commits\\");
+                char temp[100];
+                sprintf(temp, "%d", get_last_hash('a'));
+                address_commit = connectTwoString(address_commit, temp);
+                for(int i = address.size_address_neogit; i < address.size_address_cmd; i++){
+                    address_commit = connectTwoString(address_commit, connectTwoString("\\", address.address_cmd[i]));
+                }
+                address_commit = connectTwoString(address_commit, connectTwoString("\\", entry->d_name));
+                char isInstage = check_type(address_stage);
+                char isInReal = check_type(address_file);
+                char isInCommit = check_type(address_commit);
+                if(isInCommit == -1 && isInReal == 0 && isInstage == 0){
+                    char* name = connectTwoString(entry->d_name, "");
+                    isInReal = (isInReal == -1)? 1:0;
+                    isInstage = (isInstage == -1)?1:0;
+                    isInCommit = (isInCommit==-1)?1:0;
+                    char W_S =  TwoFileAreSame(address_file,address_stage);
+                    char W_C = TwoFileAreSame(address_file, address_commit);
+                    char S_C = TwoFileAreSame(address_stage,address_commit);
+                    if(W_C == 1){
+                        continue;
+                    }
+                    printf("\033[35m%s: \033[0m", name);
+                    if(isInstage){
+                        printf("+");
+                    }
+                    else{
+                        printf("-");
+                    }
+                    if(isInCommit == 0){
+                        printf("A\n");
+                    }
+                    else if(isInReal == 0){
+                        printf("D\n");
+                    }
+                    else{
+                        printf("M\n");
+                    } 
+                }               
+            }
+        }
+    }
+}
+
+
+
+
 void get_commands_V1(char ** input, int len){
     // neogit config -global user.name
     if(equalStrings(input[1], "config") && equalStrings(input[2], "-global") && equalStrings(input[3], "user.name") && strcmp(input[4], "") && equalStrings(input[5], "") && len == 5)
-        changeNameGlobal(input[4]);
+        {changeNameGlobal(input[4]); exit(0);}
     // neogit config -global user.email
     if(equalStrings(input[1], "config") && equalStrings(input[2], "-global") && equalStrings(input[3], "user.email") && strcmp(input[4], "") && equalStrings(input[5], "") && len == 5)
-        changeEmailGlobal(input[4]);
+        {changeEmailGlobal(input[4]); exit(0);}
     // neogit config user.name
     if(equalStrings(input[1], "config") && equalStrings(input[2], "user.name") && strcmp(input[3], "") && equalStrings(input[4], "") && len == 4)
-        changeName(input[3]);
+        {changeName(input[3]); exit(0);}
     // neogit config user.email
     if(equalStrings(input[1], "config") && equalStrings(input[2], "user.email") && strcmp(input[3], "") && equalStrings(input[4], "") && len == 4)
-        changeEmail(input[3]);
+        {changeEmail(input[3]); exit(0);}
     //neogit config -gelobal alias.name "command"
     if(equalStrings(input[1], "config") && equalStrings(input[2], "-global") && (input[3][0] == 'a' && input[3][1] == 'l' && input[3][2] == 'i' && input[3][3] == 'a' && input[3][4] == 's' && input[3][5] == '.' && strlen(input[3]) > 6) && strcmp(input[4], "") && equalStrings(input[5], "") && len == 5){       
         if(strlen(input[4]) > 250){
-            printf("Your command is too long!\n");
+            printf("\033[31mYour command is too long\033[0m!\n");
             exit(-1);
         }
         if(strcheck(input[4], '\"')){
-            printf("Your command is invalid!\n");
+            printf("\033[31mYour command is invalid\033[0m!\n");
             exit(-1);
         }
         GlobalAlias(input[3]+6, delete_spaces(input[4]));
+        exit(0);
     }
     //neogit config alias.name "command"
     if(equalStrings(input[1], "config") && (input[2][0] == 'a' && input[2][1] == 'l' && input[2][2] == 'i' && input[2][3] == 'a' && input[2][4] == 's' && input[2][5] == '.' && strlen(input[2]) > 6) && strcmp(input[3], "") && equalStrings(input[4], "") && len == 4){       
         if(strlen(input[3]) > 250){
-            printf("Your command is too long!\n");
+            printf("\033[31mYour command is too long\033[0m!\n");
             exit(-1);
         }
         if(strcheck(input[3], '\"')){
-            printf("Your command is invalid!\n");
+            printf("\033[31mYour command is invalid\033[0m!\n");
             exit(-1);
         }
         Alias(input[2]+6, delete_spaces(input[3]));
+        exit(0);
     }
     //neogit init
     if(equalStrings(input[1], "init") && equalStrings(input[2], "") && len == 2)
-        init();
+        {init(); exit(0);}
     //neogit add
     if(equalStrings(input[1], "add") && strcmp(input[2], "") && !strcheck(input[2] , '-') && equalStrings(input[3], "") && len == 3){
         if(strlen(input[2]) > 250){
-            printf("Your command is too long!\n");
+            printf("\033[31mYour command is too long\033[0m!\n");
             exit(-1);
         }
         if(strcheck(input[2], '\"')){
-            printf("Your command is invalid!\n");
+            printf("\033[31mYour command is invalid\033[0m!\n");
             exit(-1);
         }
         if(strstr(input[2], ".neogit") == input[2]){
@@ -2541,17 +2758,18 @@ void get_commands_V1(char ** input, int len){
             exit(0);
         }
         add(input[2]);
+        exit(0);
     }
     //neogit add *
     if(equalStrings(input[1], "add") && strcmp(input[2], "") && !strcheck(input[2] , '-') && len > 3){
         gitFoldeerCheck(".neogit", 0, getLevelofAddress(GetAddressHere()));
         for(int i = 2; i < len; i++){
             if(strlen(input[i]) > 250){
-                printf("Your path is too long!\n");
+                printf("\033[31mYour path is too long\033[0m!\n");
                 exit(-1);
             }
             if(strcheck(input[i], '\"')){
-                printf("Your path is invalid!\n");
+                printf("\033[31mYour path is invalid\033[0m!\n");
                 exit(-1);
             }
             char cc[1000];
@@ -2565,11 +2783,11 @@ void get_commands_V1(char ** input, int len){
         gitFoldeerCheck(".neogit", 0, getLevelofAddress(GetAddressHere()));
         for(int i = 3; i < len; i++){
             if(strlen(input[i]) > 250){
-                printf("Your path is too long!\n");
+                printf("\033[31mYour path is too long\033[0m!\n");
                 exit(-1);
             }
             if(strcheck(input[i], '\"')){
-                printf("Your path is invalid!\n");
+                printf("\033[31mYour path is invalid\033[0m!\n");
                 exit(-1);
             }
             char cc[1000];
@@ -2581,11 +2799,11 @@ void get_commands_V1(char ** input, int len){
     //neogit rest
     if(equalStrings(input[1], "reset") && strcmp(input[2], "") && !strcheck(input[2] , '-') && equalStrings(input[3], "") && len == 3){
         if(strlen(input[2]) > 250){
-            printf("Your command is too long!\n");
+            printf("\033[31mYour command is too long\033[0m!\n");
             exit(-1);
         }
         if(strcheck(input[2], '\"')){
-            printf("Your command is invalid!\n");
+            printf("\033[31mYour command is invalid\033[0m!\n");
             exit(-1);
         }
         if(strstr(input[2], ".neogit") == input[2]){
@@ -2596,17 +2814,18 @@ void get_commands_V1(char ** input, int len){
             exit(0);
         }
         rest(input[2]);
+        exit(0);
     }
     //neogit rest name*
     if(equalStrings(input[1], "reset") && strcmp(input[2], "") && !strcheck(input[2] , '-') && len > 3){
         gitFoldeerCheck(".neogit", 0, getLevelofAddress(GetAddressHere()));
         for(int i = 2; i < len; i++){
             if(strlen(input[i]) > 250){
-                printf("Your path is too long!\n");
+                printf("\033[31mYour path is too long\033[0m!\n");
                 exit(-1);
             }
             if(strcheck(input[i], '\"')){
-                printf("Your path is invalid!\n");
+                printf("\033[31mYour path is invalid\033[0m!\n");
                 exit(-1);
             }
             char cc[1000];
@@ -2621,11 +2840,11 @@ void get_commands_V1(char ** input, int len){
         gitFoldeerCheck(".neogit", 0, getLevelofAddress(GetAddressHere()));
         for(int i = 3; i < len; i++){
             if(strlen(input[i]) > 250){
-                printf("Your path is too long!\n");
+                printf("\033[31mYour path is too long\033[0m!\n");
                 exit(-1);
             }
             if(strcheck(input[i], '\"')){
-                printf("Your path is invalid!\n");
+                printf("\033[31mYour path is invalid\033[0m!\n");
                 exit(-1);
             }
             char cc[1000];
@@ -2636,19 +2855,20 @@ void get_commands_V1(char ** input, int len){
     }
     //reset -undo
     if(equalStrings(input[1], "reset") && equalStrings(input[2], "-undo") && len == 3)
-        Undo();
+        {Undo(); exit(0);}
     //add -n option
     if(equalStrings(input[1], "___check_if_a_file_is_in_stage__")){
         if(!strcmp(input[3], "1"))
             checkFileInStage(input[2], 1);
         else
             checkFileInStage(input[2], -1);
+        exit(0);
     }
     //add -n death (death > 1)
     if(equalStrings(input[1], "add") && equalStrings(input[2], "-n") && strcmp(input[3], "") && len == 4){
         int death = atoi(input[3]);
         if(death <= 0){
-            printf("invalid death!\n");
+            printf("\033[31minvalid death\033[0m!\n");
             exit(1);
         }
         addNDeath(".", death);
@@ -2656,49 +2876,50 @@ void get_commands_V1(char ** input, int len){
     }
     //commit
     if(equalStrings(input[1], "commit") && !equalStrings(input[2], "-m") && !equalStrings(input[2], "-s")){
-        printf("you must write a massage to commit. (use -m or -s)\n");
+        printf("you \033[31mmust\033[0m write a massage to commit. (use -m or -s)\n");
         exit(0);
     }
     if(equalStrings(input[1], "commit") && equalStrings(input[2], "-m")){
         if(len > 4){
-            printf("lots of inputs!\n");
+            printf("\033[31mlots of inputs\033[0m!\n");
             exit(0);
         }
         if(len == 3){
-            printf("you must write a massage to commit.\n");
+            printf("\033[31myou must write a massage to commit\033[0m.\n");
             exit(0);
         }
         if(strlen(input[3]) > 72){
-            printf("yor commit massage is too long\n");
+            printf("\033[31myor commit massage is too long\033[0m\n");
             exit(0);
         }
         commit(input[3]);
+        exit(0);
     }
     //shortcuts in commits
     if(equalStrings(input[1], "set") && equalStrings(input[2] , "-m") && strcmp(input[3], "") && equalStrings(input[4] , "-s") && strcmp(input[5], "") && len == 6){
         if(strlen(input[3]) > 72 || strlen(input[5]) > 40){
-            printf("Yor text is too long!\n");
+            printf("\033[31mYor text is too long\033[0m!\n");
             exit(0);
         }
         add_shortcut_massage(input[5], input[3]);
-        printf("shortcut added successfully\n");
+        printf("shortcut \033[32madded successfully\033[0m\n");
         exit(0);
     }
     if(equalStrings(input[1], "remove") && equalStrings(input[2] , "-s") && strcmp(input[3], "") && len == 4){
         delete_shortcut_massage(input[3]);
-        printf("shortcut deleted successfully\n");
+        printf("shortcut \033[32mdeleted successfully\033[0m\n");
         exit(0);
     }
     if(equalStrings(input[1], "replace") && equalStrings(input[2] , "-m") && strcmp(input[3], "") && equalStrings(input[4] , "-s") && strcmp(input[5], "") && len == 6){
         delete_shortcut_massage(input[5]);
         add_shortcut_massage(input[5], input[3]);
-        printf("shortcut replaced successfully\n");
+        printf("shortcut \033[32mreplaced successfully\033[0m\n");
         exit(0);
     }
     if(equalStrings(input[1], "commit") && equalStrings(input[2], "-s") && strcmp(input[3], "") && len == 4){
         char* massage = extract_massage_shortcut(input[3]);
         if(massage[0] == 0){
-            printf("this name of shortcut is not currently exist.\n");
+            printf("this name of shortcut is \033[31mnot\033[0m currently exist.\n");
             exit(0);  
         }
         char temp[150];
@@ -2709,6 +2930,7 @@ void get_commands_V1(char ** input, int len){
     //create a branch
     if(equalStrings(input[1], "branch") && strcmp(input[2], "") && len ==3){
         create_new_branch(input[2]);
+        printf("branch \033[32mcreated\033[0m");
         exit(0);
     }
     if(equalStrings(input[1], "branch") && len == 2){
@@ -2720,30 +2942,32 @@ void get_commands_V1(char ** input, int len){
         parametrs condition;
         folder** list = neogitLOG(timeUpToDown, beInList_normal, condition);
         if(list[0] == NULL){
-            printf("No commit history.\n");
+            printf("\033[31mNo\033[0m commit history.\n");
             exit(0);
         }
         for(int i = 0; list[i] != NULL; i++){
-            printf("%d: ID: %s, branch: \"%s\", massage: \"%s\", user name: \"%s\", user email: \"%s\"\n",i + 1, list[i]->name,list[i]->banch, list[i]->massage, list[i]->user_name, list[i]->email);
-            printf("count of file(s): %d, count of directory(s): %d, time of commit: ", list[i]->count_file, list[i]->count_folder); print_time(list[i]->time); printf("\n");
+            printf("\033[34m%d\033[0m: ID: \033[34m%s\033[0m, branch: \"\033[34m%s\033[0m\", massage: \"\033[34m%s\033[0m\", user name: \"\033[34m%s\033[0m\", user email: \"\033[34m%s\033[0m\"\n",i + 1, list[i]->name,list[i]->banch, list[i]->massage, list[i]->user_name, list[i]->email);
+            printf("count of file(s): \033[35m%d\033[0m, count of directory(s): \033[35m%d\033[0m, time of commit: ", list[i]->count_file, list[i]->count_folder); print_time(list[i]->time); printf("\n");
+            printf("\033[33m###################\033[0m\n");
         }
         exit(0);
     }
     if(equalStrings(input[1], "log") && equalStrings(input[2], "-n") && strcmp(input[3], "") && len == 4){
         int number = atoi(input[3]);
         if(number <= 0){
-            printf("Invalid number!\n");
+            printf("\033[31mInvalid number!\033[0m\n");
             exit(-1);
         }
         parametrs condition;
         folder** list = neogitLOG(timeUpToDown, beInList_normal, condition);
         if(list[0] == NULL){
-            printf("No commit history.\n");
+            printf("\033[31mNo\033[0m commit history.\n");
             exit(0);
         }
         for(int i = 0; list[i] != NULL && number > 0; i++){
-            printf("%d: ID: %s, branch: \"%s\", massage: \"%s\", user name: \"%s\", user email: \"%s\"\n",i + 1, list[i]->name,list[i]->banch, list[i]->massage, list[i]->user_name, list[i]->email);
-            printf("count of file(s): %d, count of directory(s): %d, time of commit: ", list[i]->count_file, list[i]->count_folder); print_time(list[i]->time); printf("\n");
+            printf("\033[34m%d\033[0m: ID: \033[34m%s\033[0m, branch: \"\033[34m%s\033[0m\", massage: \"\033[34m%s\033[0m\", user name: \"\033[34m%s\033[0m\", user email: \"\033[34m%s\033[0m\"\n",i + 1, list[i]->name,list[i]->banch, list[i]->massage, list[i]->user_name, list[i]->email);
+            printf("count of file(s): \033[35m%d\033[0m, count of directory(s): \033[35m%d\033[0m, time of commit: ", list[i]->count_file, list[i]->count_folder); print_time(list[i]->time); printf("\n");
+            printf("\033[33m###################\033[0m\n");
             number--;
         }
         exit(0);
@@ -2752,17 +2976,18 @@ void get_commands_V1(char ** input, int len){
         parametrs condition;
         strcpy(condition.string, input[3]);
         if(!is_banchName_exist(input[3])){
-            printf("%s is not in branch list. you can create it.\n", input[3]);
+            printf("\033[34m%s\033[0m is not in branch list. you can create it.\n", input[3]);
             exit(0);
         }
         folder** list = neogitLOG(timeUpToDown, beInList_InBranch, condition);
         if(list[0] == NULL){
-            printf("No commit history in this branch (%s).\n", input[3]);
+            printf("\033[31mNo \033[0mcommit history in this branch (%s).\n", input[3]);
             exit(0);
         }
         for(int i = 0; list[i] != NULL; i++){
-            printf("%d: ID: %s, branch: \"%s\", massage: \"%s\", user name: \"%s\", user email: \"%s\"\n",i + 1, list[i]->name,list[i]->banch, list[i]->massage, list[i]->user_name, list[i]->email);
-            printf("count of file(s): %d, count of directory(s): %d, time of commit: ", list[i]->count_file, list[i]->count_folder); print_time(list[i]->time); printf("\n");
+            printf("\033[34m%d\033[0m: ID: \033[34m%s\033[0m, branch: \"\033[34m%s\033[0m\", massage: \"\033[34m%s\033[0m\", user name: \"\033[34m%s\033[0m\", user email: \"\033[34m%s\033[0m\"\n",i + 1, list[i]->name,list[i]->banch, list[i]->massage, list[i]->user_name, list[i]->email);
+            printf("count of file(s): \033[35m%d\033[0m, count of directory(s): \033[35m%d\033[0m, time of commit: ", list[i]->count_file, list[i]->count_folder); print_time(list[i]->time); printf("\n");
+            printf("\033[33m###################\033[0m\n");
         }
         exit(0);
     }
@@ -2771,12 +2996,13 @@ void get_commands_V1(char ** input, int len){
         strcpy(condition.string, input[3]);
         folder** list = neogitLOG(timeUpToDown, beInList_InAuthor, condition);
         if(list[0] == NULL){
-            printf("No commit history with this author (%s).\n", input[3]);
+            printf("\033[31mNo \033[0mcommit history with this author (%s).\n", input[3]);
             exit(0);
         }
         for(int i = 0; list[i] != NULL; i++){
-            printf("%d: ID: %s, branch: \"%s\", massage: \"%s\", user name: \"%s\", user email: \"%s\"\n",i + 1, list[i]->name,list[i]->banch, list[i]->massage, list[i]->user_name, list[i]->email);
-            printf("count of file(s): %d, count of directory(s): %d, time of commit: ", list[i]->count_file, list[i]->count_folder); print_time(list[i]->time); printf("\n");
+            printf("\033[34m%d\033[0m: ID: \033[34m%s\033[0m, branch: \"\033[34m%s\033[0m\", massage: \"\033[34m%s\033[0m\", user name: \"\033[34m%s\033[0m\", user email: \"\033[34m%s\033[0m\"\n",i + 1, list[i]->name,list[i]->banch, list[i]->massage, list[i]->user_name, list[i]->email);
+            printf("count of file(s): \033[35m%d\033[0m, count of directory(s): \033[35m%d\033[0m, time of commit: ", list[i]->count_file, list[i]->count_folder); print_time(list[i]->time); printf("\n");
+            printf("\033[33m###################\033[0m\n");
         }
         exit(0);
     }
@@ -2788,12 +3014,13 @@ void get_commands_V1(char ** input, int len){
         condition.number_llu = total;
         folder** list = neogitLOG(timeUpToDown, beInList_since, condition);
         if(list[0] == NULL){
-            printf("No commit history since ");print_time(total); printf(".\n");
+            printf("\033[31mNo\033[0m commit history since ");print_time(total); printf(".\n");
             exit(0);
         }
         for(int i = 0; list[i] != NULL; i++){
-            printf("%d: ID: %s, branch: \"%s\", massage: \"%s\", user name: \"%s\", user email: \"%s\"\n",i + 1, list[i]->name,list[i]->banch, list[i]->massage, list[i]->user_name, list[i]->email);
-            printf("count of file(s): %d, count of directory(s): %d, time of commit: ", list[i]->count_file, list[i]->count_folder); print_time(list[i]->time); printf("\n");
+            printf("\033[34m%d\033[0m: ID: \033[34m%s\033[0m, branch: \"\033[34m%s\033[0m\", massage: \"\033[34m%s\033[0m\", user name: \"\033[34m%s\033[0m\", user email: \"\033[34m%s\033[0m\"\n",i + 1, list[i]->name,list[i]->banch, list[i]->massage, list[i]->user_name, list[i]->email);
+            printf("count of file(s): \033[35m%d\033[0m, count of directory(s): \033[35m%d\033[0m, time of commit: ", list[i]->count_file, list[i]->count_folder); print_time(list[i]->time); printf("\n");
+            printf("\033[33m###################\033[0m\n");
         }
         exit(0);
     }
@@ -2805,12 +3032,13 @@ void get_commands_V1(char ** input, int len){
         condition.number_llu = total;
         folder** list = neogitLOG(timeUpToDown, beInList_before, condition);
         if(list[0] == NULL){
-            printf("No commit history before ");print_time(total); printf(".\n");
+            printf("\033[31mNo\033[0m commit history before ");print_time(total); printf(".\n");
             exit(0);
         }
         for(int i = 0; list[i] != NULL; i++){
-            printf("%d: ID: %s, branch: \"%s\", massage: \"%s\", user name: \"%s\", user email: \"%s\"\n",i + 1, list[i]->name,list[i]->banch, list[i]->massage, list[i]->user_name, list[i]->email);
-            printf("count of file(s): %d, count of directory(s): %d, time of commit: ", list[i]->count_file, list[i]->count_folder); print_time(list[i]->time); printf("\n");
+            printf("\033[34m%d\033[0m: ID: \033[34m%s\033[0m, branch: \"\033[34m%s\033[0m\", massage: \"\033[34m%s\033[0m\", user name: \"\033[34m%s\033[0m\", user email: \"\033[34m%s\033[0m\"\n",i + 1, list[i]->name,list[i]->banch, list[i]->massage, list[i]->user_name, list[i]->email);
+            printf("count of file(s): \033[35m%d\033[0m, count of directory(s): \033[35m%d\033[0m, time of commit: ", list[i]->count_file, list[i]->count_folder); print_time(list[i]->time); printf("\n");
+            printf("\033[33m###################\033[0m\n");
         }
         exit(0);
     }
@@ -2823,32 +3051,38 @@ void get_commands_V1(char ** input, int len){
         condition.list = text;
         folder** list = neogitLOG(timeUpToDown, beInList_search, condition);
         if(list[0] == NULL){
-            printf("No commit history with this condition\n");
+            printf("\031[31mNo\033[0m commit history with this condition\n");
             exit(0);
         }
         for(int i = 0; list[i] != NULL; i++){
-            printf("%d: ID: %s, branch: \"%s\", massage: \"%s\", user name: \"%s\", user email: \"%s\"\n",i + 1, list[i]->name,list[i]->banch, list[i]->massage, list[i]->user_name, list[i]->email);
-            printf("count of file(s): %d, count of directory(s): %d, time of commit: ", list[i]->count_file, list[i]->count_folder); print_time(list[i]->time); printf("\n");
+            printf("\033[34m%d\033[0m: ID: \033[34m%s\033[0m, branch: \"\033[34m%s\033[0m\", massage: \"\033[34m%s\033[0m\", user name: \"\033[34m%s\033[0m\", user email: \"\033[34m%s\033[0m\"\n",i + 1, list[i]->name,list[i]->banch, list[i]->massage, list[i]->user_name, list[i]->email);
+            printf("count of file(s): \033[35m%d\033[0m, count of directory(s): \033[35m%d\033[0m, time of commit: ", list[i]->count_file, list[i]->count_folder); print_time(list[i]->time); printf("\n");
+            printf("\033[33m###################\033[0m\n");
         }
         exit(0);
     }
     //neogit status
     if(equalStrings(input[1], "status") && equalStrings(input[2], "-a") && len == 3){
-        status_a();
+        {status_a(); exit(0);}
     }
+    if(equalStrings(input[1], "status") && len == 2){
+        {status(); exit(0);}
+    }
+
     //neogit checkout
     if(equalStrings(input[1], "checkout") && strstr(input[2], "HEAD-") == input[2] && len == 3){
         int n = 0;
         sscanf(input[2], "HEAD-%d", &n);
+        int m = n;
         if(n <= 0){
-            printf("Invalid number!\n");
+            printf("\033[31mInvalid number\033[0m!\n");
             exit(-1);
         }
         n++;
         parametrs condition;
         folder** list = neogitLOG(timeUpToDown, beInList_normal, condition);
         if(list[0] == NULL){
-            printf("No commit history.\n");
+            printf("\033[31mNo commit history\033[0m.\n");
             exit(0);
         }
         char name[20];
@@ -2860,7 +3094,7 @@ void get_commands_V1(char ** input, int len){
             checkout(name);
         }
         else{
-            printf("No commit history with deth %d.\n", n);
+            printf("\033[31mNo \033[0mcommit history with deth %d.\n", m);
             exit(0);
         }
         exit(0);
@@ -2879,6 +3113,7 @@ void get_commands_V1(char ** input, int len){
         exit(0);
     }
 }
+
 //End of main functions
 
 // int main(int argc, char* argv[]){
