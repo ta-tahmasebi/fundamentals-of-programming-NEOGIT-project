@@ -2695,8 +2695,356 @@ void status(){
     }
 }
 
+void Hstatus_r(int spaces){
+    DIR* dir;
+    dir = opendir(".");
+    struct dirent* entry;
+    if(dir == NULL){
+        printf("\033[31munable to open %s directory\033[0m\n", "current");
+        return;
+    }
+    while ((entry = readdir(dir)) != NULL){
+        if(strcmp(entry->d_name, ".") && strcmp(entry->d_name, "..") && strcmp(entry->d_name, ".neogit")){
+            struct address__ address = Help_ADD(entry->d_name);
+            char* address_stage = connectTwoString(address.adress_stage_file, entry->d_name);
+            char* address_file = (char*)calloc(3, sizeof(char));
+            address_file[0] = '\0';
+            for(int i = 0; i < address.size_address_cmd; i++){
+                address_file = connectTwoString(address_file, connectTwoString(address.address_cmd[i], "\\"));
+            }
+            address_file = connectTwoString(address_file, entry->d_name);
+            char* address_commit = (char*)calloc(3, sizeof(char));
+            address_commit[0] = '\0';
+            for(int i = 0; i < address.size_address_neogit; i++){
+                address_commit = connectTwoString(address_commit, connectTwoString(address.address_neogit[i], "\\"));
+            }
+            address_commit = connectTwoString(address_commit, ".neogit\\commits\\");
+            char temp[100];
+            sprintf(temp, "%d", get_last_hash('a'));
+            address_commit = connectTwoString(address_commit, temp);
+            for(int i = address.size_address_neogit; i < address.size_address_cmd; i++){
+                address_commit = connectTwoString(address_commit, connectTwoString("\\", address.address_cmd[i]));
+            }
+            address_commit = connectTwoString(address_commit, connectTwoString("\\", entry->d_name));
+            char isInstage = check_type(address_stage);
+            char isInReal = check_type(address_file);
+            char isInCommit = check_type(address_commit);
+            if(isInReal == -1){
+                char* name = connectTwoString(entry->d_name, "");
+                isInReal = (isInReal == -1)? 1:0;
+                isInstage = (isInstage == -1)?1:0;
+                isInCommit = (isInCommit==-1)?1:0;
+                char W_S =  TwoFileAreSame(address_file,address_stage);
+                char W_C = TwoFileAreSame(address_file, address_commit);
+                char S_C = TwoFileAreSame(address_stage,address_commit);
+                if(W_C == 1){
+                    continue;
+                }
+                for(int i = 0; i < spaces; i++) printf("    ");
+                printf("\033[35m%s: \033[0m", name);
+                if(isInstage){
+                    printf("+");
+                }
+                else{
+                    printf("-");
+                }
+                if(isInCommit == 0){
+                    printf("A\n");
+                }
+                else if(isInReal == 0){
+                    printf("D\n");
+                }
+                else{
+                    printf("M\n");
+                }
+            }
+        }
+    }
+    struct address__ addressA = Help_ADD("");
+    char* address_stageA = addressA.adress_stage_file;
+    dir = opendir(address_stageA);
+    char flag = 1;
+    if(dir == NULL){
+        flag = 0;
+    }
+    if(flag){
+        while ((entry = readdir(dir)) != NULL){
+            if(strcmp(entry->d_name, ".") && strcmp(entry->d_name, "..") && strcmp(entry->d_name, ".neogit")){
+                struct address__ address = Help_ADD(entry->d_name);
+                char* address_stage = connectTwoString(address.adress_stage_file, entry->d_name);
+                char* address_file = (char*)calloc(3, sizeof(char));
+                address_file[0] = '\0';
+                for(int i = 0; i < address.size_address_cmd; i++){
+                    address_file = connectTwoString(address_file, connectTwoString(address.address_cmd[i], "\\"));
+                }
+                address_file = connectTwoString(address_file, entry->d_name);
+                char* address_commit = (char*)calloc(3, sizeof(char));
+                address_commit[0] = '\0';
+                for(int i = 0; i < address.size_address_neogit; i++){
+                    address_commit = connectTwoString(address_commit, connectTwoString(address.address_neogit[i], "\\"));
+                }
+                address_commit = connectTwoString(address_commit, ".neogit\\commits\\");
+                char temp[100];
+                sprintf(temp, "%d", get_last_hash('a'));
+                address_commit = connectTwoString(address_commit, temp);
+                for(int i = address.size_address_neogit; i < address.size_address_cmd; i++){
+                    address_commit = connectTwoString(address_commit, connectTwoString("\\", address.address_cmd[i]));
+                }
+                address_commit = connectTwoString(address_commit, connectTwoString("\\", entry->d_name));
+                char isInstage = check_type(address_stage);
+                char isInReal = check_type(address_file);
+                char isInCommit = check_type(address_commit);
+                if(isInstage == -1 && isInReal == 0){
+                    char* name = connectTwoString(entry->d_name, "");
+                    isInReal = (isInReal == -1)? 1:0;
+                    isInstage = (isInstage == -1)?1:0;
+                    isInCommit = (isInCommit==-1)?1:0;
+                    char W_S =  TwoFileAreSame(address_file,address_stage);
+                    char W_C = TwoFileAreSame(address_file, address_commit);
+                    char S_C = TwoFileAreSame(address_stage,address_commit);
+                    if(W_C == 1){
+                        continue;
+                    }
+                    for(int i = 0; i < spaces; i++) printf("    ");
+                    printf("\033[35m%s: \033[0m", name);
+                    if(isInstage){
+                        printf("+");
+                    }
+                    else{
+                        printf("-");
+                    }
+                    if(isInCommit == 0){
+                        printf("A\n");
+                    }
+                    else if(isInReal == 0){
+                        printf("D\n");
+                    }
+                    else{
+                        printf("M\n");
+                    }    
+                }            
+            }
+        }
+    }
+    struct address__ addressB = Help_ADD("");
+    char* address_commitB = (char*)calloc(3, sizeof(char));
+    address_commitB[0] = '\0';
+    for(int i = 0; i < addressB.size_address_neogit; i++){
+        address_commitB = connectTwoString(address_commitB, connectTwoString(addressB.address_neogit[i], "\\"));
+    }
+    address_commitB = connectTwoString(address_commitB, ".neogit\\commits\\");
+    char tempB[100];
+    sprintf(tempB, "%d", get_last_hash('a'));
+    address_commitB = connectTwoString(address_commitB, tempB);
+    for(int i = addressB.size_address_neogit; i < addressB.size_address_cmd; i++){
+        address_commitB = connectTwoString(address_commitB, connectTwoString("\\", addressB.address_cmd[i]));
+    }
+    dir = opendir(address_commitB);
+    flag = 1;
+    if(dir == NULL){
+        flag = 0;
+    }
+    if(flag){
+        while ((entry = readdir(dir)) != NULL){
+            if(strcmp(entry->d_name, ".") && strcmp(entry->d_name, "..") && strcmp(entry->d_name, ".neogit")){
+                struct address__ address = Help_ADD(entry->d_name);
+                char* address_stage = connectTwoString(address.adress_stage_file, entry->d_name);
+                char* address_file = (char*)calloc(3, sizeof(char));
+                address_file[0] = '\0';
+                for(int i = 0; i < address.size_address_cmd; i++){
+                    address_file = connectTwoString(address_file, connectTwoString(address.address_cmd[i], "\\"));
+                }
+                address_file = connectTwoString(address_file, entry->d_name);
+                char* address_commit = (char*)calloc(3, sizeof(char));
+                address_commit[0] = '\0';
+                for(int i = 0; i < address.size_address_neogit; i++){
+                    address_commit = connectTwoString(address_commit, connectTwoString(address.address_neogit[i], "\\"));
+                }
+                address_commit = connectTwoString(address_commit, ".neogit\\commits\\");
+                char temp[100];
+                sprintf(temp, "%d", get_last_hash('a'));
+                address_commit = connectTwoString(address_commit, temp);
+                for(int i = address.size_address_neogit; i < address.size_address_cmd; i++){
+                    address_commit = connectTwoString(address_commit, connectTwoString("\\", address.address_cmd[i]));
+                }
+                address_commit = connectTwoString(address_commit, connectTwoString("\\", entry->d_name));
+                char isInstage = check_type(address_stage);
+                char isInReal = check_type(address_file);
+                char isInCommit = check_type(address_commit);
+                if(isInCommit == -1 && isInReal == 0 && isInstage == 0){
+                    char* name = connectTwoString(entry->d_name, "");
+                    isInReal = (isInReal == -1)? 1:0;
+                    isInstage = (isInstage == -1)?1:0;
+                    isInCommit = (isInCommit==-1)?1:0;
+                    char W_S =  TwoFileAreSame(address_file,address_stage);
+                    char W_C = TwoFileAreSame(address_file, address_commit);
+                    char S_C = TwoFileAreSame(address_stage,address_commit);
+                    if(W_C == 1){
+                        continue;
+                    }
+                    for(int i = 0; i < spaces; i++) printf("    ");
+                    printf("\033[35m%s: \033[0m", name);
+                    if(isInstage){
+                        printf("+");
+                    }
+                    else{
+                        printf("-");
+                    }
+                    if(isInCommit == 0){
+                        printf("A\n");
+                    }
+                    else if(isInReal == 0){
+                        printf("D\n");
+                    }
+                    else{
+                        printf("M\n");
+                    } 
+                }               
+            }
+        }
+    }
+}
 
 
+
+void status_r(int spaces){
+    char address1[200];
+    getcwd(address1, 199);
+    char directiries[100][400];
+    int numberdir = 0;
+    char* address_free1;
+    DIR* dir;
+    dir = opendir(".");
+    struct dirent* entry;
+    if(dir == NULL){
+        printf("\033[31munable to open %s directory\033[0m\n", address1);
+        exit(-1);
+    }
+    Hstatus_r(spaces);
+    while ((entry = readdir(dir)) != NULL){
+        if(strcmp(entry->d_name, ".") && strcmp(entry->d_name, "..") &&  strcmp(entry->d_name, ".neogit")){
+            address_free1 = connectTwoString(address1, "");
+            char isDir1;
+            address_free1 = connectTwoString(address_free1, connectTwoString("\\", entry->d_name));
+            isDir1 = check_type(address_free1);
+            if(isDir1 == 1){
+                strcpy(directiries[numberdir], address_free1);
+                numberdir++;
+            }
+        }
+    }
+    closedir(dir);
+    for(int i = 0; i < numberdir; i++){
+        if(!strcmp(directiries[i], ".neogit")) continue;
+        for(int j = 0; j < spaces; j++){
+            printf("    ");
+        }
+        printf("\033[33m%s\033[0m:\n", directiries[i]);
+        getcwd(address1, 199);
+        chdir(directiries[i]);
+        status_r(spaces + 1);
+        chdir(address1);
+    }
+}
+void status_r_main(){
+    char address1[200];
+    getcwd(address1, 199);
+    char* main = absolute_address_neogit();
+    main[strlen(main) - 8] = 0;
+    chdir(main);
+    status_r(0);
+    chdir(address1);
+}
+void redo(){
+    struct address__ addressA = Help_ADD("");
+    char* address_stageA = addressA.adress_stage_file;
+    DIR* dir = opendir(address_stageA);
+    struct dirent* entry;
+    char flag = 1;
+    if(dir == NULL){
+        flag = 0;
+    }
+    if(flag){
+        while ((entry = readdir(dir)) != NULL){
+            if(strcmp(entry->d_name, ".") && strcmp(entry->d_name, "..") && strcmp(entry->d_name, ".neogit")){
+                struct address__ address = Help_ADD(entry->d_name);
+                char* address_stage = connectTwoString(address.adress_stage_file, entry->d_name);
+                char* address_file = (char*)calloc(3, sizeof(char));
+                address_file[0] = '\0';
+                for(int i = 0; i < address.size_address_cmd; i++){
+                    address_file = connectTwoString(address_file, connectTwoString(address.address_cmd[i], "\\"));
+                }
+                address_file = connectTwoString(address_file, entry->d_name);
+                char temp[100];
+                sprintf(temp, "%d", get_last_hash('a'));
+                char isInstage = check_type(address_stage);
+                if(isInstage == -1){
+                    char ss = check_type(address_file);
+                    if(ss == 0 || ss == 1){
+                        char command[200];
+                        sprintf(command, "del \"%s\"", address_stage);
+                        system(command);
+                        printf("%s \033[33mdeleted\033[0m!\n", address_file);
+                    }
+                    if(ss == -1){
+                        if(!TwoFileAreSame(address_file, address_stage)) {
+                            char command[200];
+                            sprintf(command, "del \"%s\"", address_stage);
+                            system(command);
+                            sprintf(command, "copy \"%s\" \"%s\" > NUL",  address_file, address_stage);
+                            system(command);
+                            printf("%s \033[32mupdated\033[0m!\n", address_file);
+                        }
+                    }
+                }          
+            }
+        }
+    }
+}
+void H_redo(){
+    char address1[200];
+    getcwd(address1, 199);
+    char directiries[100][400];
+    int numberdir = 0;
+    char* address_free1;
+    DIR* dir;
+    dir = opendir(".");
+    struct dirent* entry;
+    if(dir == NULL){
+        printf("\033[31munable to open %s directory\033[0m\n", address1);
+        exit(-1);
+    }
+    redo();
+    while ((entry = readdir(dir)) != NULL){
+        if(strcmp(entry->d_name, ".") && strcmp(entry->d_name, "..") &&  strcmp(entry->d_name, ".neogit")){
+            address_free1 = connectTwoString(address1, "");
+            char isDir1;
+            address_free1 = connectTwoString(address_free1, connectTwoString("\\", entry->d_name));
+            isDir1 = check_type(address_free1);
+            if(isDir1 == 1){
+                strcpy(directiries[numberdir], address_free1);
+                numberdir++;
+            }
+        }
+    }
+    closedir(dir);
+    for(int i = 0; i < numberdir; i++){
+        if(!strcmp(directiries[i], ".neogit")) continue;
+        getcwd(address1, 199);
+        chdir(directiries[i]);
+        H_redo();
+        chdir(address1);
+    }
+}
+void redo_main(){
+    char address1[200];
+    getcwd(address1, 199);
+    char* main = absolute_address_neogit();
+    main[strlen(main) - 8] = 0;
+    chdir(main);
+    H_redo();
+    chdir(address1);
+}
 
 void get_commands_V1(char ** input, int len){
     // neogit config -global user.name
@@ -3065,6 +3413,9 @@ void get_commands_V1(char ** input, int len){
     if(equalStrings(input[1], "status") && equalStrings(input[2], "-a") && len == 3){
         {status_a(); exit(0);}
     }
+    if(equalStrings(input[1], "status") && equalStrings(input[2], "-r") && len == 3){
+        {status_r_main(); exit(0);}
+    }
     if(equalStrings(input[1], "status") && len == 2){
         {status(); exit(0);}
     }
@@ -3112,6 +3463,11 @@ void get_commands_V1(char ** input, int len){
         checkout(input[2]);
         exit(0);
     }
+    if(equalStrings(input[1], "add") && equalStrings(input[2], "-redo") &&  equalStrings(input[3], "") && len == 3){
+        redo_main();
+        exit(0);
+    }
+
 }
 
 //End of main functions
