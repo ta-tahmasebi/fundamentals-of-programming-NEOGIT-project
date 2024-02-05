@@ -51,7 +51,7 @@ int main(int argc, char* argv[]){
     char** input = tokenizeInput(&len, argv);
     //end of getting    #############################
     get_commands_V1(input, len);
-    //get_commands_V2(input, len);
+    get_commands_V2(input, len);
     get_commands_alias(input[1]);
     printf("\033[31mInvalid inputs\033[0m!\n");
     return 0;
