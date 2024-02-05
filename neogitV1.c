@@ -8,9 +8,6 @@
 #include <time.h>
 
 
-//   *(IN THE NAME OF THE GOD)*
-//   ** AMIRMAHDI TAHMASEBI  **
-
 //portotypes
 char* connectTwoString(char*, char*);
 char checkHooks_stage(char* address, int functions, char mode);
@@ -291,6 +288,7 @@ char ** tokenizeInput(int* len, char** argv){
 char checkIfACommandIsOk(char** command){ //return 1 for accept. //********* for alias
     char* Scommand = calloc(100, 1);
     int i = 0;
+    if(strcmp(command[0], "neogit")) return 0;
     while(command[i] != NULL){
         Scommand = connectTwoString(Scommand, connectTwoString(" \"", connectTwoString(command[i], "\" ")));
         i++;
@@ -2694,7 +2692,6 @@ void status(){
         }
     }
 }
-
 void Hstatus_r(int spaces){
     DIR* dir;
     dir = opendir(".");
@@ -2904,9 +2901,6 @@ void Hstatus_r(int spaces){
         }
     }
 }
-
-
-
 void status_r(int spaces){
     char address1[200];
     getcwd(address1, 199);
@@ -3089,7 +3083,7 @@ void get_commands_V1(char ** input, int len){
     if(equalStrings(input[1], "init") && equalStrings(input[2], "") && len == 2)
         {init(); exit(0);}
     //neogit add
-    if(equalStrings(input[1], "add") && strcmp(input[2], "") && !strcheck(input[2] , '-') && equalStrings(input[3], "") && len == 3){
+    if(equalStrings(input[1], "add") && strcmp(input[2], "") && (strstr(input[2] , "-") !=  input[2]) && equalStrings(input[3], "") && len == 3){
         if(strlen(input[2]) > 250){
             printf("\033[31mYour command is too long\033[0m!\n");
             exit(-1);
@@ -3109,7 +3103,7 @@ void get_commands_V1(char ** input, int len){
         exit(0);
     }
     //neogit add *
-    if(equalStrings(input[1], "add") && strcmp(input[2], "") && !strcheck(input[2] , '-') && len > 3){
+    if(equalStrings(input[1], "add") && strcmp(input[2], "") && (strstr(input[2] , "-") !=  input[2]) && len > 3){
         gitFoldeerCheck(".neogit", 0, getLevelofAddress(GetAddressHere()));
         for(int i = 2; i < len; i++){
             if(strlen(input[i]) > 250){
@@ -3145,7 +3139,7 @@ void get_commands_V1(char ** input, int len){
         exit(0);
     }
     //neogit rest
-    if(equalStrings(input[1], "reset") && strcmp(input[2], "") && !strcheck(input[2] , '-') && equalStrings(input[3], "") && len == 3){
+    if(equalStrings(input[1], "reset") && strcmp(input[2], "") && (strstr(input[2] , "-") !=  input[2]) && equalStrings(input[3], "") && len == 3){
         if(strlen(input[2]) > 250){
             printf("\033[31mYour command is too long\033[0m!\n");
             exit(-1);
@@ -3165,7 +3159,7 @@ void get_commands_V1(char ** input, int len){
         exit(0);
     }
     //neogit rest name*
-    if(equalStrings(input[1], "reset") && strcmp(input[2], "") && !strcheck(input[2] , '-') && len > 3){
+    if(equalStrings(input[1], "reset") && strcmp(input[2], "") && (strstr(input[2] , "-") !=  input[2]) && len > 3){
         gitFoldeerCheck(".neogit", 0, getLevelofAddress(GetAddressHere()));
         for(int i = 2; i < len; i++){
             if(strlen(input[i]) > 250){
